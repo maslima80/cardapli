@@ -26,12 +26,19 @@ interface CatalogSettingsDialogProps {
 export const CatalogSettingsDialog = ({
   open,
   onOpenChange,
-  settings,
+  settings = { show_section_nav: false },
   themeOverrides = {},
   onSave,
   onThemeChange,
 }: CatalogSettingsDialogProps) => {
-  const [localTheme, setLocalTheme] = useState(themeOverrides);
+  // Initialize localTheme with default values to prevent null/undefined errors
+  const [localTheme, setLocalTheme] = useState(themeOverrides || {
+    use_brand: true,
+    mode: "light",
+    accent_color: "#8B5CF6",
+    font: "clean",
+    cta_shape: "rounded"
+  });
 
   const handleThemeChange = (updates: any) => {
     const newTheme = { ...localTheme, ...updates };
@@ -39,7 +46,8 @@ export const CatalogSettingsDialog = ({
     onThemeChange(newTheme);
   };
 
-  const useBrand = localTheme.use_brand !== false;
+  // Safely access use_brand with a fallback to true
+  const useBrand = localTheme?.use_brand !== false;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -63,7 +71,7 @@ export const CatalogSettingsDialog = ({
                 </p>
               </div>
               <Switch
-                checked={settings.show_section_nav || false}
+                checked={settings?.show_section_nav || false}
                 onCheckedChange={(checked) =>
                   onSave({ ...settings, show_section_nav: checked })
                 }
@@ -93,7 +101,7 @@ export const CatalogSettingsDialog = ({
                   <Label>Modo</Label>
                   <select
                     className="w-full border rounded-xl p-2 bg-background"
-                    value={localTheme.mode || "light"}
+                    value={localTheme?.mode || "light"}
                     onChange={(e) =>
                       handleThemeChange({
                         mode: e.target.value as "light" | "dark",
@@ -110,7 +118,7 @@ export const CatalogSettingsDialog = ({
                   <div className="flex gap-2">
                     <Input
                       type="color"
-                      value={localTheme.accent_color || "#8B5CF6"}
+                      value={localTheme?.accent_color || "#8B5CF6"}
                       onChange={(e) =>
                         handleThemeChange({ accent_color: e.target.value })
                       }
@@ -118,7 +126,7 @@ export const CatalogSettingsDialog = ({
                     />
                     <Input
                       type="text"
-                      value={localTheme.accent_color || "#8B5CF6"}
+                      value={localTheme?.accent_color || "#8B5CF6"}
                       onChange={(e) =>
                         handleThemeChange({ accent_color: e.target.value })
                       }
@@ -132,7 +140,7 @@ export const CatalogSettingsDialog = ({
                   <Label>Fonte</Label>
                   <select
                     className="w-full border rounded-xl p-2 bg-background"
-                    value={localTheme.font || "clean"}
+                    value={localTheme?.font || "clean"}
                     onChange={(e) =>
                       handleThemeChange({
                         font: e.target.value as "clean" | "elegant" | "modern",
@@ -149,7 +157,7 @@ export const CatalogSettingsDialog = ({
                   <Label>Forma dos botões</Label>
                   <select
                     className="w-full border rounded-xl p-2 bg-background"
-                    value={localTheme.cta_shape || "rounded"}
+                    value={localTheme?.cta_shape || "rounded"}
                     onChange={(e) =>
                       handleThemeChange({
                         cta_shape: e.target.value as
