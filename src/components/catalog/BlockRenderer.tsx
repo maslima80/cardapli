@@ -11,6 +11,7 @@ import { VideoBlock } from "./blocks/VideoBlock";
 import { TestimonialsBlock } from "./blocks/TestimonialsBlock";
 import { FaqBlock } from "./blocks/FaqBlock";
 import { BenefitsBlock } from "./blocks/BenefitsBlock";
+import { StepByStepBlock } from "./blocks/StepByStepBlock";
 
 interface BlockRendererProps {
   block: any;
@@ -60,6 +61,9 @@ export const BlockRenderer = ({ block, profile, userId }: BlockRendererProps) =>
     
     case "benefits":
       return <BenefitsBlock data={block.data} />;
+      
+    case "step_by_step":
+      return <StepByStepBlock data={block.data} />;
     
     case "important_info":
       return (

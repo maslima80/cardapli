@@ -1086,6 +1086,359 @@ export const BlockSettingsDrawer = ({
           </>
         );
 
+      case "step_by_step":
+        // Preset data for "Como comprar"
+        const howToBuyPreset = {
+          title: "Como comprar",
+          subtitle: "Siga estes passos simples para fazer seu pedido",
+          layout: "timeline",
+          steps: [
+            { 
+              title: "Escolha os produtos", 
+              description: "Use o catálogo e adicione observações.", 
+              icon: "search", 
+              cta_label: null, 
+              cta_url: null 
+            },
+            { 
+              title: "Fale com a gente", 
+              description: "Clique no WhatsApp e informe quantidades e prazos.", 
+              icon: "message-circle", 
+              cta_label: "Abrir WhatsApp", 
+              cta_url: "https://wa.me/" 
+            },
+            { 
+              title: "Pagamento", 
+              description: "PIX ou cartão. Enviaremos o comprovante.", 
+              icon: "credit-card",
+              cta_label: null, 
+              cta_url: null 
+            },
+            { 
+              title: "Entrega/Retirada", 
+              description: "Combine o melhor horário.", 
+              icon: "truck",
+              cta_label: null, 
+              cta_url: null 
+            }
+          ]
+        };
+
+        // Preset data for "Como personalizar"
+        const howToCustomizePreset = {
+          title: "Como personalizar",
+          subtitle: "Personalize seu pedido em 5 passos fáceis",
+          layout: "cards",
+          steps: [
+            { 
+              title: "Escolha o modelo", 
+              description: "Navegue pelo catálogo e selecione o modelo base.", 
+              icon: "search", 
+              cta_label: null, 
+              cta_url: null 
+            },
+            { 
+              title: "Defina as cores", 
+              description: "Informe as cores desejadas para cada parte do produto.", 
+              icon: "pencil", 
+              cta_label: null, 
+              cta_url: null 
+            },
+            { 
+              title: "Envie referências", 
+              description: "Compartilhe imagens ou links de inspiração.", 
+              icon: "message-circle", 
+              cta_label: null, 
+              cta_url: null 
+            },
+            { 
+              title: "Aprove o mockup", 
+              description: "Receba e aprove a visualização antes da produção.", 
+              icon: "check-circle", 
+              cta_label: null, 
+              cta_url: null 
+            },
+            { 
+              title: "Acompanhe a produção", 
+              description: "Receba atualizações sobre o andamento do seu pedido.", 
+              icon: "package", 
+              cta_label: null, 
+              cta_url: null 
+            }
+          ]
+        };
+        
+        return (
+          <>
+            <div className="space-y-2">
+              <Label>Título do Bloco</Label>
+              <Input
+                value={formData.title || "Passo a passo"}
+                onChange={(e) => {
+                  const newTitle = e.target.value;
+                  setFormData({ ...formData, title: newTitle });
+                  if (onUpdate && (!block.anchor_slug || block.anchor_slug === generateSlug(block.data.title || ""))) {
+                    onUpdate({ ...block, data: { ...formData, title: newTitle }, anchor_slug: generateSlug(newTitle) });
+                  }
+                }}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Subtítulo (opcional)</Label>
+              <Input
+                value={formData.subtitle || ""}
+                onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
+                placeholder="Instruções ou informações adicionais"
+              />
+            </div>
+
+            {showAnchorField && (
+              <div className="space-y-2">
+                <Label>ID da seção</Label>
+                <Input
+                  value={block.anchor_slug || ""}
+                  onChange={(e) => {
+                    if (onUpdate) {
+                      onUpdate({ ...block, anchor_slug: generateSlug(e.target.value) });
+                    }
+                  }}
+                  placeholder="id-da-secao"
+                />
+              </div>
+            )}
+            
+            <div className="space-y-2">
+              <Label>Layout</Label>
+              <select
+                className="w-full border rounded-xl p-2"
+                value={formData.layout || "timeline"}
+                onChange={(e) => setFormData({ ...formData, layout: e.target.value })}
+              >
+                <option value="timeline">Linha do tempo vertical</option>
+                <option value="cards">Cartões numerados</option>
+              </select>
+              <p className="text-xs text-muted-foreground">
+                Linha do tempo: ideal para processo sequencial<br />
+                Cartões: melhor para visualização em grade
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Fundo</Label>
+              <select
+                className="w-full border rounded-xl p-2"
+                value={formData.background || "default"}
+                onChange={(e) => setFormData({ ...formData, background: e.target.value })}
+              >
+                <option value="default">Padrão</option>
+                <option value="accent">Faixa suave</option>
+                <option value="cards_elevated">Cartões elevados</option>
+              </select>
+            </div>
+            
+            <div className="space-y-2 mt-4">
+              <Label>Usar modelo</Label>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setFormData(howToBuyPreset)}
+                >
+                  Como comprar
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setFormData(howToCustomizePreset)}
+                >
+                  Como personalizar
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Selecione um modelo para preencher automaticamente os passos
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <Label>Passos</Label>
+              {(formData.steps || []).map((step: any, index: number) => (
+                <div key={index} className="p-4 border rounded-xl space-y-2">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium">Passo {index + 1}</span>
+                    <div className="flex gap-1">
+                      {index > 0 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            const steps = [...(formData.steps || [])];
+                            const temp = steps[index];
+                            steps[index] = steps[index - 1];
+                            steps[index - 1] = temp;
+                            setFormData({ ...formData, steps });
+                          }}
+                        >
+                          ↑
+                        </Button>
+                      )}
+                      {index < (formData.steps || []).length - 1 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            const steps = [...(formData.steps || [])];
+                            const temp = steps[index];
+                            steps[index] = steps[index + 1];
+                            steps[index + 1] = temp;
+                            setFormData({ ...formData, steps });
+                          }}
+                        >
+                          ↓
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const steps = [...(formData.steps || [])];
+                          steps.splice(index, 1);
+                          setFormData({ ...formData, steps });
+                        }}
+                      >
+                        Remover
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <Label>Título</Label>
+                    <Input
+                      placeholder="Título do passo"
+                      value={step.title || ""}
+                      onChange={(e) => {
+                        const steps = [...(formData.steps || [])];
+                        steps[index] = { ...steps[index], title: e.target.value };
+                        setFormData({ ...formData, steps });
+                      }}
+                    />
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <Label>Descrição</Label>
+                    <Textarea
+                      placeholder="Descrição do passo"
+                      value={step.description || ""}
+                      onChange={(e) => {
+                        const steps = [...(formData.steps || [])];
+                        steps[index] = { ...steps[index], description: e.target.value };
+                        setFormData({ ...formData, steps });
+                      }}
+                      rows={2}
+                    />
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <Label>Ícone (opcional)</Label>
+                    <select
+                      className="w-full border rounded-xl p-2"
+                      value={step.icon || ""}
+                      onChange={(e) => {
+                        const steps = [...(formData.steps || [])];
+                        steps[index] = { ...steps[index], icon: e.target.value || null };
+                        setFormData({ ...formData, steps });
+                      }}
+                    >
+                      <option value="">Usar número</option>
+                      <option value="search">Lupa</option>
+                      <option value="message-circle">Chat</option>
+                      <option value="credit-card">Cartão</option>
+                      <option value="truck">Caminhão</option>
+                      <option value="pencil">Lápis</option>
+                      <option value="package">Pacote</option>
+                      <option value="calendar">Calendário</option>
+                      <option value="check-circle">Verificado</option>
+                    </select>
+                  </div>
+                  
+                  <div className="space-y-1 border-t pt-3 mt-3">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor={`cta-enabled-${index}`}>Adicionar botão</Label>
+                      <Switch
+                        id={`cta-enabled-${index}`}
+                        checked={!!(step.cta_label && step.cta_url)}
+                        onCheckedChange={(checked) => {
+                          const steps = [...(formData.steps || [])];
+                          if (checked) {
+                            steps[index] = { 
+                              ...steps[index], 
+                              cta_label: steps[index].cta_label || "Saiba mais", 
+                              cta_url: steps[index].cta_url || "#" 
+                            };
+                          } else {
+                            steps[index] = { 
+                              ...steps[index], 
+                              cta_label: null, 
+                              cta_url: null 
+                            };
+                          }
+                          setFormData({ ...formData, steps });
+                        }}
+                      />
+                    </div>
+                    
+                    {step.cta_label && step.cta_url && (
+                      <>
+                        <div className="space-y-1 mt-2">
+                          <Label>Texto do botão</Label>
+                          <Input
+                            placeholder="Ex: Saiba mais"
+                            value={step.cta_label || ""}
+                            onChange={(e) => {
+                              const steps = [...(formData.steps || [])];
+                              steps[index] = { ...steps[index], cta_label: e.target.value };
+                              setFormData({ ...formData, steps });
+                            }}
+                          />
+                        </div>
+                        
+                        <div className="space-y-1 mt-2">
+                          <Label>URL do botão</Label>
+                          <Input
+                            placeholder="https://..."
+                            value={step.cta_url || ""}
+                            onChange={(e) => {
+                              const steps = [...(formData.steps || [])];
+                              steps[index] = { ...steps[index], cta_url: e.target.value };
+                              setFormData({ ...formData, steps });
+                            }}
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  const steps = [...(formData.steps || []), { 
+                    title: "", 
+                    description: "", 
+                    icon: null,
+                    cta_label: null,
+                    cta_url: null
+                  }];
+                  setFormData({ ...formData, steps });
+                }}
+              >
+                + Adicionar Passo
+              </Button>
+            </div>
+          </>
+        );
+
       case "divider":
         return <p className="text-sm text-muted-foreground">Este bloco não tem configurações.</p>;
 

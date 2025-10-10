@@ -18,6 +18,7 @@ import {
   AlertCircle,
   Video,
   ImagePlus,
+  ListOrdered,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -38,6 +39,7 @@ const blockTypes = [
   { type: "socials", icon: Share2, label: "Redes Sociais", description: "Links para suas redes" },
   { type: "testimonials", icon: Star, label: "Depoimentos", description: "Avaliações de clientes" },
   { type: "benefits", icon: List, label: "Benefícios", description: "Lista de vantagens" },
+  { type: "step_by_step", icon: ListOrdered, label: "Passo a passo", description: "Guia de instruções sequenciais" },
   { type: "faq", icon: HelpCircle, label: "Perguntas Frequentes", description: "Dúvidas comuns" },
   { type: "important_info", icon: AlertCircle, label: "Info Importante", description: "Destaque informações" },
   { type: "divider", icon: Minus, label: "Divisor", description: "Linha de separação" },
