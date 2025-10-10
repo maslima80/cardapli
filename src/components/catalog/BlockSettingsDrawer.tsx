@@ -177,6 +177,7 @@ export const BlockSettingsDrawer = ({
 
       case "heading":
       case "text":
+        // Texto Livre block
         return (
           <>
             <div className="space-y-2">
@@ -957,7 +958,22 @@ export const BlockSettingsDrawer = ({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>Editar Bloco</SheetTitle>
+          <SheetTitle>
+            {block.type === "heading" || block.type === "text" ? "Editar Texto Livre" :
+             block.type === "cover" ? "Editar Capa" :
+             block.type === "image" ? "Editar Imagem" :
+             block.type === "video" ? "Editar Vídeo" :
+             block.type === "product_grid" ? "Editar Grade de Produtos" :
+             block.type === "about" ? "Editar Sobre" :
+             block.type === "contact" ? "Editar Contato" :
+             block.type === "socials" ? "Editar Redes Sociais" :
+             block.type === "testimonials" ? "Editar Depoimentos" :
+             block.type === "benefits" ? "Editar Benefícios" :
+             block.type === "faq" ? "Editar Perguntas Frequentes" :
+             block.type === "important_info" ? "Editar Info Importante" :
+             block.type === "divider" ? "Editar Divisor" :
+             "Editar Bloco"}
+          </SheetTitle>
         </SheetHeader>
         <div className="space-y-4 mt-6">
           {renderFields()}

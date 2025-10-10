@@ -17,12 +17,15 @@ export const TextBlock = ({ data }: TextBlockProps) => {
       align === "center" && "text-center"
     )}>
       {data.title && (
-        <h2 id={`title-${data.title.toLowerCase().replace(/\s+/g, '-')}`} className="text-2xl sm:text-3xl font-bold mb-4">
+        <h2 
+          id={`title-${data.title.toLowerCase().replace(/\s+/g, '-')}`} 
+          className="text-2xl sm:text-3xl font-bold mb-4 text-foreground"
+        >
           {data.title}
         </h2>
       )}
       {data.body && (
-        <div className="prose prose-lg max-w-none text-muted-foreground whitespace-pre-wrap">
+        <div className="prose prose-lg max-w-none text-muted-foreground whitespace-pre-wrap prose-headings:text-foreground prose-a:text-primary hover:prose-a:text-primary/80">
           {data.body}
         </div>
       )}

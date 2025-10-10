@@ -29,7 +29,7 @@ interface AddBlockDrawerProps {
 
 const blockTypes = [
   { type: "cover", icon: ImagePlus, label: "Capa", description: "Imagem de destaque com título" },
-  { type: "heading", icon: Type, label: "Título + Texto", description: "Cabeçalho e corpo de texto" },
+  { type: "heading", icon: Type, label: "Texto Livre", description: "Texto formatado com título opcional" },
   { type: "image", icon: ImageIcon, label: "Imagem", description: "Foto única com legenda" },
   { type: "video", icon: Video, label: "Vídeo", description: "Vídeo do YouTube ou Vimeo" },
   { type: "product_grid", icon: LayoutGrid, label: "Grade de Produtos", description: "Mostre seus produtos" },
