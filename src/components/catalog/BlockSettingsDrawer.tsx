@@ -1086,6 +1086,325 @@ export const BlockSettingsDrawer = ({
           </>
         );
 
+      case "important_info":
+        // Default preset for "Informações importantes"
+        const defaultPreset = {
+          title: "Informações importantes",
+          layout: "list",
+          items: [
+            {
+              icon: "truck",
+              show_icon: true,
+              title: "Entrega e prazos",
+              content: "Enviamos para todo o país. Prazo estimado: 2 a 5 dias úteis após a confirmação do pagamento.",
+              link_label: "Ver política de envio",
+              link_url: ""
+            },
+            {
+              icon: "credit-card",
+              show_icon: true,
+              title: "Formas de pagamento",
+              content: "Aceitamos Pix, cartão e transferência. Parcelamento disponível conforme condições do emissor.",
+              link_label: "Dúvidas sobre pagamento",
+              link_url: ""
+            },
+            {
+              icon: "map-pin",
+              show_icon: true,
+              title: "Retirada no local",
+              content: "Opção de retirada mediante agendamento. Informe o melhor dia/horário pelo WhatsApp.",
+              link_label: "Ver localização",
+              link_url: ""
+            }
+          ]
+        };
+        
+        const handleUsePreset = () => {
+          // Check if there are existing items
+          if (formData.items && formData.items.length > 0) {
+            if (confirm("Substituir itens atuais?")) {
+              setFormData(defaultPreset);
+            }
+          } else {
+            setFormData(defaultPreset);
+          }
+        };
+        
+        return (
+          <>
+            <div className="space-y-2">
+              <Label>Título do Bloco</Label>
+              <Input
+                value={formData.title || "Informações importantes"}
+                onChange={(e) => {
+                  const newTitle = e.target.value;
+                  setFormData({ ...formData, title: newTitle });
+                  if (onUpdate && (!block.anchor_slug || block.anchor_slug === generateSlug(block.data.title || ""))) {
+                    onUpdate({ ...block, data: { ...formData, title: newTitle }, anchor_slug: generateSlug(newTitle) });
+                  }
+                }}
+              />
+            </div>
+            
+            {showAnchorField && (
+              <div className="space-y-2">
+                <Label>ID da seção</Label>
+                <Input
+                  value={block.anchor_slug || ""}
+                  onChange={(e) => {
+                    if (onUpdate) {
+                      onUpdate({ ...block, anchor_slug: generateSlug(e.target.value) });
+                    }
+                  }}
+                  placeholder="id-da-secao"
+                />
+              </div>
+            )}
+            
+            <div className="space-y-2">
+              <Label>Layout</Label>
+              <select
+                className="w-full border rounded-xl p-2"
+                value={formData.layout || "list"}
+                onChange={(e) => setFormData({ ...formData, layout: e.target.value })}
+              >
+                <option value="list">Lista simples</option>
+                <option value="cards">Cartões</option>
+              </select>
+              <p className="text-xs text-muted-foreground">
+                Lista: ícones à esquerda, ideal para informações detalhadas<br />
+                Cartões: layout em grade, melhor para visualização rápida
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Fundo</Label>
+              <select
+                className="w-full border rounded-xl p-2"
+                value={formData.background || "default"}
+                onChange={(e) => setFormData({ ...formData, background: e.target.value })}
+              >
+                <option value="default">Padrão</option>
+                <option value="accent">Faixa suave</option>
+                <option value="cards_elevated">Cartões elevados</option>
+              </select>
+            </div>
+            
+            <div className="space-y-2 mt-4">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleUsePreset}
+              >
+                Usar modelo padrão
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                Preenche com informações de entrega, pagamento e retirada
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <Label>Informações</Label>
+              {(formData.items || []).map((item: any, index: number) => (
+                <div key={index} className="p-4 border rounded-xl space-y-2">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium">Item {index + 1}</span>
+                    <div className="flex gap-1">
+                      {index > 0 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            const items = [...(formData.items || [])];
+                            const temp = items[index];
+                            items[index] = items[index - 1];
+                            items[index - 1] = temp;
+                            setFormData({ ...formData, items });
+                          }}
+                        >
+                          ↑
+                        </Button>
+                      )}
+                      {index < (formData.items || []).length - 1 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            const items = [...(formData.items || [])];
+                            const temp = items[index];
+                            items[index] = items[index + 1];
+                            items[index + 1] = temp;
+                            setFormData({ ...formData, items });
+                          }}
+                        >
+                          ↓
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const items = [...(formData.items || [])];
+                          items.splice(index, 1);
+                          setFormData({ ...formData, items });
+                        }}
+                      >
+                        Remover
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor={`show-icon-${index}`}>Mostrar ícone</Label>
+                      <Switch
+                        id={`show-icon-${index}`}
+                        checked={item.show_icon !== false}
+                        onCheckedChange={(checked) => {
+                          const items = [...(formData.items || [])];
+                          items[index] = { ...items[index], show_icon: checked };
+                          setFormData({ ...formData, items });
+                        }}
+                      />
+                    </div>
+                  </div>
+                  
+                  {item.show_icon !== false && (
+                    <div className="space-y-1">
+                      <Label>Ícone</Label>
+                      <select
+                        className="w-full border rounded-xl p-2"
+                        value={item.icon || "info"}
+                        onChange={(e) => {
+                          const items = [...(formData.items || [])];
+                          items[index] = { ...items[index], icon: e.target.value };
+                          setFormData({ ...formData, items });
+                        }}
+                      >
+                        <option value="truck">Caminhão</option>
+                        <option value="credit-card">Cartão</option>
+                        <option value="map-pin">Localização</option>
+                        <option value="clock">Relógio</option>
+                        <option value="calendar">Calendário</option>
+                        <option value="info">Informação</option>
+                        <option value="alert-circle">Alerta</option>
+                        <option value="alert-triangle">Aviso</option>
+                        <option value="message-circle">Mensagem</option>
+                        <option value="package">Pacote</option>
+                        <option value="shield-check">Segurança</option>
+                        <option value="heart">Coração</option>
+                        <option value="star">Estrela</option>
+                        <option value="gift">Presente</option>
+                      </select>
+                    </div>
+                  )}
+                  
+                  <div className="space-y-1">
+                    <Label>Título</Label>
+                    <Input
+                      placeholder="Título da informação"
+                      value={item.title || ""}
+                      onChange={(e) => {
+                        const items = [...(formData.items || [])];
+                        items[index] = { ...items[index], title: e.target.value };
+                        setFormData({ ...formData, items });
+                      }}
+                    />
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <Label>Conteúdo</Label>
+                    <Textarea
+                      placeholder="Descrição detalhada"
+                      value={item.content || ""}
+                      onChange={(e) => {
+                        const items = [...(formData.items || [])];
+                        items[index] = { ...items[index], content: e.target.value };
+                        setFormData({ ...formData, items });
+                      }}
+                      rows={3}
+                    />
+                  </div>
+                  
+                  <div className="space-y-1 border-t pt-3 mt-3">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor={`link-enabled-${index}`}>Adicionar link</Label>
+                      <Switch
+                        id={`link-enabled-${index}`}
+                        checked={!!(item.link_label && item.link_url)}
+                        onCheckedChange={(checked) => {
+                          const items = [...(formData.items || [])];
+                          if (checked) {
+                            items[index] = { 
+                              ...items[index], 
+                              link_label: items[index].link_label || "Saiba mais", 
+                              link_url: items[index].link_url || "#" 
+                            };
+                          } else {
+                            items[index] = { 
+                              ...items[index], 
+                              link_label: null, 
+                              link_url: null 
+                            };
+                          }
+                          setFormData({ ...formData, items });
+                        }}
+                      />
+                    </div>
+                    
+                    {item.link_label && item.link_url !== undefined && (
+                      <>
+                        <div className="space-y-1 mt-2">
+                          <Label>Texto do link</Label>
+                          <Input
+                            placeholder="Ex: Saiba mais"
+                            value={item.link_label || ""}
+                            onChange={(e) => {
+                              const items = [...(formData.items || [])];
+                              items[index] = { ...items[index], link_label: e.target.value };
+                              setFormData({ ...formData, items });
+                            }}
+                          />
+                        </div>
+                        
+                        <div className="space-y-1 mt-2">
+                          <Label>URL do link</Label>
+                          <Input
+                            placeholder="https://..."
+                            value={item.link_url || ""}
+                            onChange={(e) => {
+                              const items = [...(formData.items || [])];
+                              items[index] = { ...items[index], link_url: e.target.value };
+                              setFormData({ ...formData, items });
+                            }}
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  const items = [...(formData.items || []), { 
+                    icon: "info", 
+                    show_icon: true,
+                    title: "", 
+                    content: "",
+                    link_label: null,
+                    link_url: null
+                  }];
+                  setFormData({ ...formData, items });
+                }}
+              >
+                + Adicionar Informação
+              </Button>
+            </div>
+          </>
+        );
+
       case "step_by_step":
         // Preset data for "Como comprar"
         const howToBuyPreset = {

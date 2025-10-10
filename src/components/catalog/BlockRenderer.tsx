@@ -12,6 +12,7 @@ import { TestimonialsBlock } from "./blocks/TestimonialsBlock";
 import { FaqBlock } from "./blocks/FaqBlock";
 import { BenefitsBlock } from "./blocks/BenefitsBlock";
 import { StepByStepBlock } from "./blocks/StepByStepBlock";
+import { ImportantInfoBlock } from "./blocks/ImportantInfoBlock";
 
 interface BlockRendererProps {
   block: any;
@@ -66,11 +67,7 @@ export const BlockRenderer = ({ block, profile, userId }: BlockRendererProps) =>
       return <StepByStepBlock data={block.data} />;
     
     case "important_info":
-      return (
-        <div className="py-8 px-6 text-center text-muted-foreground">
-          Bloco "Info Importante" em construção
-        </div>
-      );
+      return <ImportantInfoBlock data={block.data} />;
     
       default:
         return null;
