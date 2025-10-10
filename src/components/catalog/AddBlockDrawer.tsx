@@ -33,7 +33,7 @@ const blockTypes = [
   { type: "image", icon: ImageIcon, label: "Imagem", description: "Foto única com legenda" },
   { type: "video", icon: Video, label: "Vídeo", description: "Vídeo do YouTube ou Vimeo" },
   { type: "product_grid", icon: LayoutGrid, label: "Grade de Produtos", description: "Mostre seus produtos" },
-  { type: "about", icon: Info, label: "Sobre", description: "Informações do seu perfil" },
+  { type: "about_business", icon: Info, label: "Sobre o Negócio", description: "Apresente a história e o propósito do seu negócio" },
   { type: "contact", icon: Phone, label: "Contato", description: "WhatsApp, email, telefone" },
   { type: "socials", icon: Share2, label: "Redes Sociais", description: "Links para suas redes" },
   { type: "testimonials", icon: Star, label: "Depoimentos", description: "Avaliações de clientes" },

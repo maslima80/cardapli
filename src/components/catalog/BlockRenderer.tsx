@@ -3,6 +3,7 @@ import { TextBlock } from "./blocks/TextBlock";
 import { ImageBlock } from "./blocks/ImageBlock";
 import { ProductGridBlock } from "./blocks/ProductGridBlock";
 import { AboutBlock } from "./blocks/AboutBlock";
+import { AboutBusinessBlock } from "./blocks/AboutBusinessBlock";
 import { ContactBlock } from "./blocks/ContactBlock";
 import { SocialsBlock } from "./blocks/SocialsBlock";
 import { DividerBlock } from "./blocks/DividerBlock";
@@ -38,6 +39,9 @@ export const BlockRenderer = ({ block, profile, userId }: BlockRendererProps) =>
     
     case "about":
       return <AboutBlock data={block.data} profileAbout={profile?.about} />;
+      
+    case "about_business":
+      return <AboutBusinessBlock data={block.data} profileAbout={profile?.about} />;
     
     case "contact":
       return <ContactBlock data={block.data} profile={profile} />;
@@ -73,7 +77,7 @@ export const BlockRenderer = ({ block, profile, userId }: BlockRendererProps) =>
   if (!content) return null;
 
   // For blocks with titles, wrap in a section with anchor
-  const blocksWithAnchors = ["cover", "text", "heading", "testimonials", "faq", "benefits", "product_grid"];
+  const blocksWithAnchors = ["cover", "text", "heading", "testimonials", "faq", "benefits", "product_grid", "about_business"];
   if (blocksWithAnchors.includes(block.type) && block.anchor_slug) {
     const title = block.data?.title || "";
     return (
