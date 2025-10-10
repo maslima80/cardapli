@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { CheckCircle2, XCircle, Loader2, ArrowLeft } from "lucide-react";
 
 export default function EscolherSlug() {
   const navigate = useNavigate();
@@ -23,6 +23,18 @@ export default function EscolherSlug() {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       navigate("/entrar");
+      return;
+    }
+    
+    // Check if user already has a slug
+    const { data } = await supabase
+      .from("profiles")
+      .select("slug")
+      .eq("id", session.user.id)
+      .single();
+      
+    if (data?.slug) {
+      setSlug(data.slug);
     }
   };
 
@@ -104,7 +116,9 @@ export default function EscolherSlug() {
         description: `Seu link público: cardapli.com/@${slug}`,
       });
 
-      navigate("/dashboard");
+      // Check if we came from the profile page
+      const fromProfile = new URLSearchParams(window.location.search).get('from') === 'profile';
+      navigate(fromProfile ? "/perfil" : "/dashboard");
     } catch (err: any) {
       console.error("Error saving slug:", err);
       toast({
@@ -117,13 +131,34 @@ export default function EscolherSlug() {
     }
   };
 
+  // Check if we came from the profile page
+  const fromProfile = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('from') === 'profile';
+  
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8">
+        {fromProfile && (
+          <div className="flex justify-start">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/perfil')}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" /> Voltar ao Perfil
+            </Button>
+          </div>
+        )}
+        
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">Bem-vindo! 👋</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {fromProfile ? 'Alterar Nome de Usuário' : 'Bem-vindo! 👋'}
+          </h1>
           <p className="text-muted-foreground">
-            Escolha seu nome de usuário para começar
+            {fromProfile 
+              ? 'Atualize seu nome de usuário para o link público' 
+              : 'Escolha seu nome de usuário para começar'
+            }
           </p>
         </div>
 
@@ -193,7 +228,7 @@ export default function EscolherSlug() {
                   Salvando...
                 </>
               ) : (
-                "Continuar"
+                fromProfile ? "Salvar alterações" : "Continuar"
               )}
             </Button>
             

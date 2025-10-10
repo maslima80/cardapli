@@ -25,6 +25,7 @@ type Profile = {
   font_theme: string | null;
   cta_shape: string | null;
   locations: any;
+  slug: string | null;
 };
 
 type Location = {
@@ -51,6 +52,7 @@ export default function Perfil() {
     font_theme: "clean",
     cta_shape: "rounded",
     locations: [],
+    slug: null,
   });
   const [saving, setSaving] = useState(false);
   const [showLocations, setShowLocations] = useState(false);
@@ -92,6 +94,7 @@ export default function Perfil() {
           font_theme: data.font_theme || "clean",
           cta_shape: data.cta_shape || "rounded",
           locations: data.locations || [],
+          slug: data.slug,
         });
       }
     } catch (error) {
@@ -304,6 +307,37 @@ export default function Perfil() {
               <p className="text-xs text-muted-foreground text-right">
                 {(profile.about || "").length}/400
               </p>
+            </div>
+          </section>
+
+          {/* Link Público */}
+          <section className="space-y-6">
+            <h2 className="text-xl font-semibold border-b border-border pb-2">
+              Link Público
+            </h2>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="slug">Nome de usuário</Label>
+                <div className="flex items-center gap-2">
+                  <div className="bg-muted/50 rounded-lg p-3 flex-1">
+                    <div className="flex items-center gap-1">
+                      <span className="text-muted-foreground">cardapli.com/@</span>
+                      <span className="font-medium">{profile.slug || '—'}</span>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate('/escolher-slug?from=profile')}
+                  >
+                    Editar
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Este é o seu link público que você pode compartilhar com seus clientes.
+                </p>
+              </div>
             </div>
           </section>
 
