@@ -2,14 +2,15 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
 import { SimpleImageUploader } from "./SimpleImageUploader";
 import { ProductPickerModal } from "./ProductPickerModal";
 import { MultiSelectChips } from "./MultiSelectChips";
 import { supabase } from "@/integrations/supabase/client";
+import { extractVideoInfo } from "@/lib/external-media";
 
 interface BlockSettingsDrawerProps {
   open: boolean;
@@ -277,11 +278,23 @@ export const BlockSettingsDrawer = ({
               <Label>URL do Vídeo</Label>
               <Input
                 value={formData.url || ""}
-                onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                placeholder="YouTube, TikTok, Vimeo, Instagram..."
+                onChange={(e) => {
+                  const url = e.target.value;
+                  setFormData({ ...formData, url });
+                  
+                  // Validate if it's a YouTube URL
+                  const info = extractVideoInfo(url);
+                  if (url && (!info || info.provider !== 'youtube')) {
+                    // Show error state on input
+                    e.target.classList.add('border-destructive');
+                  } else {
+                    e.target.classList.remove('border-destructive');
+                  }
+                }}
+                placeholder="https://www.youtube.com/watch?v=..."
               />
               <p className="text-xs text-muted-foreground">
-                Suporta YouTube, TikTok, Vimeo e Instagram
+                Apenas vídeos do YouTube são suportados
               </p>
             </div>
             <div className="space-y-2">
@@ -313,17 +326,6 @@ export const BlockSettingsDrawer = ({
                 />
               </div>
             )}
-            <div className="space-y-2">
-              <Label>Modo de Exibição</Label>
-              <select
-                className="w-full border rounded-xl p-2"
-                value={formData.display || "embed"}
-                onChange={(e) => setFormData({ ...formData, display: e.target.value })}
-              >
-                <option value="embed">Incorporado (inline)</option>
-                <option value="card">Cartão com botão "Assistir"</option>
-              </select>
-            </div>
             <div className="flex items-center justify-between">
               <Label>Autoplay mudo</Label>
               <Switch

@@ -1,68 +1,31 @@
-import { useState, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Play } from "lucide-react";
-import { extractVideoInfo, getThumbnail, supportsInlineEmbed, ExternalMediaObject } from "@/lib/external-media";
+import { useState, useEffect } from "react";
+import { extractVideoInfo } from "@/lib/external-media";
+import { Youtube, Play } from "lucide-react";
 
 interface VideoBlockProps {
   data: {
     url?: string;
-    provider?: string;
     title?: string;
-    display?: "embed" | "card";
     autoplay?: boolean;
-    thumbnail_url?: string;
   };
 }
 
 export const VideoBlock = ({ data }: VideoBlockProps) => {
-  const [isVisible, setIsVisible] = useState(false);
+  const [videoId, setVideoId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [videoInfo, setVideoInfo] = useState<ExternalMediaObject | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-
+  
   useEffect(() => {
     if (!data.url) return;
-
+    
     const info = extractVideoInfo(data.url);
-    if (info) {
-      const media: ExternalMediaObject = {
-        url: data.url,
-        provider: info.provider,
-        videoId: info.videoId,
-        title: data.title || "",
-        thumbnail: data.thumbnail_url || getThumbnail({
-          url: data.url,
-          provider: info.provider,
-          videoId: info.videoId,
-          title: data.title || "",
-          thumbnail: data.thumbnail_url,
-          embedUrl: ""
-        } as ExternalMediaObject),
-        embedUrl: getEmbedUrl(info.provider, info.videoId, data.autoplay)
-      };
-      setVideoInfo(media);
+    if (info && info.provider === 'youtube') {
+      setVideoId(info.videoId);
+    } else {
+      setVideoId(null);
     }
-  }, [data.url, data.title, data.thumbnail_url, data.autoplay]);
+  }, [data.url]);
 
-  // Lazy load: observe when element enters viewport
-  useEffect(() => {
-    if (!containerRef.current || data.display === "card") return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, [data.display]);
-
-  if (!data.url || !videoInfo) {
+  if (!data.url) {
     return (
       <div className="py-8 text-center text-muted-foreground">
         Configure o vídeo nas configurações do bloco
@@ -70,108 +33,69 @@ export const VideoBlock = ({ data }: VideoBlockProps) => {
     );
   }
 
-  const handlePlayClick = () => {
-    setIsPlaying(true);
-    setIsVisible(true);
-  };
-
-  // Instagram always shows as card
-  if (videoInfo.provider === "instagram") {
+  if (!videoId) {
     return (
-      <div className="py-6" ref={containerRef}>
-        <Card className="max-w-md mx-auto overflow-hidden">
-          {videoInfo.thumbnail && (
-            <img
-              src={videoInfo.thumbnail}
-              alt={videoInfo.title || "Instagram post"}
-              className="w-full aspect-square object-cover"
-            />
-          )}
-          <div className="p-4">
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => window.open(data.url, "_blank")}
-              aria-label={`Ver ${videoInfo.title || "vídeo"} no Instagram`}
-            >
-              Ver no Instagram
-            </Button>
-          </div>
-        </Card>
+      <div className="py-8 text-center text-muted-foreground">
+        <Youtube className="w-8 h-8 mx-auto mb-2" />
+        <p>Apenas vídeos do YouTube são suportados</p>
+        <p className="text-sm mt-1">Insira uma URL válida do YouTube</p>
       </div>
     );
   }
 
-  // Card mode: show thumbnail with play button
-  if (data.display === "card" && !isPlaying) {
+  // Get the thumbnail URL
+  const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+  
+  // If not playing yet, show the thumbnail with play button
+  if (!isPlaying) {
     return (
-      <div className="py-6" ref={containerRef}>
-        <Card className="max-w-2xl mx-auto overflow-hidden cursor-pointer group" onClick={handlePlayClick}>
-          <div className="relative aspect-video bg-muted">
-            {videoInfo.thumbnail && (
-              <img
-                src={videoInfo.thumbnail}
-                alt={videoInfo.title || "Thumbnail do vídeo"}
-                className="w-full h-full object-cover"
-              />
-            )}
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/50 transition-colors">
+      <div className="py-6">
+        <div className="max-w-3xl mx-auto">
+          <div 
+            className="relative aspect-video bg-muted rounded-xl overflow-hidden cursor-pointer" 
+            onClick={() => setIsPlaying(true)}
+          >
+            <img
+              src={thumbnailUrl}
+              alt={data.title || "YouTube video"}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center hover:bg-black/50 transition-colors">
               <div className="bg-white rounded-full p-4">
-                <Play className="w-8 h-8 text-primary fill-current" />
+                <Play className="w-8 h-8 text-red-600 fill-current" />
               </div>
             </div>
           </div>
-          {videoInfo.title && (
-            <div className="p-4">
-              <p className="font-medium">{videoInfo.title}</p>
-            </div>
+          {data.title && (
+            <p className="text-sm text-center mt-2">{data.title}</p>
           )}
-        </Card>
+        </div>
       </div>
     );
   }
-
-  // Embed mode: lazy load iframe
-  if (!supportsInlineEmbed(videoInfo.provider)) {
-    return (
-      <div className="py-6 text-center text-muted-foreground">
-        Este provedor não suporta incorporação inline
-      </div>
-    );
-  }
-
+  
+  // Build the embed URL with parameters
+  const baseParams = 'playsinline=1&rel=0&modestbranding=1';
+  const autoplayParams = data.autoplay ? '&autoplay=1&mute=1' : '';
+  const embedUrl = `https://www.youtube.com/embed/${videoId}?${baseParams}${autoplayParams}`;
+  
+  // Show the embedded video
   return (
-    <div className="py-6" ref={containerRef}>
-      <div className="aspect-video max-w-3xl mx-auto rounded-xl overflow-hidden bg-muted">
-        {isVisible || isPlaying ? (
+    <div className="py-6">
+      <div className="max-w-3xl mx-auto">
+        <div className="aspect-video rounded-xl overflow-hidden">
           <iframe
-            src={videoInfo.embedUrl}
-            title={videoInfo.title || "Vídeo"}
+            src={embedUrl}
+            title={data.title || "YouTube video"}
             className="w-full h-full"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
           />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="animate-pulse text-muted-foreground">Carregando vídeo...</div>
-          </div>
+        </div>
+        {data.title && (
+          <p className="text-sm text-center mt-2">{data.title}</p>
         )}
       </div>
     </div>
   );
 };
-
-function getEmbedUrl(provider: string, videoId: string, autoplay?: boolean): string {
-  const autoplayParam = autoplay ? "1" : "0";
-  
-  switch (provider) {
-    case "youtube":
-      return `https://www.youtube.com/embed/${videoId}?autoplay=${autoplayParam}&mute=${autoplayParam}`;
-    case "tiktok":
-      return `https://www.tiktok.com/embed/v2/${videoId}`;
-    case "vimeo":
-      return `https://player.vimeo.com/video/${videoId}?autoplay=${autoplayParam}&muted=${autoplayParam}`;
-    default:
-      return "";
-  }
-}
