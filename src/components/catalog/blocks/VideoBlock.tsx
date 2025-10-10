@@ -6,7 +6,6 @@ interface VideoBlockProps {
   data: {
     url?: string;
     title?: string;
-    autoplay?: boolean;
   };
 }
 
@@ -76,7 +75,10 @@ export const VideoBlock = ({ data }: VideoBlockProps) => {
   
   // Build the embed URL with parameters
   const baseParams = 'playsinline=1&rel=0&modestbranding=1';
-  const autoplayParams = data.autoplay ? '&autoplay=1&mute=1' : '';
+  
+  // Always add autoplay=1 when user clicks the play button
+  const autoplayParams = isPlaying ? '&autoplay=1&mute=1' : '';
+  
   const embedUrl = `https://www.youtube.com/embed/${videoId}?${baseParams}${autoplayParams}`;
   
   // Show the embedded video

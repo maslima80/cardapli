@@ -326,13 +326,7 @@ export const BlockSettingsDrawer = ({
                 />
               </div>
             )}
-            <div className="flex items-center justify-between">
-              <Label>Autoplay mudo</Label>
-              <Switch
-                checked={formData.autoplay || false}
-                onCheckedChange={(checked) => setFormData({ ...formData, autoplay: checked })}
-              />
-            </div>
+            {/* Autoplay option removed for V1, will be added back in V2 */}
           </>
         );
 
