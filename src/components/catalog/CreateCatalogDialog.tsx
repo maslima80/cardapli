@@ -35,7 +35,9 @@ export function CreateCatalogDialog({ open, onOpenChange, onSuccess }: CreateCat
   const [description, setDescription] = useState("");
   const [coverImage, setCoverImage] = useState("");
   const [slug, setSlug] = useState("");
-  const [status, setStatus] = useState<"draft" | "public" | "unlisted">("draft");
+  // Only allow these specific values for status
+  type CatalogStatus = 'draft' | 'public' | 'unlisted';
+  const [status, setStatus] = useState<CatalogStatus>('draft');
   const [loading, setLoading] = useState(false);
   const [slugError, setSlugError] = useState("");
 
@@ -102,6 +104,8 @@ export function CreateCatalogDialog({ open, onOpenChange, onSuccess }: CreateCat
     }
 
     const finalSlug = slug.trim() || `catalogo-${Date.now()}`;
+    
+    console.log('Creating catalog with status:', status);
 
     const { data, error } = await supabase
       .from("catalogs")
@@ -110,7 +114,7 @@ export function CreateCatalogDialog({ open, onOpenChange, onSuccess }: CreateCat
         title: title.trim(),
         description: description.trim() || null,
         slug: finalSlug,
-        status,
+        status: status, // This is already typed as CatalogStatus
       })
       .select()
       .single();
@@ -232,7 +236,17 @@ export function CreateCatalogDialog({ open, onOpenChange, onSuccess }: CreateCat
 
           <div className="grid gap-2">
             <Label htmlFor="status">Visibilidade</Label>
-            <Select value={status} onValueChange={(value: any) => setStatus(value)}>
+            <Select 
+              value={status} 
+              onValueChange={(value) => {
+                // Ensure only valid values are accepted
+                if (value === 'draft' || value === 'public' || value === 'unlisted') {
+                  setStatus(value);
+                } else {
+                  setStatus('draft');
+                }
+              }}
+            >
               <SelectTrigger id="status">
                 <SelectValue />
               </SelectTrigger>

@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, ExternalLink, Copy, Files, Trash2, Edit } from "lucide-react";
+import { Plus, Search, ExternalLink, Copy, Files, Trash2, Edit, ArrowLeft } from "lucide-react";
 import { CreateCatalogDialog } from "@/components/catalog/CreateCatalogDialog";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -156,6 +156,19 @@ const Catalogos = () => {
   return (
     <div className="min-h-screen bg-gradient-subtle p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
+        {/* Back to Dashboard Button */}
+        <div className="mb-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/dashboard")}
+            className="gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Voltar ao Painel
+          </Button>
+        </div>
+        
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold mb-1">Meus Catálogos</h1>
