@@ -85,6 +85,29 @@ export const BlockSettingsDrawer = ({
   };
 
   const handleSave = () => {
+    console.log("handleSave called with block type:", block?.type);
+    console.log("formData before save:", formData);
+    
+    // Special handling for testimonials
+    if (block?.type === "testimonials") {
+      console.log("Testimonials block detected, items:", formData.items);
+      
+      // Ensure items is an array
+      if (!Array.isArray(formData.items)) {
+        console.log("formData.items is not an array, initializing empty array");
+        formData.items = [];
+      }
+      
+      // Filter out empty testimonials
+      const validItems = formData.items.filter(item => 
+        item && item.name && item.name.trim() && item.quote && item.quote.trim()
+      );
+      
+      console.log("Valid testimonial items:", validItems);
+      formData.items = validItems;
+    }
+    
+    console.log("Final formData being saved:", formData);
     onSave(formData);
     onOpenChange(false);
   };
@@ -794,8 +817,13 @@ export const BlockSettingsDrawer = ({
                 variant="outline"
                 className="w-full"
                 onClick={() => {
-                  const items = [...(formData.items || []), { name: "", quote: "", avatar_url: "" }];
+                  console.log("Adding new testimonial, current formData:", formData);
+                  console.log("Current items array:", formData.items);
+                  const newItem = { name: "", quote: "", avatar_url: "", role: "" };
+                  const items = Array.isArray(formData.items) ? [...formData.items, newItem] : [newItem];
+                  console.log("New items array:", items);
                   setFormData({ ...formData, items });
+                  console.log("Updated formData:", { ...formData, items });
                 }}
               >
                 + Adicionar Depoimento
@@ -917,6 +945,15 @@ export const BlockSettingsDrawer = ({
                 }}
               />
             </div>
+            
+            <div className="space-y-2">
+              <Label>Subtítulo (opcional)</Label>
+              <Input
+                value={formData.subtitle || ""}
+                onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
+                placeholder="Um breve texto explicativo"
+              />
+            </div>
 
             {showAnchorField && (
               <div className="space-y-2">
@@ -934,6 +971,22 @@ export const BlockSettingsDrawer = ({
             )}
             
             <div className="space-y-2">
+              <Label>Layout</Label>
+              <select
+                className="w-full border rounded-xl p-2"
+                value={formData.layout || "grid"}
+                onChange={(e) => setFormData({ ...formData, layout: e.target.value })}
+              >
+                <option value="grid">Cartões em grade</option>
+                <option value="list">Lista com ícones à esquerda</option>
+              </select>
+              <p className="text-xs text-muted-foreground">
+                Grade: ícones acima do título, ideal para 3-12 itens<br />
+                Lista: ícones à esquerda, melhor para textos longos
+              </p>
+            </div>
+            
+            <div className="space-y-2">
               <Label>Fundo</Label>
               <select
                 className="w-full border rounded-xl p-2"
@@ -942,6 +995,7 @@ export const BlockSettingsDrawer = ({
               >
                 <option value="default">Padrão</option>
                 <option value="accent">Faixa suave</option>
+                <option value="cards_elevated">Cartões elevados</option>
               </select>
             </div>
 
@@ -963,39 +1017,59 @@ export const BlockSettingsDrawer = ({
                       Remover
                     </Button>
                   </div>
-                  <select
-                    className="w-full border rounded-xl p-2"
-                    value={item.icon || "star"}
-                    onChange={(e) => {
-                      const items = [...(formData.items || [])];
-                      items[index] = { ...items[index], icon: e.target.value };
-                      setFormData({ ...formData, items });
-                    }}
-                  >
-                    <option value="star">Estrela</option>
-                    <option value="shield">Escudo</option>
-                    <option value="truck">Caminhão</option>
-                    <option value="leaf">Folha</option>
-                  </select>
-                  <Input
-                    placeholder="Título"
-                    value={item.title || ""}
-                    onChange={(e) => {
-                      const items = [...(formData.items || [])];
-                      items[index] = { ...items[index], title: e.target.value };
-                      setFormData({ ...formData, items });
-                    }}
-                  />
-                  <Textarea
-                    placeholder="Descrição"
-                    value={item.description || ""}
-                    onChange={(e) => {
-                      const items = [...(formData.items || [])];
-                      items[index] = { ...items[index], description: e.target.value };
-                      setFormData({ ...formData, items });
-                    }}
-                    rows={2}
-                  />
+                  
+                  <div className="space-y-1">
+                    <Label>Ícone</Label>
+                    <select
+                      className="w-full border rounded-xl p-2"
+                      value={item.icon || "star"}
+                      onChange={(e) => {
+                        const items = [...(formData.items || [])];
+                        items[index] = { ...items[index], icon: e.target.value };
+                        setFormData({ ...formData, items });
+                      }}
+                    >
+                      <option value="star">Estrela</option>
+                      <option value="shield">Escudo</option>
+                      <option value="truck">Caminhão</option>
+                      <option value="leaf">Folha</option>
+                      <option value="chat">Chat</option>
+                      <option value="gift">Presente</option>
+                      <option value="diamond">Diamante</option>
+                      <option value="clock">Relógio</option>
+                      <option value="hammer">Ferramenta</option>
+                      <option value="globe">Globo</option>
+                      <option value="thumbsUp">Curtir</option>
+                      <option value="check">Verificado</option>
+                    </select>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <Label>Título</Label>
+                    <Input
+                      placeholder="Título"
+                      value={item.title || ""}
+                      onChange={(e) => {
+                        const items = [...(formData.items || [])];
+                        items[index] = { ...items[index], title: e.target.value };
+                        setFormData({ ...formData, items });
+                      }}
+                    />
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <Label>Descrição</Label>
+                    <Textarea
+                      placeholder="Descrição"
+                      value={item.description || ""}
+                      onChange={(e) => {
+                        const items = [...(formData.items || [])];
+                        items[index] = { ...items[index], description: e.target.value };
+                        setFormData({ ...formData, items });
+                      }}
+                      rows={2}
+                    />
+                  </div>
                 </div>
               ))}
               <Button

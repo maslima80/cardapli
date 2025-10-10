@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, Eye, Settings } from "lucide-react";
+import { ArrowLeft, Plus, Eye, Settings, FileDown } from "lucide-react";
 import { toast } from "sonner";
 import { BlockCard } from "@/components/catalog/BlockCard";
 import { AddBlockDrawer } from "@/components/catalog/AddBlockDrawer";
@@ -10,6 +10,7 @@ import { BlockSettingsDrawer } from "@/components/catalog/BlockSettingsDrawer";
 import { BlockRenderer } from "@/components/catalog/BlockRenderer";
 import { PublishModal } from "@/components/catalog/PublishModal";
 import { CatalogSettingsDialog } from "@/components/catalog/CatalogSettingsDialog";
+import { GeneratePdfModal } from "@/components/catalog/GeneratePdfModal";
 import { getEffectiveTheme, generateThemeVariables } from "@/lib/theme-utils";
 import {
   DndContext,
@@ -38,6 +39,7 @@ const CatalogoEditor = () => {
   const [previewMode, setPreviewMode] = useState(false);
   const [publishModalOpen, setPublishModalOpen] = useState(false);
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
+  const [pdfModalOpen, setPdfModalOpen] = useState(false);
   const [profile, setProfile] = useState<any>(null);
 
   const sensors = useSensors(
@@ -113,14 +115,50 @@ const CatalogoEditor = () => {
   };
 
   const handleUpdateBlock = async (blockId: string, updates: any) => {
+    console.log("Updating block:", blockId, "with updates:", updates);
+    
+    // Find the block to check its type
+    const block = blocks.find(b => b.id === blockId);
+    console.log("Found block:", block);
+    
+    // Special handling for testimonials blocks
+    const isTestimonialBlock = block?.type === "testimonials" || updates.type === "testimonials";
+    console.log("Is testimonial block?", isTestimonialBlock);
+    
+    if (isTestimonialBlock) {
+      console.log("Testimonial block detected, checking data structure");
+      
+      // Make sure updates.data exists
+      if (!updates.data) {
+        console.log("updates.data doesn't exist, creating it");
+        updates.data = {};
+      }
+      
+      // Make sure items array exists and is properly initialized
+      if (!updates.data.items) {
+        console.log("updates.data.items doesn't exist, initializing empty array");
+        updates.data.items = [];
+      } else {
+        console.log("updates.data.items exists:", updates.data.items);
+      }
+      
+      // Ensure items is an array
+      if (!Array.isArray(updates.data.items)) {
+        console.log("updates.data.items is not an array, converting to array");
+        updates.data.items = Object.values(updates.data.items);
+      }
+    }
+    
     const { error } = await supabase
       .from("catalog_blocks")
       .update(updates)
       .eq("id", blockId);
 
     if (error) {
+      console.error("Error updating block:", error);
       toast.error("Erro ao atualizar");
     } else {
+      console.log("Block updated successfully");
       setBlocks(blocks.map(b => b.id === blockId ? { ...b, ...updates } : b));
       toast.success("Salvo ✓");
     }
@@ -297,6 +335,17 @@ const CatalogoEditor = () => {
                 {previewMode ? "Editar" : "Preview"}
               </Button>
               <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPdfModalOpen(true)}
+                className="gap-2"
+                disabled={!canPublish}
+                title="Gerar PDF"
+              >
+                <FileDown className="w-4 h-4" />
+                PDF
+              </Button>
+              <Button
                 size="sm"
                 onClick={() => setPublishModalOpen(true)}
                 disabled={!canPublish}
@@ -341,12 +390,13 @@ const CatalogoEditor = () => {
         ) : previewMode ? (
           <div className="space-y-6 bg-background rounded-2xl shadow-lg overflow-hidden">
             {blocks.filter(b => b.visible).map((block) => (
-              <BlockRenderer
-                key={block.id}
-                block={block}
-                profile={profile}
-                userId={catalog?.user_id}
-              />
+              <div key={block.id} className="catalog-preview-block">
+                <BlockRenderer
+                  block={block}
+                  profile={profile}
+                  userId={catalog?.user_id}
+                />
+              </div>
             ))}
           </div>
         ) : (
@@ -427,6 +477,13 @@ const CatalogoEditor = () => {
         profileSlug={profile?.slug}
         currentStatus={catalog?.status}
         onPublish={handlePublish}
+      />
+      
+      <GeneratePdfModal
+        open={pdfModalOpen}
+        onOpenChange={setPdfModalOpen}
+        catalogTitle={catalog?.title || "Meu Catálogo"}
+        businessName={profile?.business_name}
       />
     </div>
   );
