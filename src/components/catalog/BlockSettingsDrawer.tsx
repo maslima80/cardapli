@@ -239,7 +239,13 @@ export const BlockSettingsDrawer = ({
               <Label>Imagem</Label>
               <SimpleImageUploader
                 currentImageUrl={formData.image_url}
-                onImageChange={(url) => setFormData({ ...formData, image_url: url })}
+                onImageChange={(url, metadata) => {
+                  setFormData({
+                    ...formData,
+                    image_url: url,
+                    image_metadata: metadata || {}
+                  });
+                }}
               />
             </div>
             <div className="space-y-2">
@@ -250,17 +256,17 @@ export const BlockSettingsDrawer = ({
                 placeholder="Descrição da imagem (opcional)"
               />
             </div>
-            <div className="space-y-2">
-              <Label>Largura</Label>
-              <select
-                className="w-full border rounded-xl p-2"
-                value={formData.width || "auto"}
-                onChange={(e) => setFormData({ ...formData, width: e.target.value })}
-              >
-                <option value="auto">Automático</option>
-                <option value="full">Largura total</option>
-              </select>
+            <div className="flex items-center justify-between py-2">
+              <Label htmlFor="show-caption">Mostrar legenda</Label>
+              <Switch
+                id="show-caption"
+                checked={formData.show_caption !== false}
+                onCheckedChange={(checked) => 
+                  setFormData({ ...formData, show_caption: checked })
+                }
+              />
             </div>
+            {/* Tamanho and Alinhamento options hidden for MVP */}
           </>
         );
 

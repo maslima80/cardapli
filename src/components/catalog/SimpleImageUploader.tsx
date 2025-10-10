@@ -10,8 +10,27 @@ import { ProductImagePickerModal } from "./ProductImagePickerModal";
 
 interface SimpleImageUploaderProps {
   currentImageUrl?: string;
-  onImageChange: (url: string) => void;
+  onImageChange: (url: string, metadata?: { width?: number; height?: number; ratio?: number }) => void;
 }
+
+// Helper function to get image dimensions
+const getImageDimensions = (file: File): Promise<{ width?: number; height?: number; ratio?: number }> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const width = img.width;
+      const height = img.height;
+      const ratio = width / height;
+      URL.revokeObjectURL(img.src); // Clean up
+      resolve({ width, height, ratio });
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(img.src); // Clean up
+      resolve({}); // Return empty object if there's an error
+    };
+    img.src = URL.createObjectURL(file);
+  });
+};
 
 export const SimpleImageUploader = ({
   currentImageUrl,
@@ -32,6 +51,9 @@ export const SimpleImageUploader = ({
     setUploading(true);
 
     try {
+      // Get image dimensions before uploading
+      const imageMetadata = await getImageDimensions(file);
+      
       const { data: authData } = await supabase.functions.invoke("imagekit-signature");
       
       if (!authData || authData.error) {
@@ -55,7 +77,7 @@ export const SimpleImageUploader = ({
       const result = await response.json();
 
       if (result.url) {
-        onImageChange(result.url);
+        onImageChange(result.url, imageMetadata);
         toast.success("Imagem enviada!");
       }
     } catch (error) {
@@ -78,11 +100,13 @@ export const SimpleImageUploader = ({
         <TabsContent value="upload" className="space-y-3">
           {currentImageUrl ? (
             <div className="relative">
-              <img
-                src={currentImageUrl}
-                alt="Preview"
-                className="w-full h-48 object-cover rounded-xl"
-              />
+              <div className="relative w-full flex justify-center items-center bg-muted/30 rounded-xl overflow-hidden" style={{ minHeight: '120px', maxHeight: '200px' }}>
+                <img
+                  src={currentImageUrl}
+                  alt="Preview"
+                  className="max-w-full max-h-[200px] object-contain"
+                />
+              </div>
               <Button
                 variant="destructive"
                 size="icon"
@@ -95,9 +119,15 @@ export const SimpleImageUploader = ({
           ) : (
             <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-xl cursor-pointer hover:bg-muted/50 transition-colors">
               <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                {uploading ? "Enviando..." : "Clique para enviar"}
+              <span className="text-sm text-muted-foreground font-medium">
+                {uploading ? "Enviando..." : "Arraste uma imagem ou clique aqui"}
               </span>
+              <span className="text-xs text-muted-foreground mt-1">
+                Tamanho máximo: 5 MB
+              </span>
+              <p className="text-xs text-muted-foreground mt-2 max-w-[80%] text-center">
+                A imagem manterá seu formato original e será otimizada automaticamente
+              </p>
               <input
                 type="file"
                 className="hidden"
@@ -112,11 +142,13 @@ export const SimpleImageUploader = ({
         <TabsContent value="url" className="space-y-2">
           {currentImageUrl && (
             <div className="relative mb-3">
-              <img
-                src={currentImageUrl}
-                alt="Preview"
-                className="w-full h-48 object-cover rounded-xl"
-              />
+              <div className="relative w-full flex justify-center items-center bg-muted/30 rounded-xl overflow-hidden" style={{ minHeight: '120px', maxHeight: '200px' }}>
+                <img
+                  src={currentImageUrl}
+                  alt="Preview"
+                  className="max-w-full max-h-[200px] object-contain"
+                />
+              </div>
               <Button
                 variant="destructive"
                 size="icon"
@@ -138,11 +170,13 @@ export const SimpleImageUploader = ({
         <TabsContent value="products" className="space-y-3">
           {currentImageUrl ? (
             <div className="relative">
-              <img
-                src={currentImageUrl}
-                alt="Preview"
-                className="w-full h-48 object-cover rounded-xl"
-              />
+              <div className="relative w-full flex justify-center items-center bg-muted/30 rounded-xl overflow-hidden" style={{ minHeight: '120px', maxHeight: '200px' }}>
+                <img
+                  src={currentImageUrl}
+                  alt="Preview"
+                  className="max-w-full max-h-[200px] object-contain"
+                />
+              </div>
               <Button
                 variant="destructive"
                 size="icon"
@@ -160,8 +194,11 @@ export const SimpleImageUploader = ({
             >
               <div className="flex flex-col items-center gap-2">
                 <ImageIcon className="w-8 h-8 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">
-                  Escolher de Produtos
+                <span className="text-sm text-muted-foreground font-medium">
+                  Escolher imagem de um produto
+                </span>
+                <span className="text-xs text-muted-foreground mt-1">
+                  Use fotos já existentes no seu catálogo
                 </span>
               </div>
             </Button>
