@@ -2,22 +2,28 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ExternalLink } from "lucide-react";
 
 interface ProductGridBlockProps {
   data: {
     title?: string;
-    source?: "manual" | "category" | "tag";
-    product_ids?: string[];
-    categories?: string[];
-    tags?: string[];
-    status_filter?: string[];
-    sort?: "newest" | "price_asc" | "price_desc" | "name_asc";
+    source_type?: "manual" | "category" | "tag";
+    selected_product_ids?: string[];
+    selected_categories?: string[];
+    selected_tags?: string[];
+    tags_match_type?: "any" | "all";
+    auto_update?: boolean;
+    status_filter?: "disponivel" | "sob_encomenda" | "ambos";
+    sort_order?: "recentes" | "antigos" | "nome_az" | "preco_asc" | "preco_desc";
     layout?: "grid";
     show_price?: boolean;
     show_tags?: boolean;
+    show_button?: boolean;
     limit?: number;
   };
   userId?: string;
+  profile?: any;
 }
 
 export const ProductGridBlock = ({ data, userId }: ProductGridBlockProps) => {
@@ -36,32 +42,50 @@ export const ProductGridBlock = ({ data, userId }: ProductGridBlockProps) => {
       .select("*")
       .eq("user_id", userId);
 
-    // Filter by source
-    if (data.source === "manual" && data.product_ids?.length) {
-      query = query.in("id", data.product_ids);
-    } else if (data.source === "category" && data.categories?.length) {
-      query = query.overlaps("categories", data.categories);
-    } else if (data.source === "tag" && data.tags?.length) {
-      query = query.overlaps("quality_tags", data.tags);
+    // Filter by source type
+    if (data.source_type === "manual" && data.selected_product_ids?.length) {
+      query = query.in("id", data.selected_product_ids);
+    } else if (data.source_type === "category" && data.selected_categories?.length) {
+      query = query.overlaps("categories", data.selected_categories);
+    } else if (data.source_type === "tag" && data.selected_tags?.length) {
+      // Handle tag filtering based on match type
+      if (data.tags_match_type === "all" && data.selected_tags.length > 1) {
+        // For "all" match type, we need to check that each tag is present
+        // This is a more complex query that might require multiple filters
+        data.selected_tags.forEach(tag => {
+          query = query.contains("quality_tags", [tag]);
+        });
+      } else {
+        // For "any" match type (default), any of the selected tags will match
+        query = query.overlaps("quality_tags", data.selected_tags);
+      }
     }
 
     // Filter by status
-    if (data.status_filter?.length) {
-      query = query.in("status", data.status_filter);
+    if (data.status_filter) {
+      if (data.status_filter === "disponivel") {
+        query = query.eq("status", "Disponível");
+      } else if (data.status_filter === "sob_encomenda") {
+        query = query.eq("status", "Sob encomenda");
+      }
+      // If "ambos" or undefined, don't filter by status
     }
 
     // Apply sorting
-    switch (data.sort) {
-      case "price_asc":
+    switch (data.sort_order) {
+      case "preco_asc":
         query = query.order("price", { ascending: true, nullsFirst: false });
         break;
-      case "price_desc":
+      case "preco_desc":
         query = query.order("price", { ascending: false, nullsFirst: false });
         break;
-      case "name_asc":
+      case "nome_az":
         query = query.order("title", { ascending: true });
         break;
-      case "newest":
+      case "antigos":
+        query = query.order("created_at", { ascending: true });
+        break;
+      case "recentes":
       default:
         query = query.order("created_at", { ascending: false });
         break;
@@ -69,11 +93,17 @@ export const ProductGridBlock = ({ data, userId }: ProductGridBlockProps) => {
 
     query = query.limit(data.limit || 12);
 
-    const { data: productsData } = await query;
+    const { data: productsData, error } = await query;
+    
+    if (error) {
+      console.error("Error loading products:", error);
+      setLoading(false);
+      return;
+    }
 
     // If manual, preserve order
-    if (data.source === "manual" && data.product_ids?.length) {
-      const ordered = data.product_ids
+    if (data.source_type === "manual" && data.selected_product_ids?.length) {
+      const ordered = data.selected_product_ids
         .map(id => productsData?.find(p => p.id === id))
         .filter(Boolean);
       setProducts(ordered as any[]);
@@ -87,8 +117,8 @@ export const ProductGridBlock = ({ data, userId }: ProductGridBlockProps) => {
   if (loading) {
     return (
       <div className="py-8">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {[...Array(6)].map((_, i) => (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {[...Array(8)].map((_, i) => (
             <div key={i} className="aspect-square bg-muted animate-pulse rounded-xl" />
           ))}
         </div>
@@ -98,8 +128,24 @@ export const ProductGridBlock = ({ data, userId }: ProductGridBlockProps) => {
 
   if (products.length === 0) {
     return (
-      <div className="py-8 text-center text-muted-foreground">
-        Nenhum produto selecionado
+      <div className="py-12 text-center">
+        <div className="container max-w-6xl mx-auto px-4">
+          {data.title && (
+            <h2 id={`title-${data.title.toLowerCase().replace(/\s+/g, '-')}`} className="text-3xl font-bold text-center mb-8">
+              {data.title}
+            </h2>
+          )}
+          <div className="py-8 text-muted-foreground border border-dashed rounded-xl p-8">
+            <p className="text-lg mb-2">Nenhum produto encontrado</p>
+            <p className="text-sm max-w-md mx-auto">
+              {data.source_type === "manual" 
+                ? "Selecione produtos manualmente nas configurações do bloco."
+                : data.source_type === "category" 
+                  ? "Verifique se existem produtos nas categorias selecionadas."
+                  : "Verifique se existem produtos com as tags selecionadas."}
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -112,43 +158,67 @@ export const ProductGridBlock = ({ data, userId }: ProductGridBlockProps) => {
             {data.title}
           </h2>
         )}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {products.map((product) => (
-          <div key={product.id} className="group cursor-pointer">
-            <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="aspect-square bg-muted relative">
-                {product.photos?.[0]?.url ? (
-                  <img
-                    src={product.photos[0].url}
-                    alt={product.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <span className="text-muted-foreground text-sm">Sem imagem</span>
-                  </div>
-                )}
-              </div>
-              <div className="p-4">
-                <h3 className="font-semibold line-clamp-2 mb-2">{product.title}</h3>
-                {data.show_price && !product.price_hidden && (
-                  <p className="text-primary font-bold">
-                    {product.price_on_request
-                      ? product.price_on_request_label || "Sob consulta"
-                      : `R$ ${product.price?.toFixed(2)}`}
-                  </p>
-                )}
-                {data.show_tags && product.quality_tags && product.quality_tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {product.quality_tags.slice(0, 2).map((tag, i) => (
-                      <Badge key={i} variant="secondary" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </Card>
+            <div key={product.id} className="group">
+              <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
+                <div className="aspect-square bg-muted relative overflow-hidden">
+                  {product.photos?.[0]?.url ? (
+                    <img
+                      src={product.photos[0].url}
+                      alt={product.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <span className="text-muted-foreground text-sm">Sem imagem</span>
+                    </div>
+                  )}
+                  {product.status === "Sob encomenda" && (
+                    <Badge className="absolute top-2 right-2 bg-primary text-white">
+                      Sob encomenda
+                    </Badge>
+                  )}
+                </div>
+                <div className="p-4 flex-1 flex flex-col">
+                  <h3 className="font-semibold line-clamp-2 mb-2">{product.title}</h3>
+                  
+                  {data.show_price && !product.price_hidden && (
+                    <p className="text-primary font-bold">
+                      {product.price_on_request
+                        ? product.price_on_request_label || "Sob consulta"
+                        : `R$ ${product.price?.toFixed(2)}`}
+                    </p>
+                  )}
+                  
+                  {data.show_tags && product.quality_tags && product.quality_tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {product.quality_tags.slice(0, 2).map((tag, i) => (
+                        <Badge key={i} variant="secondary" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                      {product.quality_tags.length > 2 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{product.quality_tags.length - 2}
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+                  
+                  {data.show_button !== false && (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-auto pt-2 w-full gap-1.5 mt-3"
+                      onClick={() => window.open(`/p/${product.id}`, "_blank")}
+                    >
+                      Ver produto
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </Button>
+                  )}
+                </div>
+              </Card>
             </div>
           ))}
         </div>

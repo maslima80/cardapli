@@ -38,6 +38,28 @@ export const BlockSettingsDrawer = ({
     loadProfile();
     if (block?.type === "product_grid") {
       loadProductMetadata();
+      
+      // Convert old data format to new format if needed
+      const data = block?.data || {};
+      if (data.source && !data.source_type) {
+        // Convert old format to new format
+        const newData = {
+          ...data,
+          source_type: data.source,
+          selected_product_ids: data.product_ids || [],
+          selected_categories: data.categories || [],
+          selected_tags: data.tags || [],
+          status_filter: data.status_filter?.length === 1 
+            ? data.status_filter[0] === "Disponível" ? "disponivel" : "sob_encomenda"
+            : "ambos",
+          sort_order: data.sort === "newest" ? "recentes" 
+            : data.sort === "price_asc" ? "preco_asc"
+            : data.sort === "price_desc" ? "preco_desc"
+            : data.sort === "name_asc" ? "nome_az"
+            : "recentes"
+        };
+        setFormData(newData);
+      }
     }
   }, [block]);
 
@@ -360,8 +382,8 @@ export const BlockSettingsDrawer = ({
               <Label>Fonte dos Produtos</Label>
               <select
                 className="w-full border rounded-xl p-2"
-                value={formData.source || "manual"}
-                onChange={(e) => setFormData({ ...formData, source: e.target.value })}
+                value={formData.source_type || formData.source || "manual"}
+                onChange={(e) => setFormData({ ...formData, source_type: e.target.value })}
               >
                 <option value="manual">Seleção Manual</option>
                 <option value="category">Por Categoria</option>
@@ -369,37 +391,37 @@ export const BlockSettingsDrawer = ({
               </select>
             </div>
 
-            {formData.source === "manual" && (
+            {(formData.source_type || formData.source) === "manual" && (
               <div className="space-y-2">
                 <Button
                   variant="outline"
                   className="w-full"
                   onClick={() => setProductPickerOpen(true)}
                 >
-                  Selecionar Produtos ({formData.product_ids?.length || 0})
+                  Selecionar Produtos ({formData.selected_product_ids?.length || formData.product_ids?.length || 0})
                 </Button>
               </div>
             )}
 
-            {formData.source === "category" && (
+            {(formData.source_type || formData.source) === "category" && (
               <div className="space-y-2">
                 <Label>Categorias</Label>
                 <MultiSelectChips
                   availableOptions={availableCategories}
-                  selectedOptions={formData.categories || []}
-                  onChange={(categories) => setFormData({ ...formData, categories })}
+                  selectedOptions={formData.selected_categories || formData.categories || []}
+                  onChange={(selected_categories) => setFormData({ ...formData, selected_categories })}
                   placeholder="Digite para buscar categorias..."
                 />
               </div>
             )}
 
-            {formData.source === "tag" && (
+            {(formData.source_type || formData.source) === "tag" && (
               <div className="space-y-2">
                 <Label>Tags de Qualidade</Label>
                 <MultiSelectChips
                   availableOptions={availableTags}
-                  selectedOptions={formData.tags || []}
-                  onChange={(tags) => setFormData({ ...formData, tags })}
+                  selectedOptions={formData.selected_tags || formData.tags || []}
+                  onChange={(selected_tags) => setFormData({ ...formData, selected_tags })}
                   placeholder="Digite para buscar tags..."
                 />
               </div>
@@ -435,7 +457,7 @@ export const BlockSettingsDrawer = ({
               </div>
             )}
 
-            {formData.source !== "manual" && (
+            {(formData.source_type || formData.source) !== "manual" && (
               <>
                 <div className="space-y-2">
                   <Label>Filtrar por Status</Label>
@@ -507,8 +529,8 @@ export const BlockSettingsDrawer = ({
             <ProductPickerModal
               open={productPickerOpen}
               onOpenChange={setProductPickerOpen}
-              selectedIds={formData.product_ids || []}
-              onSave={(ids) => setFormData({ ...formData, product_ids: ids })}
+              selectedIds={formData.selected_product_ids || formData.product_ids || []}
+              onSave={(ids) => setFormData({ ...formData, selected_product_ids: ids })}
             />
           </>
         );
