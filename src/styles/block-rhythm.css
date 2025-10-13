@@ -1,0 +1,124 @@
+/* Block Rhythm System */
+
+:root {
+  /* Vertical rhythm - responsive clamp */
+  --section-spacing-sm: clamp(32px, 4vw, 48px);
+  --section-spacing: clamp(48px, 6vw, 96px);
+  --section-spacing-lg: clamp(64px, 8vw, 128px);
+  
+  /* Background transitions */
+  --bg-transition-duration: 0.3s;
+  
+  /* Shadows and borders */
+  --shadow-subtle: 0 4px 12px -2px rgba(0, 0, 0, 0.05);
+  --shadow-medium: 0 8px 24px -4px rgba(0, 0, 0, 0.1);
+  --border-subtle: 1px solid var(--border);
+}
+
+/* Base block wrapper styles */
+.block-wrapper {
+  position: relative;
+  padding-top: var(--section-spacing);
+  padding-bottom: var(--section-spacing);
+}
+
+/* Background styles */
+.block-wrapper[data-bg="surface"] {
+  background-color: hsl(var(--background));
+}
+
+.block-wrapper[data-bg="tint"] {
+  background-color: hsl(var(--secondary));
+}
+
+.block-wrapper[data-bg="elevated"] {
+  background-color: hsl(var(--card));
+  box-shadow: var(--shadow-subtle);
+}
+
+.block-wrapper[data-bg="media"] {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* Transitions between blocks */
+
+/* Same background type - reduce spacing */
+.block-wrapper + .block-wrapper[data-bg="surface"],
+.block-wrapper[data-bg="surface"] + .block-wrapper[data-bg="surface"],
+.block-wrapper[data-bg="tint"] + .block-wrapper[data-bg="tint"],
+.block-wrapper[data-bg="elevated"] + .block-wrapper[data-bg="elevated"] {
+  margin-top: calc(-1 * var(--section-spacing));
+  padding-top: 0;
+}
+
+/* Surface to tint transition */
+.block-wrapper[data-bg="surface"] + .block-wrapper[data-bg="tint"] {
+  position: relative;
+}
+
+.block-wrapper[data-bg="surface"] + .block-wrapper[data-bg="tint"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: linear-gradient(to bottom, hsl(var(--background)), hsl(var(--secondary)));
+  transform: translateY(-50%);
+  z-index: -1;
+}
+
+/* Tint to surface transition */
+.block-wrapper[data-bg="tint"] + .block-wrapper[data-bg="surface"] {
+  position: relative;
+}
+
+.block-wrapper[data-bg="tint"] + .block-wrapper[data-bg="surface"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: linear-gradient(to bottom, hsl(var(--secondary)), hsl(var(--background)));
+  transform: translateY(-50%);
+  z-index: -1;
+}
+
+/* Elevated transitions */
+.block-wrapper[data-bg="elevated"] {
+  margin-top: 16px;
+  margin-bottom: 16px;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* Media block transitions */
+.block-wrapper[data-bg="media"] + .block-wrapper:not([data-bg="media"]) {
+  margin-top: -16px;
+  padding-top: calc(var(--section-spacing) - 16px);
+  border-radius: 16px 16px 0 0;
+  position: relative;
+  z-index: 2;
+}
+
+/* Dark mode adjustments */
+.dark .block-wrapper[data-bg="elevated"] {
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.2);
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  .block-wrapper {
+    padding-top: var(--section-spacing-sm);
+    padding-bottom: var(--section-spacing-sm);
+  }
+  
+  .block-wrapper + .block-wrapper[data-bg="surface"],
+  .block-wrapper[data-bg="surface"] + .block-wrapper[data-bg="surface"],
+  .block-wrapper[data-bg="tint"] + .block-wrapper[data-bg="tint"],
+  .block-wrapper[data-bg="elevated"] + .block-wrapper[data-bg="elevated"] {
+    margin-top: calc(-1 * var(--section-spacing-sm));
+  }
+}

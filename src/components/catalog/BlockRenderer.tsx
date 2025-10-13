@@ -13,6 +13,8 @@ import { FaqBlock } from "./blocks/FaqBlock";
 import { BenefitsBlock } from "./blocks/BenefitsBlock";
 import { StepByStepBlock } from "./blocks/StepByStepBlock";
 import { ImportantInfoBlock } from "./blocks/ImportantInfoBlock";
+import { BlockWrapper } from "./BlockWrapper";
+import { getBlockBackground } from "./BlockBackgroundMapper";
 
 interface BlockRendererProps {
   block: any;
@@ -77,16 +79,26 @@ export const BlockRenderer = ({ block, profile, userId }: BlockRendererProps) =>
   const content = renderBlock();
   if (!content) return null;
 
-  // For blocks with titles, wrap in a section with anchor
-  const blocksWithAnchors = ["cover", "text", "heading", "testimonials", "faq", "benefits", "product_grid", "about_business"];
-  if (blocksWithAnchors.includes(block.type) && block.anchor_slug) {
-    const title = block.data?.title || "";
-    return (
-      <section id={block.anchor_slug} aria-labelledby={title ? `title-${block.anchor_slug}` : undefined}>
-        {content}
-      </section>
-    );
-  }
-
-  return content;
+  // Determine if this is a full-bleed block (like image or video)
+  const isFullBleed = block.type === "image" || 
+                     (block.type === "video" && block.data?.layout === "full") || 
+                     (block.type === "cover" && block.data?.layout === "full");
+                     
+  // Get the appropriate background for this block
+  const background = getBlockBackground(block.type, block.data);
+  
+  // Determine if this block has an anchor
+  const hasAnchor = block.anchor_slug && block.data?.title;
+  const title = block.data?.title || "";
+  
+  return (
+    <BlockWrapper 
+      id={hasAnchor ? block.anchor_slug : undefined}
+      ariaLabelledby={hasAnchor && title ? `title-${block.anchor_slug}` : undefined}
+      background={background}
+      fullBleed={isFullBleed}
+    >
+      {content}
+    </BlockWrapper>
+  );
 };

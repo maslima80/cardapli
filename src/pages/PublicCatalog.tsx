@@ -124,27 +124,27 @@ const PublicCatalog = () => {
       >
         {showSectionNav && <SectionNavigation sections={sections} />}
         
-        <div className="max-w-5xl mx-auto">
-          {blocks.map((block) => (
-            <BlockRenderer
-              key={block.id}
-              block={block}
-              profile={profile}
-              userId={profile?.id}
-            />
-          ))}
+        {blocks.map((block) => (
+          <BlockRenderer
+            key={block.id}
+            block={block}
+            profile={profile}
+            userId={profile?.id}
+          />
+        ))}
 
-          {blocks.length === 0 && (
-            <div className="text-center py-24 px-4">
-              <p className="text-muted-foreground">
-                Este catálogo ainda não tem conteúdo.
-              </p>
-            </div>
-          )}
+        {blocks.length === 0 && (
+          <div className="container max-w-[1120px] mx-auto text-center py-24 px-4">
+            <p className="text-muted-foreground">
+              Este catálogo ainda não tem conteúdo.
+            </p>
+          </div>
+        )}
 
-          {/* Footer */}
-          <div className="text-center py-12 px-4 border-t border-border mt-12">
-            <p className="text-sm text-muted-foreground">
+        {/* Footer */}
+        <div className="block-wrapper" data-bg="surface">
+          <div className="container max-w-[1120px] mx-auto text-center border-t border-border">
+            <p className="text-sm text-muted-foreground py-8">
               {profile?.business_name && (
                 <>
                   © {new Date().getFullYear()} {profile.business_name}
