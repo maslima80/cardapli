@@ -52,22 +52,29 @@ export const ImportantInfoBlock = ({ data }: ImportantInfoBlockProps) => {
 
   // Animation on scroll
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("animate-in");
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
+    // Add a small delay to ensure the elements are properly rendered in preview mode
+    const animationTimeout = setTimeout(() => {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("info-animate-in");
+            }
+          });
+        },
+        { threshold: 0.1 }
+      );
 
-    const itemElements = containerRef.current?.querySelectorAll(".info-item");
-    itemElements?.forEach((el) => observer.observe(el));
+      const itemElements = containerRef.current?.querySelectorAll(".info-item");
+      itemElements?.forEach((el) => observer.observe(el));
 
+      return () => {
+        itemElements?.forEach((el) => observer.unobserve(el));
+      };
+    }, 100); // Small delay to ensure DOM is ready
+    
     return () => {
-      itemElements?.forEach((el) => observer.unobserve(el));
+      clearTimeout(animationTimeout);
     };
   }, [items]);
 
@@ -172,7 +179,7 @@ export const ImportantInfoBlock = ({ data }: ImportantInfoBlockProps) => {
               return (
                 <Card 
                   key={index} 
-                  className={`${getCardClass()} info-item opacity-0 translate-y-4`}
+                  className={`${getCardClass()} info-item opacity-0 translate-y-4 info-animate-in`}
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   {renderContent()}
@@ -182,7 +189,7 @@ export const ImportantInfoBlock = ({ data }: ImportantInfoBlockProps) => {
               return (
                 <div 
                   key={index} 
-                  className={`${data.background === "cards_elevated" ? getCardClass() : "border-b pb-6 last:border-b-0"} info-item opacity-0 translate-y-4`}
+                  className={`${data.background === "cards_elevated" ? getCardClass() : "border-b pb-6 last:border-b-0"} info-item opacity-0 translate-y-4 info-animate-in`}
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   {renderContent()}
@@ -198,11 +205,11 @@ export const ImportantInfoBlock = ({ data }: ImportantInfoBlockProps) => {
 
 // Add CSS for animations
 const animationStyles = `
-  .animate-in {
-    animation: fadeInUp 0.5s ease forwards;
+  .info-animate-in {
+    animation: infoFadeInUp 0.5s ease forwards;
   }
   
-  @keyframes fadeInUp {
+  @keyframes infoFadeInUp {
     from {
       opacity: 0;
       transform: translateY(1rem);

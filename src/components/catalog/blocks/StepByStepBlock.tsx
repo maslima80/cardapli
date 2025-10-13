@@ -51,22 +51,29 @@ export const StepByStepBlock = ({ data }: StepByStepBlockProps) => {
 
   // Animation on scroll
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("animate-in");
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
+    // Add a small delay to ensure the elements are properly rendered in preview mode
+    const animationTimeout = setTimeout(() => {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("step-animate-in");
+            }
+          });
+        },
+        { threshold: 0.1 }
+      );
 
-    const itemElements = containerRef.current?.querySelectorAll(".step-item");
-    itemElements?.forEach((el) => observer.observe(el));
+      const itemElements = containerRef.current?.querySelectorAll(".step-item");
+      itemElements?.forEach((el) => observer.observe(el));
 
+      return () => {
+        itemElements?.forEach((el) => observer.unobserve(el));
+      };
+    }, 100); // Small delay to ensure DOM is ready
+    
     return () => {
-      itemElements?.forEach((el) => observer.unobserve(el));
+      clearTimeout(animationTimeout);
     };
   }, [steps]);
 
@@ -113,7 +120,7 @@ export const StepByStepBlock = ({ data }: StepByStepBlockProps) => {
         return (
           <div 
             key={index} 
-            className="mb-8 last:mb-0 relative step-item opacity-0 translate-y-4"
+            className="mb-8 last:mb-0 relative step-item opacity-0 translate-y-4 step-animate-in"
             style={{ animationDelay: `${index * 100}ms` }}
           >
             {/* Circle with number or icon */}
@@ -163,7 +170,7 @@ export const StepByStepBlock = ({ data }: StepByStepBlockProps) => {
         return (
           <Card 
             key={index} 
-            className={`${getCardClass()} step-item opacity-0 translate-y-4`}
+            className={`${getCardClass()} step-item opacity-0 translate-y-4 step-animate-in`}
             style={{ animationDelay: `${index * 100}ms` }}
           >
             <div className="flex items-start gap-4">
@@ -223,11 +230,11 @@ export const StepByStepBlock = ({ data }: StepByStepBlockProps) => {
 
 // Add CSS for animations
 const animationStyles = `
-  .animate-in {
-    animation: fadeInUp 0.5s ease forwards;
+  .step-animate-in {
+    animation: stepFadeInUp 0.5s ease forwards;
   }
   
-  @keyframes fadeInUp {
+  @keyframes stepFadeInUp {
     from {
       opacity: 0;
       transform: translateY(1rem);

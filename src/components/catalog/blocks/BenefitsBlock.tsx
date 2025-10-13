@@ -44,22 +44,29 @@ export const BenefitsBlock = ({ data }: BenefitsBlockProps) => {
 
   // Animation on scroll
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("animate-in");
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
+    // Add a small delay to ensure the elements are properly rendered in preview mode
+    const animationTimeout = setTimeout(() => {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("benefit-animate-in");
+            }
+          });
+        },
+        { threshold: 0.1 }
+      );
 
-    const itemElements = containerRef.current?.querySelectorAll(".benefit-item");
-    itemElements?.forEach((el) => observer.observe(el));
+      const itemElements = containerRef.current?.querySelectorAll(".benefit-item");
+      itemElements?.forEach((el) => observer.observe(el));
 
+      return () => {
+        itemElements?.forEach((el) => observer.unobserve(el));
+      };
+    }, 100); // Small delay to ensure DOM is ready
+    
     return () => {
-      itemElements?.forEach((el) => observer.unobserve(el));
+      clearTimeout(animationTimeout);
     };
   }, [items]);
 
@@ -124,7 +131,7 @@ export const BenefitsBlock = ({ data }: BenefitsBlockProps) => {
               return (
                 <Card 
                   key={index} 
-                  className={`${getCardClass()} text-center benefit-item opacity-0 translate-y-4`}
+                  className={`${getCardClass()} text-center benefit-item opacity-0 translate-y-4 benefit-animate-in`}
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <div className="flex justify-center mb-4">
@@ -142,7 +149,7 @@ export const BenefitsBlock = ({ data }: BenefitsBlockProps) => {
               return (
                 <div 
                   key={index} 
-                  className={`${getCardClass()} flex items-start gap-4 benefit-item opacity-0 translate-y-4`}
+                  className={`${getCardClass()} flex items-start gap-4 benefit-item opacity-0 translate-y-4 benefit-animate-in`}
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <div className="flex-shrink-0">
@@ -168,11 +175,11 @@ export const BenefitsBlock = ({ data }: BenefitsBlockProps) => {
 
 // Add CSS for animations
 const animationStyles = `
-  .animate-in {
-    animation: fadeInUp 0.5s ease forwards;
+  .benefit-animate-in {
+    animation: benefitFadeInUp 0.5s ease forwards;
   }
   
-  @keyframes fadeInUp {
+  @keyframes benefitFadeInUp {
     from {
       opacity: 0;
       transform: translateY(1rem);
