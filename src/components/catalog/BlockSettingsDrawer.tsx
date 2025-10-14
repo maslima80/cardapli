@@ -203,14 +203,33 @@ export const BlockSettingsDrawer = ({
             </div>
             <div className="space-y-2">
               <Label>Alinhamento</Label>
-              <select
-                className="w-full border rounded-xl p-2"
+              <Select
                 value={formData.align || "center"}
-                onChange={(e) => setFormData({ ...formData, align: e.target.value })}
+                onValueChange={(value) => setFormData({ ...formData, align: value })}
               >
-                <option value="left">Esquerda</option>
-                <option value="center">Centro</option>
-              </select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Escolha o alinhamento" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="left">Esquerda</SelectItem>
+                  <SelectItem value="center">Centro</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Layout</Label>
+              <Select
+                value={formData.layout || "card"}
+                onValueChange={(value) => setFormData({ ...formData, layout: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Escolha o layout" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="card">Cartão (com bordas arredondadas)</SelectItem>
+                  <SelectItem value="full">Faixa completa (full-bleed)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex items-center justify-between">
               <Label>Usar logo do perfil</Label>

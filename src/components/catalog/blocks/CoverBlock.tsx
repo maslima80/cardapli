@@ -8,20 +8,46 @@ interface CoverBlockProps {
     align?: "left" | "center";
     use_profile_logo?: boolean;
     logo_url?: string;
+    layout?: "card" | "full";
   };
   preview?: boolean;
 }
 
+// Helper function to optimize image URL for ImageKit
+const getOptimizedImageUrl = (url: string, isFullBleed: boolean): string => {
+  if (!url) return "";
+  
+  if (url.includes('ik.imagekit.io')) {
+    // Base transformations
+    const baseParams = "q-80,dpr-auto,c-maintain_ratio";
+    
+    // Width based on layout
+    const widthParam = isFullBleed ? "w-1600" : "w-1200";
+    
+    return `${url}?tr=${widthParam},${baseParams}`;
+  }
+  
+  return url;
+};
+
 export const CoverBlock = ({ data, preview = false }: CoverBlockProps) => {
   const align = data.align || "center";
+  const layout = data.layout || "card";
+  
+  // Determine if we should apply rounded corners based on layout
+  const isFullBleed = layout === "full";
 
   return (
-    <div className="relative w-full h-[60vh] min-h-[400px] overflow-hidden rounded-2xl">
+    <div className={cn(
+      "relative w-full h-[60vh] min-h-[400px] overflow-hidden",
+      !isFullBleed && "rounded-2xl",
+      isFullBleed && "mx-[-1.5rem] sm:mx-[-1.5rem] w-[calc(100%+3rem)]"
+    )}>
       {/* Background Image */}
       {data.image_url && (
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${data.image_url})` }}
+          style={{ backgroundImage: `url(${getOptimizedImageUrl(data.image_url, isFullBleed)})` }}
         />
       )}
       

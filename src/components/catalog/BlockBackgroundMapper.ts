@@ -41,7 +41,13 @@ export const getBlockBackground = (blockType: string, blockData: any): BlockBack
     // Cover blocks can be media or surface
     case "cover":
       if (blockData?.image_url) {
-        background = "media";
+        // If it's full layout, treat as media block
+        if (blockData?.layout === "full") {
+          background = "media";
+        } else {
+          // For card layout with image, still treat as media but with different styling
+          background = "media";
+        }
       }
       break;
       
