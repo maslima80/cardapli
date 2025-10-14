@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { ZoomIn } from "lucide-react";
+import { Dialog, DialogContent, DialogOverlay } from "@/components/ui/dialog";
+import { ZoomIn, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type ImageWidth = "auto" | "full" | "contained" | "inline";
 type ImageCorners = "auto" | "none" | "soft" | "medium";
@@ -22,8 +23,6 @@ interface ImageBlockProps {
   };
 }
 
-import { cn } from "@/lib/utils";
-
 export const ImageBlock = ({ data }: ImageBlockProps) => {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -38,13 +37,27 @@ export const ImageBlock = ({ data }: ImageBlockProps) => {
   
   // Determine if we have image metadata to calculate aspect ratio
   useEffect(() => {
+    // Reset aspect ratio when image changes
+    setAspectRatio(null);
+    
+    // Calculate aspect ratio from metadata if available
     if (data.image_metadata?.width && data.image_metadata?.height) {
       const ratio = data.image_metadata.width / data.image_metadata.height;
       if (ratio > 1.1) setAspectRatio('landscape');
       else if (ratio < 0.9) setAspectRatio('portrait');
       else setAspectRatio('square');
+    } else {
+      // If no metadata, try to determine from the image itself
+      const img = new Image();
+      img.onload = () => {
+        const ratio = img.width / img.height;
+        if (ratio > 1.1) setAspectRatio('landscape');
+        else if (ratio < 0.9) setAspectRatio('portrait');
+        else setAspectRatio('square');
+      };
+      img.src = data.image_url;
     }
-  }, [data.image_metadata]);
+  }, [data.image_url, data.image_metadata]);
   
   // Determine if image is very tall and should have a max height
   const isVeryTall = aspectRatio === 'portrait' && data.image_metadata?.ratio && data.image_metadata.ratio < 0.5;
@@ -127,6 +140,20 @@ export const ImageBlock = ({ data }: ImageBlockProps) => {
   // Determine if image should be clickable for lightbox
   const isLightboxEnabled = isVeryTall || width === "inline" || width === "auto";
   
+  // Determine hover effect style based on image type
+  const getHoverEffectStyle = () => {
+    if (width === "inline") {
+      // For inline images, use a more prominent hover effect
+      return "bg-black/20 backdrop-blur-[2px]";
+    } else if (isVeryTall) {
+      // For very tall images, use a hint that they can be expanded
+      return "bg-gradient-to-b from-black/10 via-transparent to-black/20";
+    } else {
+      // For other images, use a subtle effect
+      return "bg-black/10";
+    }
+  };
+  
   // Optimize image URL if it's from ImageKit
   const getImageUrl = (forLightbox = false) => {
     if (!data.image_url) return "";
@@ -162,8 +189,12 @@ export const ImageBlock = ({ data }: ImageBlockProps) => {
   };
   
   // Handle image click for lightbox
-  const handleImageClick = () => {
+  const handleImageClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (isLightboxEnabled) {
+      console.log('Opening lightbox');
       setLightboxOpen(true);
     }
   };
@@ -185,8 +216,15 @@ export const ImageBlock = ({ data }: ImageBlockProps) => {
             getCornerClass()
           )}>
             {isLightboxEnabled && (
-              <div className="absolute inset-0 opacity-0 hover:opacity-100 bg-black/10 flex items-center justify-center transition-opacity duration-300">
-                <ZoomIn className="text-white w-8 h-8" />
+              <div 
+                className={`absolute inset-0 opacity-0 hover:opacity-100 flex items-center justify-center transition-all duration-300 ${getHoverEffectStyle()}`}
+                onClick={handleImageClick}
+                role="button"
+                aria-label="Open image in lightbox"
+              >
+                <div className="bg-black/50 rounded-full p-3 transform scale-90 hover:scale-100 transition-transform shadow-lg">
+                  <ZoomIn className="text-white w-6 h-6" />
+                </div>
               </div>
             )}
             
@@ -199,7 +237,8 @@ export const ImageBlock = ({ data }: ImageBlockProps) => {
                 getBorderClass(),
                 isVeryTall && "max-h-[80vh] object-contain",
                 !imageLoaded && "opacity-0",
-                imageLoaded && "opacity-100 transition-opacity duration-500"
+                imageLoaded && "opacity-100 transition-opacity duration-500",
+                isLightboxEnabled && "cursor-pointer"
               )}
               loading="lazy"
               onClick={handleImageClick}
@@ -220,17 +259,32 @@ export const ImageBlock = ({ data }: ImageBlockProps) => {
       
       {/* Lightbox */}
       <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
-        <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 bg-transparent border-none shadow-none">
-          <img 
-            src={getImageUrl(true)} 
-            alt={data.caption || ""} 
-            className="w-auto h-auto max-w-[90vw] max-h-[90vh] object-contain"
-          />
-          {showCaption && (
-            <p className="text-sm text-white/80 text-center mt-2">
-              {data.caption}
-            </p>
-          )}
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 bg-transparent border-none shadow-none">
+          <div className="relative">
+            <button 
+              onClick={() => setLightboxOpen(false)}
+              className="absolute top-2 right-2 z-10 bg-black/50 hover:bg-black/70 rounded-full p-2 transition-colors"
+              aria-label="Close lightbox"
+            >
+              <X className="text-white w-5 h-5" />
+            </button>
+            
+            <div className="flex flex-col items-center">
+              <img 
+                src={getImageUrl(true)} 
+                alt={data.caption || ""} 
+                className="w-auto h-auto max-w-[95vw] max-h-[85vh] object-contain rounded-md shadow-2xl"
+              />
+              
+              {showCaption && (
+                <div className="bg-black/50 backdrop-blur-sm px-4 py-2 rounded-full mt-4 max-w-[80%]">
+                  <p className="text-sm text-white text-center">
+                    {data.caption}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </>
