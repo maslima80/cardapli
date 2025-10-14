@@ -27,6 +27,7 @@ interface ProductGridBlockSettingsProps {
   onUpdate?: (block: any) => void;
   block?: any;
   profile?: any;
+  userId?: string;
 }
 
 export function ProductGridBlockSettings({
@@ -35,16 +36,58 @@ export function ProductGridBlockSettings({
   onUpdate,
   block,
   profile,
+  userId,
 }: ProductGridBlockSettingsProps) {
   const [productPickerOpen, setProductPickerOpen] = useState(false);
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [availableVariations, setAvailableVariations] = useState<string[]>([]);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [selectedProductsPreview, setSelectedProductsPreview] = useState<any[]>([]);
 
   useEffect(() => {
     loadCategoriesAndTags();
+    
+    // Ensure source_type is set to a default value if not already set
+    if (!formData.source_type) {
+      setFormData(prev => ({
+        ...prev,
+        source_type: prev.source_type || "manual"
+      }));
+    }
   }, []);
+  
+  // Load preview of selected products when IDs change
+  useEffect(() => {
+    if (formData.source_type === "manual" && formData.selected_product_ids?.length > 0) {
+      loadSelectedProductsPreview();
+    } else {
+      setSelectedProductsPreview([]);
+    }
+  }, [formData.selected_product_ids]);
+  
+  // Load preview data for selected products
+  const loadSelectedProductsPreview = async () => {
+    if (!formData.selected_product_ids?.length) return;
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    
+    const { data } = await supabase
+      .from("products")
+      .select("id, title, photos")
+      .in("id", formData.selected_product_ids)
+      .eq("user_id", user.id);
+      
+    if (data) {
+      // Sort according to the order in selected_product_ids
+      const orderedProducts = formData.selected_product_ids
+        .map(id => data.find(p => p.id === id))
+        .filter(Boolean);
+      
+      setSelectedProductsPreview(orderedProducts as any[]);
+    }
+  };
 
   const loadCategoriesAndTags = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -94,8 +137,11 @@ export function ProductGridBlockSettings({
         const allVariations = productsWithVariations
           .flatMap(product => {
             // Use type guards to safely access variations
-            if (product && 
-                typeof product === 'object' && 
+            // First check if product is not null
+            if (!product) return [];
+            
+            // Then check if it's an object with variations property
+            if (typeof product === 'object' && 
                 'variations' in product && 
                 product.variations && 
                 Array.isArray(product.variations)) {
@@ -176,19 +222,62 @@ export function ProductGridBlockSettings({
           </Select>
         </div>
 
-        {/* Manual product selection */}
+        {/* Manual product selection - show prominently */}
         {formData.source_type === "manual" && (
-          <div className="space-y-2">
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => setProductPickerOpen(true)}
-            >
-              Selecionar Produtos ({formData.selected_product_ids?.length || 0})
-            </Button>
-            <p className="text-xs text-muted-foreground">
-              Clique para selecionar produtos manualmente. Você pode reordenar os produtos na lista.
-            </p>
+          <div className="space-y-4 mt-4 border rounded-lg p-4 bg-muted/20">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-medium">Produtos selecionados</h3>
+                <p className="text-sm text-muted-foreground">
+                  {formData.selected_product_ids?.length || 0} produto(s) selecionado(s)
+                </p>
+              </div>
+              <Button
+                onClick={() => setProductPickerOpen(true)}
+                className="whitespace-nowrap"
+              >
+                {formData.selected_product_ids?.length ? "Editar seleção" : "Selecionar produtos"}
+              </Button>
+            </div>
+            
+            {formData.selected_product_ids?.length > 0 ? (
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground mb-2">Produtos serão exibidos na ordem selecionada. Você pode reordenar na tela de seleção.</p>
+                
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[200px] overflow-y-auto p-1">
+                  {selectedProductsPreview.map((product) => (
+                    <div key={product.id} className="border rounded-md p-2 flex items-center gap-2 bg-background">
+                      <div className="w-10 h-10 bg-muted rounded-md flex-shrink-0 overflow-hidden">
+                        {product.photos?.[0]?.url ? (
+                          <img 
+                            src={product.photos[0].url} 
+                            alt={product.title} 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><line x1="12" y1="22" x2="12" y2="12"></line></svg>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium truncate">{product.title}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-8 text-center border border-dashed rounded-md">
+                <p className="text-muted-foreground mb-4">Nenhum produto selecionado</p>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setProductPickerOpen(true)}
+                >
+                  Selecionar produtos
+                </Button>
+              </div>
+            )}
           </div>
         )}
 
@@ -409,6 +498,7 @@ export function ProductGridBlockSettings({
         onOpenChange={setProductPickerOpen}
         selectedIds={formData.selected_product_ids || []}
         onSave={(ids) => setFormData({ ...formData, selected_product_ids: ids })}
+        userId={userId}
       />
     </>
   );

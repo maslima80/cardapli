@@ -48,6 +48,7 @@ interface ProductPickerModalProps {
   onOpenChange: (open: boolean) => void;
   selectedIds: string[];
   onSave: (ids: string[]) => void;
+  userId?: string;
 }
 
 // Sortable product item component
@@ -117,6 +118,7 @@ export function ProductPickerModal({
   onOpenChange,
   selectedIds,
   onSave,
+  userId,
 }: ProductPickerModalProps) {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -143,6 +145,7 @@ export function ProductPickerModal({
 
   useEffect(() => {
     if (open) {
+      console.log("ProductPickerModal opened");
       setTempSelectedIds(selectedIds);
       loadProducts();
       loadCategories();
@@ -157,14 +160,28 @@ export function ProductPickerModal({
   }, [search, category, status, sortOrder, selectedVariation, page]);
 
   const loadCategories = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    // Use the provided userId or try to get it from auth
+    let currentUserId = userId;
+    
+    if (!currentUserId) {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          currentUserId = user.id;
+        }
+      } catch (error) {
+        console.error("Error getting user:", error);
+        return;
+      }
+    }
+    
+    if (!currentUserId) return;
 
     // Get all unique categories from products
     const { data, error } = await supabase
       .from("products")
       .select("categories")
-      .eq("user_id", user.id);
+      .eq("user_id", currentUserId);
 
     if (error || !data) {
       console.error("Error loading categories:", error);
@@ -182,23 +199,44 @@ export function ProductPickerModal({
   };
 
   const loadVariations = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    // Use the provided userId or try to get it from auth
+    let currentUserId = userId;
+    
+    if (!currentUserId) {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          currentUserId = user.id;
+        }
+      } catch (error) {
+        console.error("Error getting user:", error);
+        return;
+      }
+    }
+    
+    if (!currentUserId) return;
 
     try {
       // Get all unique variation names from products
       const { data } = await supabase
         .from("products")
         .select("variations")
-        .eq("user_id", user.id)
+        .eq("user_id", currentUserId)
         .not("variations", "is", null);
 
       if (data && Array.isArray(data)) {
         // Extract all variation names
         const allVariations = data
           .flatMap(product => {
-            // Check if product has variations and it's an array
-            if (product && typeof product === 'object' && 'variations' in product && Array.isArray(product.variations)) {
+            // First check if product is null or undefined
+            if (!product) return [];
+            
+            // Then check if it has variations and it's an array
+            if (typeof product === 'object' && 
+                'variations' in product && 
+                product.variations && 
+                Array.isArray(product.variations)) {
+              
               return product.variations
                 .filter(v => v && typeof v === 'object' && 'name' in v)
                 .map(v => v.name)
@@ -218,8 +256,30 @@ export function ProductPickerModal({
   };
 
   const loadProducts = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    console.log("Loading products...");
+    
+    // Use the provided userId or try to get it from auth
+    let currentUserId = userId;
+    
+    if (!currentUserId) {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          currentUserId = user.id;
+          console.log("Got user ID from auth:", currentUserId);
+        }
+      } catch (error) {
+        console.error("Error getting user:", error);
+      }
+    } else {
+      console.log("Using provided user ID:", currentUserId);
+    }
+    
+    if (!currentUserId) {
+      console.log("No user ID available");
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
 
@@ -231,7 +291,7 @@ export function ProductPickerModal({
     let query = supabase
       .from("products")
       .select("id, title, photos, category, price, status, created_at, price_on_request, price_hidden, price_on_request_label, categories, quality_tags, variations", { count: "exact" })
-      .eq("user_id", user.id);
+      .eq("user_id", currentUserId);
 
     // Apply search filter
     if (search) {
@@ -276,6 +336,7 @@ export function ProductPickerModal({
     // Apply pagination
     query = query.range(from, to);
 
+    console.log("Executing query:", query);
     const { data, error, count } = await query;
 
     if (error) {
@@ -284,6 +345,9 @@ export function ProductPickerModal({
       return;
     }
 
+    console.log("Products found:", data?.length || 0);
+    console.log("First few products:", data?.slice(0, 3));
+    
     setProducts(data || []);
     setTotalPages(Math.ceil((count || 0) / perPage));
     setLoading(false);

@@ -32,6 +32,7 @@ export const BlockSettingsDrawer = ({
   const [formData, setFormData] = useState(block?.data || {});
   const [productPickerOpen, setProductPickerOpen] = useState(false);
   const [profile, setProfile] = useState<any>(null);
+  const [userId, setUserId] = useState<string | undefined>(undefined);
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
 
@@ -68,6 +69,9 @@ export const BlockSettingsDrawer = ({
   const loadProfile = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
+
+    // Set the user ID for use in child components
+    setUserId(user.id);
 
     const { data } = await supabase
       .from("profiles")
@@ -479,6 +483,7 @@ export const BlockSettingsDrawer = ({
             onUpdate={onUpdate}
             block={block}
             profile={profile}
+            userId={userId}
           />
         );
 
