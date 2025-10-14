@@ -38,10 +38,12 @@ export function sanitizeProductData(data: Partial<Product>): Record<string, any>
     variants: Array.isArray(data.variants) ? data.variants : [],
     
     // JSON fields
-    option_groups: Array.isArray(data.option_groups) ? data.option_groups : [],
-    disabled_combinations: Array.isArray(data.disabled_combinations) ? data.disabled_combinations : [],
     photos: Array.isArray(data.photos) ? data.photos : [],
     external_media: Array.isArray(data.external_media) ? data.external_media : [],
+    
+    // Set option_groups and disabled_combinations to empty arrays
+    option_groups: [],
+    disabled_combinations: [],
   };
 }
 
@@ -56,7 +58,6 @@ export function logProductData(data: Partial<Product>, action: "create" | "updat
   console.log("Categories:", data.categories);
   console.log("Quality Tags:", data.quality_tags);
   console.log("Variants:", data.variants);
-  console.log("Option Groups:", data.option_groups);
   console.log("Photos:", data.photos);
   console.log("External Media:", data.external_media);
   console.log("Full data:", data);

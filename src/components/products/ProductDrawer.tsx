@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Product } from "@/pages/Produtos";
+import { Product, ProductOption, ProductVariant } from "@/types/product";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { debounce } from "@/lib/utils";
@@ -11,13 +11,15 @@ import {
 } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MediaSection } from "./sections/MediaSection";
 import { BasicInfoSection } from "./sections/BasicInfoSection";
 import { PricingSection } from "./sections/PricingSection";
 import { CustomizationSection } from "./sections/CustomizationSection";
 import { FoodSpecificSection } from "./sections/FoodSpecificSection";
 import { CategoriesSection } from "./sections/CategoriesSection";
-import { SimpleVariantsSection } from "./sections/SimpleVariantsSection";
+import { OptionSection } from "./sections/OptionSection";
+import { VariantListSection } from "./sections/VariantListSection";
 import { ProductDeleteButton } from "./ProductDeleteButton";
 import { sanitizeProductData, logProductData } from "./ProductDebugHelper";
 
@@ -54,14 +56,15 @@ export function ProductDrawer({
     categories: [],
     quality_tags: [],
     variants: [],
-    option_groups: [],
-    disabled_combinations: [],
     photos: [],
     external_media: [],
   });
+  const [productOptions, setProductOptions] = useState<ProductOption[]>([]);
+  const [productVariants, setProductVariants] = useState<ProductVariant[]>([]);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>("geral");
 
   useEffect(() => {
     if (product) {
@@ -69,8 +72,6 @@ export function ProductDrawer({
       setFormData({
         ...product,
         category: product.category || null,
-        option_groups: product.option_groups || [],
-        disabled_combinations: product.disabled_combinations || [],
         photos: product.photos || [],
         external_media: product.external_media || [],
         min_qty: product.min_qty ?? null,
@@ -106,8 +107,6 @@ export function ProductDrawer({
       categories: [],
       quality_tags: [],
       variants: [],
-      option_groups: [],
-      disabled_combinations: [],
       photos: [],
       external_media: [],
     });
@@ -258,111 +257,143 @@ export function ProductDrawer({
           </div>
         </DrawerHeader>
 
-        <ScrollArea className="flex-1 p-4 md:p-6">
-          <div className="max-w-4xl mx-auto space-y-8">
+        {/* Fixed: Adjusted height calculations and added explicit overflow handling */}
+        <div className="flex flex-col" style={{ height: "calc(90vh - 65px)" }}>
+          <Tabs 
+            value={activeTab} 
+            onValueChange={setActiveTab}
+            className="flex flex-col h-full"
+          >
+            <div className="border-b px-4">
+              <TabsList className="h-12">
+                <TabsTrigger value="geral">Geral</TabsTrigger>
+                <TabsTrigger value="opcoes">Opções</TabsTrigger>
+              </TabsList>
+            </div>
             
-            {/* Sticky section header */}
-            <div className="sticky top-0 bg-background/95 backdrop-blur-sm z-10 -mx-4 md:-mx-6 px-4 md:px-6 py-3 mb-4 border-b">
-              <h2 className="text-sm font-semibold text-muted-foreground">Mídia</h2>
-            </div>
-            <MediaSection
-              photos={formData.photos || []}
-              externalMedia={formData.external_media || []}
-              productId={product?.id}
-              onPhotosChange={(photos) => updateField("photos", photos)}
-              onExternalMediaChange={(media) => updateField("external_media", media)}
-            />
+            <TabsContent value="geral" className="flex-1 overflow-auto" style={{ height: "calc(100% - 48px)" }}>
+              <div className="p-4 md:p-6">
+                <div className="max-w-4xl mx-auto space-y-8">
+                  
+                  {/* Sticky section header */}
+                  <div className="sticky top-0 bg-background/95 backdrop-blur-sm z-10 -mx-4 md:-mx-6 px-4 md:px-6 py-3 mb-4 border-b">
+                    <h2 className="text-sm font-semibold text-muted-foreground">Mídia</h2>
+                  </div>
+                  <MediaSection
+                    photos={formData.photos || []}
+                    externalMedia={formData.external_media || []}
+                    productId={product?.id}
+                    onPhotosChange={(photos) => updateField("photos", photos)}
+                    onExternalMediaChange={(media) => updateField("external_media", media)}
+                  />
 
-            {/* Sticky section header */}
-            <div className="sticky top-0 bg-background/95 backdrop-blur-sm z-10 -mx-4 md:-mx-6 px-4 md:px-6 py-3 mb-4 border-b">
-              <h2 className="text-sm font-semibold text-muted-foreground">Informações Básicas</h2>
-            </div>
-            <BasicInfoSection
-              title={formData.title || ""}
-              description={formData.description || ""}
-              status={formData.status || "Disponível"}
-              productionDays={formData.production_days || null}
-              onTitleChange={(v) => updateField("title", v)}
-              onDescriptionChange={(v) => updateField("description", v)}
-              onStatusChange={(v) => updateField("status", v)}
-              onProductionDaysChange={(v) => updateField("production_days", v)}
-            />
+                  {/* Sticky section header */}
+                  <div className="sticky top-0 bg-background/95 backdrop-blur-sm z-10 -mx-4 md:-mx-6 px-4 md:px-6 py-3 mb-4 border-b">
+                    <h2 className="text-sm font-semibold text-muted-foreground">Informações Básicas</h2>
+                  </div>
+                  <BasicInfoSection
+                    title={formData.title || ""}
+                    description={formData.description || ""}
+                    status={formData.status || "Disponível"}
+                    productionDays={formData.production_days || null}
+                    onTitleChange={(v) => updateField("title", v)}
+                    onDescriptionChange={(v) => updateField("description", v)}
+                    onStatusChange={(v) => updateField("status", v)}
+                    onProductionDaysChange={(v) => updateField("production_days", v)}
+                  />
 
-            {/* Sticky section header */}
-            <div className="sticky top-0 bg-background/95 backdrop-blur-sm z-10 -mx-4 md:-mx-6 px-4 md:px-6 py-3 mb-4 border-b">
-              <h2 className="text-sm font-semibold text-muted-foreground">Preço e Disponibilidade</h2>
-            </div>
+                  {/* Sticky section header */}
+                  <div className="sticky top-0 bg-background/95 backdrop-blur-sm z-10 -mx-4 md:-mx-6 px-4 md:px-6 py-3 mb-4 border-b">
+                    <h2 className="text-sm font-semibold text-muted-foreground">Preço e Disponibilidade</h2>
+                  </div>
 
-            <PricingSection
-              price={formData.price || 0}
-              priceUnit={formData.price_unit || "Unidade"}
-              priceUnitCustom={formData.price_unit_custom || ""}
-              priceNote={formData.price_note || ""}
-              minQty={formData.min_qty || null}
-              priceOnRequest={formData.price_on_request || false}
-              priceOnRequestLabel={formData.price_on_request_label || "Sob consulta"}
-              priceHidden={formData.price_hidden || false}
-              sku={formData.sku || ""}
-              onPriceChange={(v) => updateField("price", v)}
-              onPriceUnitChange={(v) => updateField("price_unit", v)}
-              onPriceUnitCustomChange={(v) => updateField("price_unit_custom", v)}
-              onPriceNoteChange={(v) => updateField("price_note", v)}
-              onMinQtyChange={(v) => updateField("min_qty", v)}
-              onPriceOnRequestChange={(v) => updateField("price_on_request", v)}
-              onPriceOnRequestLabelChange={(v) => updateField("price_on_request_label", v)}
-              onPriceHiddenChange={(v) => updateField("price_hidden", v)}
-              onSkuChange={(v) => updateField("sku", v)}
-            />
+                  <PricingSection
+                    price={formData.price || 0}
+                    priceUnit={formData.price_unit || "Unidade"}
+                    priceUnitCustom={formData.price_unit_custom || ""}
+                    priceNote={formData.price_note || ""}
+                    minQty={formData.min_qty || null}
+                    priceOnRequest={formData.price_on_request || false}
+                    priceOnRequestLabel={formData.price_on_request_label || "Sob consulta"}
+                    priceHidden={formData.price_hidden || false}
+                    sku={formData.sku || ""}
+                    onPriceChange={(v) => updateField("price", v)}
+                    onPriceUnitChange={(v) => updateField("price_unit", v)}
+                    onPriceUnitCustomChange={(v) => updateField("price_unit_custom", v)}
+                    onPriceNoteChange={(v) => updateField("price_note", v)}
+                    onMinQtyChange={(v) => updateField("min_qty", v)}
+                    onPriceOnRequestChange={(v) => updateField("price_on_request", v)}
+                    onPriceOnRequestLabelChange={(v) => updateField("price_on_request_label", v)}
+                    onPriceHiddenChange={(v) => updateField("price_hidden", v)}
+                    onSkuChange={(v) => updateField("sku", v)}
+                  />
 
-            {/* Sticky section header */}
-            <div className="sticky top-0 bg-background/95 backdrop-blur-sm z-10 -mx-4 md:-mx-6 px-4 md:px-6 py-3 mb-4 border-b">
-              <h2 className="text-sm font-semibold text-muted-foreground">Personalização</h2>
-            </div>
-            <CustomizationSection
-              accepts={formData.accepts_customization || false}
-              instructions={formData.customization_instructions || ""}
-              onAcceptsChange={(v) => updateField("accepts_customization", v)}
-              onInstructionsChange={(v) => updateField("customization_instructions", v)}
-            />
+                  {/* Sticky section header */}
+                  <div className="sticky top-0 bg-background/95 backdrop-blur-sm z-10 -mx-4 md:-mx-6 px-4 md:px-6 py-3 mb-4 border-b">
+                    <h2 className="text-sm font-semibold text-muted-foreground">Personalização</h2>
+                  </div>
+                  <CustomizationSection
+                    accepts={formData.accepts_customization || false}
+                    instructions={formData.customization_instructions || ""}
+                    onAcceptsChange={(v) => updateField("accepts_customization", v)}
+                    onInstructionsChange={(v) => updateField("customization_instructions", v)}
+                  />
 
-            {/* Sticky section header */}
-            <div className="sticky top-0 bg-background/95 backdrop-blur-sm z-10 -mx-4 md:-mx-6 px-4 md:px-6 py-3 mb-4 border-b">
-              <h2 className="text-sm font-semibold text-muted-foreground">Informações Alimentares</h2>
-            </div>
+                  {/* Sticky section header */}
+                  <div className="sticky top-0 bg-background/95 backdrop-blur-sm z-10 -mx-4 md:-mx-6 px-4 md:px-6 py-3 mb-4 border-b">
+                    <h2 className="text-sm font-semibold text-muted-foreground">Informações Alimentares</h2>
+                  </div>
 
-            <FoodSpecificSection
-              ingredients={formData.ingredients || ""}
-              allergens={formData.allergens || ""}
-              conservation={formData.conservation || ""}
-              onIngredientsChange={(v) => updateField("ingredients", v)}
-              onAllergensChange={(v) => updateField("allergens", v)}
-              onConservationChange={(v) => updateField("conservation", v)}
-            />
+                  <FoodSpecificSection
+                    ingredients={formData.ingredients || ""}
+                    allergens={formData.allergens || ""}
+                    conservation={formData.conservation || ""}
+                    onIngredientsChange={(v) => updateField("ingredients", v)}
+                    onAllergensChange={(v) => updateField("allergens", v)}
+                    onConservationChange={(v) => updateField("conservation", v)}
+                  />
 
-            {/* Sticky section header */}
-            <div className="sticky top-0 bg-background/95 backdrop-blur-sm z-10 -mx-4 md:-mx-6 px-4 md:px-6 py-3 mb-4 border-b">
-              <h2 className="text-sm font-semibold text-muted-foreground">Categorias e Tags</h2>
-            </div>
-            <CategoriesSection
-              categories={formData.categories || []}
-              tags={formData.quality_tags || []}
-              onCategoriesChange={(v) => updateField("categories", v)}
-              onTagsChange={(v) => updateField("quality_tags", v)}
-            />
-
-            {/* Sticky section header */}
-            <div className="sticky top-0 bg-background/95 backdrop-blur-sm z-10 -mx-4 md:-mx-6 px-4 md:px-6 py-3 mb-4 border-b">
-              <h2 className="text-sm font-semibold text-muted-foreground">Variações</h2>
-            </div>
-
-            <SimpleVariantsSection
-              optionGroups={formData.option_groups || []}
-              disabledCombinations={formData.disabled_combinations || []}
-              onOptionGroupsChange={(v) => updateField("option_groups", v)}
-              onDisabledCombinationsChange={(v) => updateField("disabled_combinations", v)}
-            />
-          </div>
-        </ScrollArea>
+                  {/* Sticky section header */}
+                  <div className="sticky top-0 bg-background/95 backdrop-blur-sm z-10 -mx-4 md:-mx-6 px-4 md:px-6 py-3 mb-4 border-b">
+                    <h2 className="text-sm font-semibold text-muted-foreground">Categorias e Tags</h2>
+                  </div>
+                  <CategoriesSection
+                    categories={formData.categories || []}
+                    tags={formData.quality_tags || []}
+                    onCategoriesChange={(v) => updateField("categories", v)}
+                    onTagsChange={(v) => updateField("quality_tags", v)}
+                  />
+                </div>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="opcoes" className="flex-1 overflow-auto" style={{ height: "calc(100% - 48px)" }}>
+              <div className="p-4 md:p-6">
+                <div className="max-w-4xl mx-auto space-y-8">
+                  <h3 className="text-lg font-semibold mb-1">Opções de Produto</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Configure opções como tamanho, cor, material, etc.
+                  </p>
+                  
+                  <OptionSection 
+                    productId={product?.id} 
+                    userId={product?.user_id || ""}
+                    onOptionsChange={setProductOptions}
+                  />
+                  
+                  {productOptions.length > 0 && (
+                    <VariantListSection
+                      productId={product?.id}
+                      userId={product?.user_id || ""}
+                      productOptions={productOptions}
+                      onVariantsChange={setProductVariants}
+                    />
+                  )}
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
       </DrawerContent>
     </Drawer>
   );
