@@ -106,26 +106,40 @@ export function ProductCard({ product, onEdit, onDuplicate, onDelete }: ProductC
               {formatPrice() || "—"}
             </p>
 
-            {/* Status, Categories & Tags */}
-            <div className="flex flex-wrap gap-1 mb-2">
-              <Badge className={`${getStatusColor()} text-xs`} variant="secondary">
+            {/* Status */}
+            <div className="flex flex-wrap gap-1 mb-1.5">
+              <Badge className={`${getStatusColor()} text-xs`}>
                 {product.status}
               </Badge>
-              
-              {/* Categories */}
-              {product.categories && product.categories.length > 0 && (
-                <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 text-xs">
-                  {product.categories[0]}
-                </Badge>
-              )}
-              
-              {/* Tags */}
-              {product.quality_tags && product.quality_tags.slice(0, 1).map((tag, index) => (
-                <Badge key={index} variant="outline" className="text-xs">
-                  {tag}
-                </Badge>
-              ))}
             </div>
+            
+            {/* Categories */}
+            {product.categories && product.categories.length > 0 && (
+              <div className="flex flex-wrap gap-1 mb-1.5 max-w-full overflow-hidden">
+                {product.categories.map((category, index) => (
+                  <Badge 
+                    key={`cat-${index}`} 
+                    className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 text-[10px] px-1.5 py-0 h-4"
+                  >
+                    {category}
+                  </Badge>
+                ))}
+              </div>
+            )}
+            
+            {/* Tags */}
+            {product.quality_tags && product.quality_tags.length > 0 && (
+              <div className="flex flex-wrap gap-1 mb-1.5 max-w-full overflow-hidden">
+                {product.quality_tags.map((tag, index) => (
+                  <Badge 
+                    key={`tag-${index}`} 
+                    className="text-[10px] px-1.5 py-0 h-4 border border-dashed"
+                  >
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
 
             {/* Quick Actions */}
             <div className="flex gap-1 mt-auto" onClick={(e) => e.stopPropagation()}>
@@ -207,26 +221,40 @@ export function ProductCard({ product, onEdit, onDuplicate, onDelete }: ProductC
           {formatPrice() || "—"}
         </p>
 
-        {/* Status, Categories & Tags */}
-        <div className="flex flex-wrap gap-1.5 min-h-[1.75rem]">
-          <Badge className={`${getStatusColor()} text-xs`} variant="secondary">
+        {/* Status */}
+        <div className="flex flex-wrap gap-1.5 mb-1.5">
+          <Badge className={`${getStatusColor()} text-xs`}>
             {product.status}
           </Badge>
-          
-          {/* Categories */}
-          {product.categories && product.categories.length > 0 && (
-            <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 text-xs">
-              {product.categories[0]}
-            </Badge>
-          )}
-          
-          {/* Tags */}
-          {product.quality_tags && product.quality_tags.slice(0, 2).map((tag, index) => (
-            <Badge key={index} variant="outline" className="text-xs">
-              {tag}
-            </Badge>
-          ))}
         </div>
+        
+        {/* Categories */}
+        {product.categories && product.categories.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-1.5">
+            {product.categories.map((category, index) => (
+              <Badge 
+                key={`cat-${index}`}
+                className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 text-xs"
+              >
+                {category}
+              </Badge>
+            ))}
+          </div>
+        )}
+        
+        {/* Tags */}
+        {product.quality_tags && product.quality_tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-1.5">
+            {product.quality_tags.map((tag, index) => (
+              <Badge 
+                key={`tag-${index}`}
+                className="border border-dashed text-xs"
+              >
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        )}
 
         {/* Quick Actions */}
         <div className="flex gap-1 pt-1" onClick={(e) => e.stopPropagation()}>
