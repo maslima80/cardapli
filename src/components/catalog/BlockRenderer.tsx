@@ -80,7 +80,7 @@ export const BlockRenderer = ({ block, profile, userId }: BlockRendererProps) =>
   if (!content) return null;
 
   // Determine if this is a full-bleed block (like image or video)
-  const isFullBleed = block.type === "image" || 
+  const isFullBleed = (block.type === "image" && block.data?.width === "full") || 
                      (block.type === "video" && block.data?.layout === "full") || 
                      (block.type === "cover" && block.data?.layout === "full");
                      

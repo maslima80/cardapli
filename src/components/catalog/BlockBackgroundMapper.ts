@@ -7,9 +7,17 @@ export const getBlockBackground = (blockType: string, blockData: any): BlockBack
   
   switch (blockType) {
     // Media blocks
-    case "image":
     case "video":
       background = "media";
+      break;
+      
+    // Image blocks - background depends on width setting
+    case "image":
+      if (blockData?.width === "full") {
+        background = "media";
+      } else {
+        background = "surface";
+      }
       break;
       
     // Blocks that can have configurable backgrounds

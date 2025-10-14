@@ -1,10 +1,11 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect } from "react";
 import { SimpleImageUploader } from "./SimpleImageUploader";
 import { ProductPickerModal } from "./ProductPickerModal";
@@ -294,6 +295,81 @@ export const BlockSettingsDrawer = ({
                 }}
               />
             </div>
+            
+            <div className="space-y-2">
+              <Label>Largura / Moldura</Label>
+              <Select
+                value={formData.width || "auto"}
+                onValueChange={(value) => setFormData({ ...formData, width: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o tamanho" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="auto">Automático (recomendado)</SelectItem>
+                  <SelectItem value="full">Faixa completa (full-bleed)</SelectItem>
+                  <SelectItem value="contained">Contido (cartão)</SelectItem>
+                  <SelectItem value="inline">Inline (pequena)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {formData.width === "inline" && (
+              <div className="space-y-2">
+                <Label>Alinhamento</Label>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant={formData.align === "left" ? "default" : "outline"}
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => setFormData({ ...formData, align: "left" })}
+                  >
+                    Esquerda
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={formData.align === "center" || !formData.align ? "default" : "outline"}
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => setFormData({ ...formData, align: "center" })}
+                  >
+                    Centro
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={formData.align === "right" ? "default" : "outline"}
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => setFormData({ ...formData, align: "right" })}
+                  >
+                    Direita
+                  </Button>
+                </div>
+              </div>
+            )}
+            
+            <div className="space-y-2">
+              <Label>Cantos arredondados</Label>
+              <Select
+                value={formData.corners || "auto"}
+                onValueChange={(value) => setFormData({ ...formData, corners: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o estilo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="auto">Automático</SelectItem>
+                  <SelectItem value="none">Nenhum</SelectItem>
+                  <SelectItem value="soft">Suave</SelectItem>
+                  <SelectItem value="medium">Médio</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                Automático aplica: nenhum para faixa completa, arredondado para outros.
+              </p>
+            </div>
+            
             <div className="space-y-2">
               <Label>Legenda</Label>
               <Input
@@ -302,6 +378,7 @@ export const BlockSettingsDrawer = ({
                 placeholder="Descrição da imagem (opcional)"
               />
             </div>
+            
             <div className="flex items-center justify-between py-2">
               <Label htmlFor="show-caption">Mostrar legenda</Label>
               <Switch
@@ -312,7 +389,6 @@ export const BlockSettingsDrawer = ({
                 }
               />
             </div>
-            {/* Tamanho and Alinhamento options hidden for MVP */}
           </>
         );
 
