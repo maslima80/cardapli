@@ -1,7 +1,7 @@
 import { CoverBlock } from "./blocks/CoverBlock";
 import { TextBlock } from "./blocks/TextBlock";
 import { ImageBlock } from "./blocks/ImageBlock";
-import { ProductGridBlock } from "./blocks/ProductGridBlock";
+import { ProductGridBlock } from "./blocks/ProductGridBlockV2";
 import { AboutBlock } from "./blocks/AboutBlock";
 import { AboutBusinessBlock } from "./blocks/AboutBusinessBlock";
 import { ContactBlock } from "./blocks/ContactBlock";

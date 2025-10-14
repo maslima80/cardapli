@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { SimpleImageUploader } from "./SimpleImageUploader";
 import { ProductPickerModal } from "./ProductPickerModal";
 import { MultiSelectChips } from "./MultiSelectChips";
+import { ProductGridBlockSettings } from "./ProductGridBlockSettings";
 import { supabase } from "@/integrations/supabase/client";
 import { extractVideoInfo } from "@/lib/external-media";
 
@@ -472,162 +473,13 @@ export const BlockSettingsDrawer = ({
 
       case "product_grid":
         return (
-          <>
-            <div className="space-y-2">
-              <Label>Fonte dos Produtos</Label>
-              <select
-                className="w-full border rounded-xl p-2"
-                value={formData.source_type || formData.source || "manual"}
-                onChange={(e) => setFormData({ ...formData, source_type: e.target.value })}
-              >
-                <option value="manual">Seleção Manual</option>
-                <option value="category">Por Categoria</option>
-                <option value="tag">Por Tag</option>
-              </select>
-            </div>
-
-            {(formData.source_type || formData.source) === "manual" && (
-              <div className="space-y-2">
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => setProductPickerOpen(true)}
-                >
-                  Selecionar Produtos ({formData.selected_product_ids?.length || formData.product_ids?.length || 0})
-                </Button>
-              </div>
-            )}
-
-            {(formData.source_type || formData.source) === "category" && (
-              <div className="space-y-2">
-                <Label>Categorias</Label>
-                <MultiSelectChips
-                  availableOptions={availableCategories}
-                  selectedOptions={formData.selected_categories || formData.categories || []}
-                  onChange={(selected_categories) => setFormData({ ...formData, selected_categories })}
-                  placeholder="Digite para buscar categorias..."
-                />
-              </div>
-            )}
-
-            {(formData.source_type || formData.source) === "tag" && (
-              <div className="space-y-2">
-                <Label>Tags de Qualidade</Label>
-                <MultiSelectChips
-                  availableOptions={availableTags}
-                  selectedOptions={formData.selected_tags || formData.tags || []}
-                  onChange={(selected_tags) => setFormData({ ...formData, selected_tags })}
-                  placeholder="Digite para buscar tags..."
-                />
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <Label>Título (opcional)</Label>
-              <Input
-                value={formData.title || ""}
-                onChange={(e) => {
-                  const newTitle = e.target.value;
-                  setFormData({ ...formData, title: newTitle });
-                  if (onUpdate && newTitle && (!block.anchor_slug || block.anchor_slug === generateSlug(block.data.title || ""))) {
-                    onUpdate({ ...block, data: { ...formData, title: newTitle }, anchor_slug: generateSlug(newTitle) });
-                  }
-                }}
-                placeholder="Nossos produtos"
-              />
-            </div>
-
-            {showAnchorField && formData.title && (
-              <div className="space-y-2">
-                <Label>ID da seção</Label>
-                <Input
-                  value={block.anchor_slug || ""}
-                  onChange={(e) => {
-                    if (onUpdate) {
-                      onUpdate({ ...block, anchor_slug: generateSlug(e.target.value) });
-                    }
-                  }}
-                  placeholder="id-da-secao"
-                />
-              </div>
-            )}
-
-            {(formData.source_type || formData.source) !== "manual" && (
-              <>
-                <div className="space-y-2">
-                  <Label>Filtrar por Status</Label>
-                  <div className="space-y-2">
-                    {["Disponível", "Sob encomenda"].map((status) => (
-                      <div key={status} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`status-${status}`}
-                          checked={formData.status_filter?.includes(status)}
-                          onCheckedChange={(checked) => {
-                            const current = formData.status_filter || [];
-                            const updated = checked
-                              ? [...current, status]
-                              : current.filter((s) => s !== status);
-                            setFormData({ ...formData, status_filter: updated });
-                          }}
-                        />
-                        <label htmlFor={`status-${status}`} className="text-sm">
-                          {status}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Ordenação</Label>
-                  <select
-                    className="w-full border rounded-xl p-2"
-                    value={formData.sort || "newest"}
-                    onChange={(e) => setFormData({ ...formData, sort: e.target.value })}
-                  >
-                    <option value="newest">Mais recentes</option>
-                    <option value="price_asc">Preço crescente</option>
-                    <option value="price_desc">Preço decrescente</option>
-                    <option value="name_asc">Nome A→Z</option>
-                  </select>
-                </div>
-              </>
-            )}
-
-            <div className="space-y-2">
-              <Label>Limite de Produtos</Label>
-              <Input
-                type="number"
-                value={formData.limit || 12}
-                onChange={(e) => setFormData({ ...formData, limit: parseInt(e.target.value) })}
-                min={1}
-                max={50}
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <Label>Mostrar Preço</Label>
-              <Switch
-                checked={formData.show_price !== false}
-                onCheckedChange={(checked) => setFormData({ ...formData, show_price: checked })}
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <Label>Mostrar Tags</Label>
-              <Switch
-                checked={formData.show_tags || false}
-                onCheckedChange={(checked) => setFormData({ ...formData, show_tags: checked })}
-              />
-            </div>
-
-            <ProductPickerModal
-              open={productPickerOpen}
-              onOpenChange={setProductPickerOpen}
-              selectedIds={formData.selected_product_ids || formData.product_ids || []}
-              onSave={(ids) => setFormData({ ...formData, selected_product_ids: ids })}
-            />
-          </>
+          <ProductGridBlockSettings
+            formData={formData}
+            setFormData={setFormData}
+            onUpdate={onUpdate}
+            block={block}
+            profile={profile}
+          />
         );
 
       case "about":
