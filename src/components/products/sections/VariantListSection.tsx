@@ -19,7 +19,6 @@ import {
   Check, 
   X, 
   Plus, 
-  ImagePlus,
   Loader2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -29,11 +28,13 @@ import {
   ProductVariant,
   ProductVariantOption,
 } from "@/types/product";
+import { VariantImagePicker } from "@/components/media/VariantImagePicker";
 
 interface VariantListSectionProps {
   productId: string | undefined;
   userId: string;
   productOptions: ProductOption[];
+  productPhotos?: any[];
   onVariantsChange?: (variants: ProductVariant[]) => void;
 }
 
@@ -49,6 +50,7 @@ export function VariantListSection({
   productId, 
   userId, 
   productOptions,
+  productPhotos = [],
   onVariantsChange 
 }: VariantListSectionProps) {
   const { toast } = useToast();
@@ -664,29 +666,12 @@ export function VariantListSection({
               
               <div className="space-y-2">
                 <Label htmlFor="image">Imagem (opcional)</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="image"
-                    value={variantImageUrl || ""}
-                    onChange={(e) => setVariantImageUrl(e.target.value || null)}
-                    placeholder="URL da imagem"
-                  />
-                  <Button variant="outline" size="icon">
-                    <ImagePlus className="h-4 w-4" />
-                  </Button>
-                </div>
-                {variantImageUrl && (
-                  <div className="mt-2 border rounded-md p-2 flex justify-center">
-                    <img 
-                      src={variantImageUrl} 
-                      alt="Imagem da variante" 
-                      className="max-h-40 object-contain"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = "https://placehold.co/400x400?text=Imagem+inválida";
-                      }}
-                    />
-                  </div>
-                )}
+                <VariantImagePicker
+                  productId={productId || ""}
+                  productPhotos={productPhotos}
+                  value={variantImageUrl}
+                  onChange={setVariantImageUrl}
+                />
               </div>
             </div>
           )}

@@ -19,7 +19,7 @@ import { CustomizationSection } from "./sections/CustomizationSection";
 import { FoodSpecificSection } from "./sections/FoodSpecificSection";
 import { CategoriesSection } from "./sections/CategoriesSection";
 import { OptionSection } from "./sections/OptionSection";
-import { VariantListSection } from "./sections/VariantListSection";
+import { VariantListSection } from "./sections/VariantListSection.updated";
 import { ProductDeleteButton } from "./ProductDeleteButton";
 import { sanitizeProductData, logProductData } from "./ProductDebugHelper";
 
@@ -386,6 +386,7 @@ export function ProductDrawer({
                       productId={product?.id}
                       userId={product?.user_id || ""}
                       productOptions={productOptions}
+                      productPhotos={formData.photos || []}
                       onVariantsChange={setProductVariants}
                     />
                   )}

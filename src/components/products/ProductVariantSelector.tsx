@@ -12,10 +12,17 @@ import { Label } from "@/components/ui/label";
 
 interface ProductVariantSelectorProps {
   productId: string;
+  productCoverImage?: string;
   onVariantChange?: (variant: ProductVariant | null) => void;
+  onVariantImageChange?: (imageUrl: string | null) => void;
 }
 
-export function ProductVariantSelector({ productId, onVariantChange }: ProductVariantSelectorProps) {
+export function ProductVariantSelector({ 
+  productId, 
+  productCoverImage,
+  onVariantChange,
+  onVariantImageChange
+}: ProductVariantSelectorProps) {
   const [loading, setLoading] = useState(true);
   const [options, setOptions] = useState<ProductOption[]>([]);
   const [variants, setVariants] = useState<ProductVariant[]>([]);
@@ -29,6 +36,7 @@ export function ProductVariantSelector({ productId, onVariantChange }: ProductVa
   }, [productId]);
 
   useEffect(() => {
+    // When product options change, update combinations
     if (options.length > 0 && variants.length > 0) {
       // Pre-select the first available option values
       const initialValues: Record<string, string> = {};
@@ -54,6 +62,15 @@ export function ProductVariantSelector({ productId, onVariantChange }: ProductVa
       findMatchingVariant();
     }
   }, [selectedValues]);
+
+  // When selected variant changes, update the image if needed
+  useEffect(() => {
+    if (onVariantImageChange) {
+      // If variant has an image, use it; otherwise use product cover
+      const imageUrl = selectedVariant?.image_url || productCoverImage || null;
+      onVariantImageChange(imageUrl);
+    }
+  }, [selectedVariant, productCoverImage]);
 
   const loadOptionsAndVariants = async () => {
     setLoading(true);
