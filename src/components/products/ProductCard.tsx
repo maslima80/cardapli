@@ -79,19 +79,25 @@ export function ProductCard({ product, onEdit, onDuplicate, onDelete }: ProductC
         onClick={() => onEdit(product)}
       >
         <div className="flex gap-3 p-3">
-          {/* Thumbnail - Left */}
-          <div className="w-24 h-24 flex-shrink-0 bg-secondary relative overflow-hidden rounded-lg">
-            {coverPhoto ? (
-              <img
-                src={coverPhoto}
-                alt={product.title}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <ImageIcon className="h-8 w-8 text-muted-foreground" />
-              </div>
-            )}
+          {/* Thumbnail - Left with status badge */}
+          <div className="w-24 flex-shrink-0 flex flex-col gap-1">
+            <div className="h-24 bg-secondary relative overflow-hidden rounded-lg">
+              {coverPhoto ? (
+                <img
+                  src={coverPhoto}
+                  alt={product.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                </div>
+              )}
+            </div>
+            {/* Status badge under photo */}
+            <Badge className={`${getStatusColor()} text-xs text-center w-full`}>
+              {product.status}
+            </Badge>
           </div>
 
           {/* Content - Right */}
@@ -106,13 +112,6 @@ export function ProductCard({ product, onEdit, onDuplicate, onDelete }: ProductC
               {formatPrice() || "—"}
             </p>
 
-            {/* Status */}
-            <div className="flex flex-wrap gap-1 mb-1.5">
-              <Badge className={`${getStatusColor()} text-xs`}>
-                {product.status}
-              </Badge>
-            </div>
-            
             {/* Categories */}
             {product.categories && product.categories.length > 0 && (
               <div className="flex flex-wrap gap-1 mb-1.5 max-w-full overflow-hidden">
