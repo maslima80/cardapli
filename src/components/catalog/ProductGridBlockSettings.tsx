@@ -18,7 +18,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { MultiSelectChips } from "./MultiSelectChips";
-import { ProductPickerModal } from "./ProductPickerModalV2";
+import ProductPickerModal from "./ProductPickerModalBridge";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface ProductGridBlockSettingsProps {
@@ -41,7 +41,6 @@ export function ProductGridBlockSettings({
   const [productPickerOpen, setProductPickerOpen] = useState(false);
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
-  const [availableVariations, setAvailableVariations] = useState<string[]>([]);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [selectedProductsPreview, setSelectedProductsPreview] = useState<any[]>([]);
 
@@ -124,48 +123,7 @@ export function ProductGridBlockSettings({
       const uniqueTags = [...new Set(allTags)].sort();
       setAvailableTags(uniqueTags);
     }
-
-    // Load variations - check if the column exists in the schema
-    try {
-      const { data: productsWithVariations } = await supabase
-        .from("products")
-        .select("variations")
-        .eq("user_id", user.id)
-        .not("variations", "is", null);
-
-      if (productsWithVariations && Array.isArray(productsWithVariations)) {
-        const allVariations = productsWithVariations
-          .flatMap(product => {
-            // Use type guards to safely access variations
-            // First check if product is not null
-            if (!product) return [];
-            
-            // Then check if it's an object with variations property
-            if (typeof product === 'object' && 
-                'variations' in product && 
-                product.variations && 
-                Array.isArray(product.variations)) {
-              
-              return product.variations
-                .filter(v => v && typeof v === 'object' && 'name' in v)
-                .map(v => v.name)
-                .filter(Boolean);
-            }
-            return [];
-          });
-        
-        const uniqueVariations = [...new Set(allVariations)].sort();
-        setAvailableVariations(uniqueVariations);
-      }
-    } catch (error) {
-      console.error("Error loading variations:", error);
-      // If the column doesn't exist, just set empty variations
-      setAvailableVariations([]);
-    }
   };
-
-  // Determine if we should show the variation filter
-  const showVariationFilter = availableVariations.length > 0;
 
   // Determine if we're in combined mode (both categories and tags selected)
   const isCombinedMode = 
@@ -356,27 +314,6 @@ export function ProductGridBlockSettings({
                 </div>
               )}
 
-              {/* Variation filter */}
-              {showVariationFilter && (
-                <div className="space-y-2">
-                  <Label>Filtrar por Variação</Label>
-                  <Select
-                    value={formData.variation_filter || ""}
-                    onValueChange={(value) => setFormData({ ...formData, variation_filter: value || undefined })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Todas as variações" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">Todas as variações</SelectItem>
-                      {availableVariations.map(variation => (
-                        <SelectItem key={variation} value={variation}>{variation}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
               {/* Status filter */}
               <div className="space-y-2">
                 <Label>Filtrar por Status</Label>
@@ -496,8 +433,13 @@ export function ProductGridBlockSettings({
       <ProductPickerModal
         open={productPickerOpen}
         onOpenChange={setProductPickerOpen}
-        selectedIds={formData.selected_product_ids || []}
-        onSave={(ids) => setFormData({ ...formData, selected_product_ids: ids })}
+        value={formData.selected_product_ids || []}
+        onConfirm={(ids) => setFormData({ ...formData, selected_product_ids: ids })}
+        initialFilters={{
+          categories: formData.selected_categories || [],
+          tags: formData.selected_tags || [],
+          status: (formData.status_filter as "disponivel" | "sob_encomenda" | "ambos") || "disponivel",
+        }}
         userId={userId}
       />
     </>
