@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Dialog,
   DialogContent,
@@ -619,71 +620,74 @@ export function VariantListSection({
         )}
       </Card>
       
-      {/* Variant details dialog */}
+      {/* Variant details dialog - Fixed with proper scrolling */}
       <Dialog open={variantDialogOpen} onOpenChange={setVariantDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
+        <DialogContent className="p-0 max-h-[85vh] w-full sm:max-w-lg overflow-hidden">
+          <DialogHeader className="px-5 pt-5">
             <DialogTitle>Detalhes da Variante</DialogTitle>
           </DialogHeader>
           
           {selectedVariant && (
-            <div className="space-y-4 py-4">
-              <div>
-                <h3 className="font-medium mb-2">Combinação</h3>
-                <div className="flex flex-wrap gap-1">
-                  {selectedVariant.options?.map((opt, idx) => (
-                    <Badge key={idx} variant="secondary">
-                      {opt.option_name}: {opt.value_name}
-                    </Badge>
-                  ))}
+            <ScrollArea className="h-[70vh] sm:h-[75vh] px-5 pb-5">
+              <div className="space-y-4">
+                <div className="mb-4 text-sm">
+                  <div className="flex flex-wrap gap-1">
+                    {selectedVariant.options?.map((opt, idx) => (
+                      <Badge key={idx} className="bg-secondary text-secondary-foreground">
+                        {opt.option_name}: {opt.value_name}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="sku">SKU (opcional)</Label>
+                  <Input
+                    id="sku"
+                    value={variantSku || ""}
+                    onChange={(e) => setVariantSku(e.target.value || null)}
+                    placeholder="SKU da variante"
+                    className="mb-4"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="price">Preço (opcional)</Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    step="0.01"
+                    value={variantPrice || ""}
+                    onChange={(e) => setVariantPrice(e.target.value ? parseFloat(e.target.value) : null)}
+                    placeholder="Preço específico da variante"
+                    className="mb-4"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Se não informado, será usado o preço base do produto.
+                  </p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="image">Imagem (opcional)</Label>
+                  <VariantImagePicker
+                    productId={productId || ""}
+                    productPhotos={productPhotos}
+                    value={variantImageUrl}
+                    onChange={setVariantImageUrl}
+                  />
                 </div>
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="sku">SKU (opcional)</Label>
-                <Input
-                  id="sku"
-                  value={variantSku || ""}
-                  onChange={(e) => setVariantSku(e.target.value || null)}
-                  placeholder="SKU da variante"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="price">Preço (opcional)</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  step="0.01"
-                  value={variantPrice || ""}
-                  onChange={(e) => setVariantPrice(e.target.value ? parseFloat(e.target.value) : null)}
-                  placeholder="Preço específico da variante"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Se não informado, será usado o preço base do produto.
-                </p>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="image">Imagem (opcional)</Label>
-                <VariantImagePicker
-                  productId={productId || ""}
-                  productPhotos={productPhotos}
-                  value={variantImageUrl}
-                  onChange={setVariantImageUrl}
-                />
-              </div>
-            </div>
+            </ScrollArea>
           )}
           
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Cancelar</Button>
-            </DialogClose>
-            <Button onClick={updateVariantDetails}>
+          <div className="sticky bottom-0 bg-background px-5 pb-5 pt-3">
+            <Button className="w-full" onClick={updateVariantDetails}>
               Salvar
             </Button>
-          </DialogFooter>
+            <Button variant="ghost" className="w-full mt-2" onClick={() => setVariantDialogOpen(false)}>
+              Cancelar
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

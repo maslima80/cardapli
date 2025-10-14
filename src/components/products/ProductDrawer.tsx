@@ -19,7 +19,7 @@ import { CustomizationSection } from "./sections/CustomizationSection";
 import { FoodSpecificSection } from "./sections/FoodSpecificSection";
 import { CategoriesSection } from "./sections/CategoriesSection";
 import { OptionSection } from "./sections/OptionSection";
-import { VariantListSection } from "./sections/VariantListSection.updated";
+import { VariantListSection } from "./sections/VariantListSection";
 import { ProductDeleteButton } from "./ProductDeleteButton";
 import { sanitizeProductData, logProductData } from "./ProductDebugHelper";
 
