@@ -13,6 +13,8 @@ import Produtos from "./pages/Produtos";
 import Catalogos from "./pages/Catalogos";
 import CatalogoEditor from "./pages/CatalogoEditor";
 import Compartilhar from "./pages/Compartilhar";
+import QuickCatalogCreate from "./pages/QuickCatalogCreate";
+import QuickCatalogSuccess from "./pages/QuickCatalogSuccess";
 import PublicCatalog from "./pages/PublicCatalog";
 import PublicCatalogPage from "./pages/PublicCatalogPage";
 import PublicProfilePage from "./pages/PublicProfilePage";
@@ -44,6 +46,8 @@ const App = () => (
           <Route path="/catalogos" element={<Catalogos />} />
           <Route path="/catalogos/:id/editor" element={<CatalogoEditor />} />
           <Route path="/compartilhar" element={<Compartilhar />} />
+          <Route path="/compartilhar/criar" element={<QuickCatalogCreate />} />
+          <Route path="/compartilhar/sucesso" element={<QuickCatalogSuccess />} />
           <Route path="/escolher-slug" element={<EscolherSlug />} />
           
           {/* Public routes - /u/:userSlug for profiles and catalogs */}
