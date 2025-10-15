@@ -4,12 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, ExternalLink, Copy, Files, Trash2, Edit, ArrowLeft } from "lucide-react";
+import { Plus, Search, ExternalLink, Copy, Files, Trash2, Edit, ArrowLeft, Share2, Eye } from "lucide-react";
 import { CreateCatalogDialog } from "@/components/catalog/CreateCatalogDialog";
+import { PublishSuccessModal } from "@/components/catalog/PublishSuccessModal";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { publicCatalogUrl } from "@/lib/urls";
+import { publicCatalogUrl, whatsappShareCatalog } from "@/lib/urls";
 
 interface Catalog {
   id: string;
@@ -29,6 +30,9 @@ const Catalogos = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [catalogCovers, setCatalogCovers] = useState<Record<string, string>>({});
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [selectedCatalog, setSelectedCatalog] = useState<Catalog | null>(null);
+  const [userSlug, setUserSlug] = useState<string>("");
 
   useEffect(() => {
     loadCatalogs();
@@ -51,6 +55,17 @@ const Catalogos = () => {
     if (!session) {
       navigate("/entrar");
       return;
+    }
+
+    // Load user profile slug
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("slug")
+      .eq("id", session.user.id)
+      .single();
+    
+    if (profileData?.slug) {
+      setUserSlug(profileData.slug);
     }
 
     const { data, error } = await supabase
@@ -127,25 +142,24 @@ const Catalogos = () => {
     }
   };
 
+  const handleShare = (catalog: Catalog) => {
+    if (!userSlug) {
+      toast.error("Configure seu nome de usuário primeiro");
+      return;
+    }
+    setSelectedCatalog(catalog);
+    setShareModalOpen(true);
+  };
+
   const handleCopyLink = async (catalog: Catalog) => {
-    // Get user profile to build correct URL
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("slug")
-      .eq("id", user.id)
-      .single();
-    
-    if (!profile?.slug) {
+    if (!userSlug) {
       toast.error("Configure seu nome de usuário primeiro");
       return;
     }
     
-    const url = `${window.location.origin}${publicCatalogUrl(profile.slug, catalog.slug)}`;
+    const url = `${window.location.origin}${publicCatalogUrl(userSlug, catalog.slug)}`;
     navigator.clipboard.writeText(url);
-    toast.success("Link copiado");
+    toast.success("Link copiado!");
   };
 
   const getStatusBadge = (status: Catalog["status"]) => {
@@ -235,96 +249,118 @@ const Catalogos = () => {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filteredCatalogs.map((catalog) => (
-              <div
-                key={catalog.id}
-                className="bg-card rounded-2xl shadow-soft border border-border overflow-hidden hover:shadow-lg transition-shadow"
-              >
+          <div className="space-y-3">
+            {filteredCatalogs.map((catalog) => {
+              const isPublished = catalog.status === "publicado" || catalog.status === "public" || catalog.status === "unlisted";
+              
+              return (
                 <div
-                  className="h-32 bg-gradient-to-br from-primary/10 to-primary/5 cursor-pointer relative overflow-hidden"
-                  onClick={() => navigate(`/catalogos/${catalog.id}/editor`)}
+                  key={catalog.id}
+                  className="bg-card rounded-xl shadow-soft border border-border overflow-hidden hover:shadow-md transition-all"
                 >
-                  {catalogCovers[catalog.id] && (
-                    <img
-                      src={catalogCovers[catalog.id]}
-                      alt=""
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-                </div>
-                <div className="p-4">
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <h3
-                      className="font-semibold text-base leading-tight cursor-pointer hover:text-primary transition-colors line-clamp-2"
+                  <div className="flex gap-4 p-4">
+                    {/* Thumbnail */}
+                    <div
+                      className="w-24 h-24 sm:w-28 sm:h-28 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg cursor-pointer relative overflow-hidden flex-shrink-0"
                       onClick={() => navigate(`/catalogos/${catalog.id}/editor`)}
                     >
-                      {catalog.title}
-                    </h3>
-                    {getStatusBadge(catalog.status)}
-                  </div>
-                  <p className="text-xs text-muted-foreground mb-4">
-                    Atualizado{" "}
-                    {formatDistanceToNow(new Date(catalog.updated_at), {
-                      addSuffix: true,
-                      locale: ptBR,
-                    })}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => navigate(`/catalogos/${catalog.id}/editor`)}
-                      className="flex-1"
-                    >
-                      <Edit className="w-3 h-3 mr-1" />
-                      Editar
-                    </Button>
-                    {(catalog.status === "public" || catalog.status === "unlisted" || catalog.status === "publicado") && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={async () => {
-                          const { data: { user } } = await supabase.auth.getUser();
-                          if (!user) return;
-                          const { data: profile } = await supabase
-                            .from("profiles")
-                            .select("slug")
-                            .eq("id", user.id)
-                            .single();
-                          if (profile?.slug) {
-                            window.open(publicCatalogUrl(profile.slug, catalog.slug), "_blank");
-                          }
-                        }}
-                      >
-                        <ExternalLink className="w-3 h-3" />
-                      </Button>
-                    )}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleCopyLink(catalog)}
-                    >
-                      <Copy className="w-3 h-3" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleDuplicate(catalog)}
-                    >
-                      <Files className="w-3 h-3" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleDelete(catalog.id)}
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
+                      {catalogCovers[catalog.id] ? (
+                        <img
+                          src={catalogCovers[catalog.id]}
+                          alt=""
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                          <Eye className="w-8 h-8" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <h3
+                          className="font-semibold text-base sm:text-lg leading-tight cursor-pointer hover:text-primary transition-colors line-clamp-2"
+                          onClick={() => navigate(`/catalogos/${catalog.id}/editor`)}
+                        >
+                          {catalog.title}
+                        </h3>
+                        {getStatusBadge(catalog.status)}
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-3">
+                        Atualizado{" "}
+                        {formatDistanceToNow(new Date(catalog.updated_at), {
+                          addSuffix: true,
+                          locale: ptBR,
+                        })}
+                      </p>
+
+                      {/* Actions */}
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => navigate(`/catalogos/${catalog.id}/editor`)}
+                          className="gap-1.5"
+                        >
+                          <Edit className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">Editar</span>
+                        </Button>
+                        
+                        {isPublished && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleShare(catalog)}
+                              className="gap-1.5"
+                            >
+                              <Share2 className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline">Compartilhar</span>
+                            </Button>
+                            
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                if (userSlug) {
+                                  window.open(publicCatalogUrl(userSlug, catalog.slug), "_blank");
+                                }
+                              }}
+                              className="gap-1.5"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline">Ver</span>
+                            </Button>
+                          </>
+                        )}
+                        
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDuplicate(catalog)}
+                          className="gap-1.5"
+                        >
+                          <Files className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">Duplicar</span>
+                        </Button>
+                        
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDelete(catalog.id)}
+                          className="gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">Excluir</span>
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
@@ -333,6 +369,16 @@ const Catalogos = () => {
           onOpenChange={setCreateDialogOpen}
           onSuccess={loadCatalogs}
         />
+
+        {selectedCatalog && (
+          <PublishSuccessModal
+            open={shareModalOpen}
+            onOpenChange={setShareModalOpen}
+            userSlug={userSlug}
+            catalogSlug={selectedCatalog.slug}
+            catalogTitle={selectedCatalog.title}
+          />
+        )}
       </div>
     </div>
   );
