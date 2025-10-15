@@ -17,6 +17,7 @@ import { LocationBlock } from "./blocks/LocationBlock";
 import { CategoryGridBlock } from "./blocks/CategoryGridBlock";
 import { TagGridBlock } from "./blocks/TagGridBlock";
 import { CatalogosBlock } from "./blocks/CatalogosBlock";
+import { ProfileHeaderBlock } from "./blocks/ProfileHeaderBlock";
 import { BlockWrapper } from "./BlockWrapper";
 import { getBlockBackground } from "./BlockBackgroundMapper";
 
@@ -86,6 +87,9 @@ export const BlockRenderer = ({ block, profile, userId }: BlockRendererProps) =>
     
     case "catalogs":
       return <CatalogosBlock data={block.data} profile={profile} />;
+    
+    case "profile_header":
+      return <ProfileHeaderBlock data={block.data} profile={profile} />;
     
       default:
         return null;

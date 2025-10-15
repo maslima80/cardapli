@@ -25,6 +25,7 @@ import {
   LayoutGrid,
   Layers,
   HelpCircle,
+  User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -35,6 +36,7 @@ interface AddBlockDrawerProps {
 }
 
 const blockTypes = [
+  { type: "profile_header", icon: User, label: "Cabeçalho do Perfil", description: "Logo, nome e slogan" },
   { type: "cover", icon: ImagePlus, label: "Capa", description: "Imagem de destaque com título" },
   { type: "heading", icon: Type, label: "Texto Livre", description: "Texto formatado com título opcional" },
   { type: "image", icon: ImageIcon, label: "Imagem", description: "Foto única com legenda" },

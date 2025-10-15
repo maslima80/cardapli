@@ -15,6 +15,7 @@ import { LocationBlockSettings } from "./settings/LocationBlockSettings";
 import { CategoryGridBlockSettings } from "./settings/CategoryGridBlockSettings";
 import { TagGridBlockSettings } from "./settings/TagGridBlockSettings";
 import { CatalogosBlockSettings } from "./blocks/CatalogosBlockSettings";
+import { ProfileHeaderBlockSettings } from "./blocks/ProfileHeaderBlockSettings";
 import { supabase } from "@/integrations/supabase/client";
 import { extractVideoInfo } from "@/lib/external-media";
 
@@ -1780,6 +1781,14 @@ export const BlockSettingsDrawer = ({
           <div className="text-center py-8">
             <p className="text-muted-foreground">Carregando...</p>
           </div>
+        );
+      
+      case "profile_header":
+        return (
+          <ProfileHeaderBlockSettings
+            data={formData}
+            onUpdate={(updatedData) => setFormData(updatedData)}
+          />
         );
 
       default:

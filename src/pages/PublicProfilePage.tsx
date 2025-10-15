@@ -92,23 +92,6 @@ const PublicProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
-      {/* Header */}
-      <div className="bg-background border-b border-border">
-        <div className="container max-w-3xl mx-auto px-4 py-8 text-center">
-          {profile.logo_url && (
-            <img
-              src={profile.logo_url}
-              alt={profile.business_name}
-              className="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-4 border-border"
-            />
-          )}
-          <h1 className="text-3xl font-bold mb-2">{profile.business_name}</h1>
-          {profile.slogan && (
-            <p className="text-lg text-muted-foreground">{profile.slogan}</p>
-          )}
-        </div>
-      </div>
-
       {/* Blocks */}
       <div className="container max-w-3xl mx-auto px-4 py-6">
         {blocks.length === 0 ? (
