@@ -5,7 +5,6 @@ import { ExternalLink } from "lucide-react";
 
 interface CatalogosBlockProps {
   data: {
-    mode?: "all" | "manual";
     catalog_ids?: string[];
     layout?: string;
     columns?: number;
@@ -33,35 +32,33 @@ export const CatalogosBlock = ({ data, profile }: CatalogosBlockProps) => {
 
   useEffect(() => {
     loadCatalogs();
-  }, [data.mode, data.catalog_ids, profile.id]);
+  }, [data.catalog_ids, profile.id]);
 
   const loadCatalogs = async () => {
     try {
-      let query = supabase
+      // Only show catalogs that are in catalog_ids (manual selection only)
+      if (!data.catalog_ids || data.catalog_ids.length === 0) {
+        setCatalogs([]);
+        setLoading(false);
+        return;
+      }
+
+      const { data: catalogsData, error } = await supabase
         .from("catalogs")
         .select("*")
         .eq("user_id", profile.id)
         .eq("status", "publicado")
-        .eq("link_ativo", true);
-
-      if (data.mode === "manual" && data.catalog_ids && data.catalog_ids.length > 0) {
-        query = query.in("id", data.catalog_ids);
-      }
-
-      const { data: catalogsData, error } = await query.order("updated_at", { ascending: false });
+        .eq("link_ativo", true)
+        .in("id", data.catalog_ids);
 
       if (error) {
         console.error("Error loading catalogs:", error);
         setCatalogs([]);
       } else {
-        let orderedCatalogs = catalogsData || [];
-        
-        // If manual mode, maintain the order from catalog_ids
-        if (data.mode === "manual" && data.catalog_ids) {
-          orderedCatalogs = data.catalog_ids
-            .map(id => orderedCatalogs.find(c => c.id === id))
-            .filter(Boolean) as Catalog[];
-        }
+        // Maintain the order from catalog_ids
+        const orderedCatalogs = data.catalog_ids
+          .map(id => catalogsData?.find(c => c.id === id))
+          .filter(Boolean) as Catalog[];
         
         setCatalogs(orderedCatalogs);
       }
@@ -82,15 +79,7 @@ export const CatalogosBlock = ({ data, profile }: CatalogosBlockProps) => {
   }
 
   if (catalogs.length === 0) {
-    return (
-      <div className="py-8 text-center">
-        <p className="text-muted-foreground">
-          {data.mode === "manual"
-            ? "Nenhum catálogo selecionado"
-            : "Nenhum catálogo publicado ainda"}
-        </p>
-      </div>
-    );
+    return null; // Don't show anything if no catalogs selected
   }
 
   const columns = data.columns || 2;

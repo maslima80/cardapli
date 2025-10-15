@@ -3,7 +3,13 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
-import { GripVertical, X } from "lucide-react";
+import { GripVertical, X, AlertCircle } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   DndContext,
   closestCenter,
@@ -24,7 +30,6 @@ import { CSS } from "@dnd-kit/utilities";
 
 interface CatalogosBlockSettingsProps {
   data: {
-    mode?: "all" | "manual";
     catalog_ids?: string[];
     layout?: string;
     columns?: number;
@@ -85,7 +90,6 @@ export const CatalogosBlockSettings = ({
   onUpdate,
   userId,
 }: CatalogosBlockSettingsProps) => {
-  const [mode, setMode] = useState<"all" | "manual">(data.mode || "all");
   const [selectedIds, setSelectedIds] = useState<string[]>(data.catalog_ids || []);
   const [availableCatalogs, setAvailableCatalogs] = useState<Catalog[]>([]);
   const [selectedCatalogs, setSelectedCatalogs] = useState<Catalog[]>([]);
@@ -123,24 +127,36 @@ export const CatalogosBlockSettings = ({
     }
   };
 
-  const handleModeChange = (newMode: "all" | "manual") => {
-    setMode(newMode);
-    updateParent(newMode, selectedIds);
-  };
-
-  const handleToggleCatalog = (catalogId: string) => {
+  const handleToggleCatalog = (catalogId: string, catalog: Catalog) => {
+    // Check if catalog is eligible
+    if (!isEligible(catalog)) return;
+    
     const newIds = selectedIds.includes(catalogId)
       ? selectedIds.filter(id => id !== catalogId)
       : [...selectedIds, catalogId];
     
     setSelectedIds(newIds);
-    updateParent(mode, newIds);
+    updateParent(newIds);
+  };
+
+  const isEligible = (catalog: Catalog) => {
+    return catalog.status === 'publicado' && catalog.link_ativo === true;
+  };
+
+  const getIneligibilityReason = (catalog: Catalog) => {
+    if (catalog.status !== 'publicado') {
+      return 'Precisa estar publicado';
+    }
+    if (!catalog.link_ativo) {
+      return 'Precisa ter link ativo';
+    }
+    return '';
   };
 
   const handleRemoveCatalog = (catalogId: string) => {
     const newIds = selectedIds.filter(id => id !== catalogId);
     setSelectedIds(newIds);
-    updateParent(mode, newIds);
+    updateParent(newIds);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -152,12 +168,11 @@ export const CatalogosBlockSettings = ({
     const newIds = arrayMove(selectedIds, oldIndex, newIndex);
     
     setSelectedIds(newIds);
-    updateParent(mode, newIds);
+    updateParent(newIds);
   };
 
-  const updateParent = (newMode: "all" | "manual", newIds: string[]) => {
+  const updateParent = (newIds: string[]) => {
     onUpdate({
-      mode: newMode,
       catalog_ids: newIds,
       layout: data.layout || "grid",
       columns: data.columns || 2,
@@ -165,135 +180,111 @@ export const CatalogosBlockSettings = ({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Mode Selection */}
-      <div className="space-y-3">
-        <Label>Modo de exibição</Label>
-        <div className="space-y-2">
-          <div
-            className={`p-4 rounded-lg border-2 cursor-pointer transition-colors ${
-              mode === "all"
-                ? "border-primary bg-primary/5"
-                : "border-border hover:border-primary/50"
-            }`}
-            onClick={() => handleModeChange("all")}
-          >
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5">
-                <div
-                  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                    mode === "all" ? "border-primary" : "border-muted-foreground"
-                  }`}
-                >
-                  {mode === "all" && (
-                    <div className="w-2 h-2 rounded-full bg-primary" />
-                  )}
-                </div>
-              </div>
-              <div>
-                <p className="font-medium">Mostrar todos</p>
-                <p className="text-sm text-muted-foreground">
-                  Exibe automaticamente todos os catálogos publicados com link ativo
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div
-            className={`p-4 rounded-lg border-2 cursor-pointer transition-colors ${
-              mode === "manual"
-                ? "border-primary bg-primary/5"
-                : "border-border hover:border-primary/50"
-            }`}
-            onClick={() => handleModeChange("manual")}
-          >
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5">
-                <div
-                  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                    mode === "manual" ? "border-primary" : "border-muted-foreground"
-                  }`}
-                >
-                  {mode === "manual" && (
-                    <div className="w-2 h-2 rounded-full bg-primary" />
-                  )}
-                </div>
-              </div>
-              <div>
-                <p className="font-medium">Selecionar manualmente</p>
-                <p className="text-sm text-muted-foreground">
-                  Escolha quais catálogos exibir e defina a ordem
-                </p>
-              </div>
-            </div>
-          </div>
+    <TooltipProvider>
+      <div className="space-y-6">
+        {/* Header */}
+        <div>
+          <Label className="text-base">Catálogos no perfil</Label>
+          <p className="text-sm text-muted-foreground mt-1">
+            Escolha quais catálogos exibir na sua página pública e defina a ordem
+          </p>
         </div>
-      </div>
 
-      {/* Manual Selection */}
-      {mode === "manual" && (
-        <div className="space-y-4">
-          {/* Available Catalogs */}
-          <div className="space-y-2">
-            <Label>Catálogos disponíveis</Label>
+        {/* Available Catalogs */}
+        <div className="space-y-2">
+          <Label>Catálogos disponíveis</Label>
+          {availableCatalogs.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4">
+              Nenhum catálogo disponível. Crie um catálogo primeiro.
+            </p>
+          ) : (
             <div className="space-y-2 max-h-60 overflow-y-auto">
-              {availableCatalogs.map((catalog) => (
-                <div
-                  key={catalog.id}
-                  className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg"
-                >
-                  <Checkbox
-                    checked={selectedIds.includes(catalog.id)}
-                    onCheckedChange={() => handleToggleCatalog(catalog.id)}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{catalog.title}</p>
-                    <p className="text-xs text-muted-foreground">{catalog.slug}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Selected Catalogs (Reorderable) */}
-          {selectedCatalogs.length > 0 && (
-            <div className="space-y-2">
-              <Label>Ordem de exibição ({selectedCatalogs.length})</Label>
-              <p className="text-sm text-muted-foreground">
-                Arraste para reordenar
-              </p>
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext
-                  items={selectedCatalogs.map(c => c.id)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  <div className="space-y-2">
-                    {selectedCatalogs.map((catalog) => (
-                      <SortableCatalogItem
-                        key={catalog.id}
-                        catalog={catalog}
-                        onRemove={() => handleRemoveCatalog(catalog.id)}
-                      />
-                    ))}
-                  </div>
-                </SortableContext>
-              </DndContext>
+              {availableCatalogs.map((catalog) => {
+                const eligible = isEligible(catalog);
+                const reason = getIneligibilityReason(catalog);
+                
+                return (
+                  <Tooltip key={catalog.id}>
+                    <TooltipTrigger asChild>
+                      <div
+                        className={`flex items-center gap-3 p-3 rounded-lg ${
+                          eligible
+                            ? "bg-muted/50 cursor-pointer hover:bg-muted"
+                            : "bg-muted/30 opacity-60 cursor-not-allowed"
+                        }`}
+                      >
+                        <Checkbox
+                          checked={selectedIds.includes(catalog.id)}
+                          onCheckedChange={() => handleToggleCatalog(catalog.id, catalog)}
+                          disabled={!eligible}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium truncate">{catalog.title}</p>
+                            {!eligible && (
+                              <AlertCircle className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground">{catalog.slug}</p>
+                        </div>
+                      </div>
+                    </TooltipTrigger>
+                    {!eligible && (
+                      <TooltipContent>
+                        <p>{reason}</p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                );
+              })}
             </div>
           )}
         </div>
-      )}
 
-      {/* Info */}
-      <div className="bg-muted/50 rounded-lg p-4">
-        <p className="text-sm text-muted-foreground">
-          💡 <strong>Dica:</strong> Apenas catálogos publicados com link ativo serão exibidos na página pública.
-          {mode === "manual" && " Catálogos que voltarem para rascunho serão ocultados automaticamente."}
-        </p>
+        {/* Selected Catalogs (Reorderable) */}
+        {selectedCatalogs.length > 0 ? (
+          <div className="space-y-2">
+            <Label>Ordem de exibição ({selectedCatalogs.length})</Label>
+            <p className="text-sm text-muted-foreground">
+              Arraste para reordenar
+            </p>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={selectedCatalogs.map(c => c.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-2">
+                  {selectedCatalogs.map((catalog) => (
+                    <SortableCatalogItem
+                      key={catalog.id}
+                      catalog={catalog}
+                      onRemove={() => handleRemoveCatalog(catalog.id)}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          </div>
+        ) : (
+          <div className="text-center py-8 border-2 border-dashed border-border rounded-lg">
+            <p className="text-muted-foreground">
+              Nenhum catálogo adicionado. Selecione catálogos acima para exibir no seu perfil.
+            </p>
+          </div>
+        )}
+
+        {/* Info */}
+        <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+          <p className="text-sm text-blue-900 dark:text-blue-100">
+            💡 <strong>Dica:</strong> Apenas catálogos publicados com link ativo serão exibidos. 
+            Catálogos que voltarem para rascunho serão ocultados automaticamente.
+          </p>
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 };
