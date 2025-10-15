@@ -12,6 +12,7 @@ import Perfil from "./pages/Perfil";
 import Produtos from "./pages/Produtos";
 import Catalogos from "./pages/Catalogos";
 import CatalogoEditor from "./pages/CatalogoEditor";
+import Compartilhar from "./pages/Compartilhar";
 import PublicCatalog from "./pages/PublicCatalog";
 import PublicCatalogPage from "./pages/PublicCatalogPage";
 import PublicProfilePage from "./pages/PublicProfilePage";
@@ -42,6 +43,7 @@ const App = () => (
           <Route path="/produtos" element={<Produtos />} />
           <Route path="/catalogos" element={<Catalogos />} />
           <Route path="/catalogos/:id/editor" element={<CatalogoEditor />} />
+          <Route path="/compartilhar" element={<Compartilhar />} />
           <Route path="/escolher-slug" element={<EscolherSlug />} />
           
           {/* Public routes - /u/:userSlug for profiles and catalogs */}
