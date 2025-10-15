@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,19 +9,51 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin } from "lucide-react";
 
+// Define types for better type safety
+type Location = { 
+  id: string; 
+  name: string; 
+  address?: string; 
+  phone?: string; 
+  hours?: string; 
+  maps_url?: string; 
+  tags?: string[] 
+};
+
 interface LocationBlockSettingsProps {
   data: any;
   onUpdate: (data: any) => void;
 }
 
 export function LocationBlockSettings({ data, onUpdate }: LocationBlockSettingsProps) {
+  // Initialize state with default values
   const [title, setTitle] = useState(data?.title || "Nossas Localizações");
   const [description, setDescription] = useState(data?.description || "");
   const [layout, setLayout] = useState(data?.layout || "list");
   const [showMap, setShowMap] = useState(data?.show_map !== false);
-  const [selectedLocations, setSelectedLocations] = useState<string[]>(data?.selected_locations || []);
-  const [locations, setLocations] = useState<any[]>([]);
+  const [selectedLocationIds, setSelectedLocationIds] = useState<string[]>(
+    Array.isArray(data?.selected_locations) ? data.selected_locations.filter(Boolean) : []
+  );
+  const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Sync state with data prop when it changes (when dialog reopens)
+  useEffect(() => {
+    console.log("🗺️ LocationBlockSettings - Data prop changed:", data);
+    console.log("  - Title:", data?.title);
+    console.log("  - Description:", data?.description);
+    console.log("  - Selected locations:", data?.selected_locations);
+    console.log("  - Layout:", data?.layout);
+    console.log("  - Show map:", data?.show_map);
+    
+    setTitle(data?.title || "Nossas Localizações");
+    setDescription(data?.description || "");
+    setLayout(data?.layout || "list");
+    setShowMap(data?.show_map !== false);
+    setSelectedLocationIds(
+      Array.isArray(data?.selected_locations) ? data.selected_locations.filter(Boolean) : []
+    );
+  }, [data]);
 
   // Load locations from user profile
   useEffect(() => {
@@ -37,13 +69,16 @@ export function LocationBlockSettings({ data, onUpdate }: LocationBlockSettingsP
           .eq("id", user.id)
           .single();
 
-        if (profileData?.locations) {
-          setLocations(profileData.locations);
+        if (profileData?.locations && Array.isArray(profileData.locations)) {
+          // Add IDs to locations if they don't have them (using index as ID)
+          const locationsWithIds = profileData.locations
+            .filter((loc: any) => loc && loc.name) // Only include locations with names
+            .map((loc: any, index: number) => ({
+              ...loc,
+              id: loc.id || `location-${index}`, // Use existing ID or generate one
+            }));
           
-          // If no locations are selected yet, select all by default
-          if (!data?.selected_locations?.length) {
-            setSelectedLocations(profileData.locations.map((loc: any) => loc.id));
-          }
+          setLocations(locationsWithIds);
         }
       } catch (error) {
         console.error("Error loading locations:", error);
@@ -55,38 +90,49 @@ export function LocationBlockSettings({ data, onUpdate }: LocationBlockSettingsP
     loadLocations();
   }, []);
 
-  // Update parent component when settings change
-  useEffect(() => {
+  // Helper function to update parent with current state
+  const updateParent = (overrides = {}) => {
     const updatedData = {
-      ...data,
-      title,
-      description,
-      layout,
-      show_map: showMap,
-      selected_locations: selectedLocations,
+      title: title || "Nossas Localizações",
+      description: description || "",
+      layout: layout || "list",
+      show_map: showMap !== false,
+      selected_locations: selectedLocationIds,
+      ...overrides,
     };
     onUpdate(updatedData);
-  }, [title, description, layout, showMap, selectedLocations]);
+  };
 
   // Toggle location selection
   const toggleLocation = (locationId: string) => {
-    setSelectedLocations(prev => {
-      if (prev.includes(locationId)) {
-        return prev.filter(id => id !== locationId);
-      } else {
-        return [...prev, locationId];
-      }
+    if (!locationId) return; // Skip if ID is undefined
+    
+    setSelectedLocationIds(prev => {
+      const newIds = prev.includes(locationId)
+        ? prev.filter(id => id !== locationId)
+        : [...prev, locationId];
+      
+      // Update parent immediately with new selection
+      updateParent({ selected_locations: newIds });
+      return newIds;
     });
   };
 
   // Select all locations
   const selectAllLocations = () => {
-    setSelectedLocations(locations.map(loc => loc.id));
+    // Only select locations with valid IDs
+    const validIds = locations
+      .filter(loc => loc && typeof loc.id === 'string' && loc.id.trim() !== '')
+      .map(loc => loc.id);
+      
+    setSelectedLocationIds(validIds);
+    updateParent({ selected_locations: validIds });
   };
 
   // Clear all selected locations
   const clearSelectedLocations = () => {
-    setSelectedLocations([]);
+    setSelectedLocationIds([]);
+    updateParent({ selected_locations: [] });
   };
 
   return (
@@ -96,7 +142,11 @@ export function LocationBlockSettings({ data, onUpdate }: LocationBlockSettingsP
         <Input
           id="title"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => {
+            const newTitle = e.target.value;
+            setTitle(newTitle);
+            updateParent({ title: newTitle });
+          }}
           placeholder="Nossas Localizações"
         />
       </div>
@@ -106,7 +156,11 @@ export function LocationBlockSettings({ data, onUpdate }: LocationBlockSettingsP
         <Textarea
           id="description"
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={(e) => {
+            const newDesc = e.target.value;
+            setDescription(newDesc);
+            updateParent({ description: newDesc });
+          }}
           placeholder="Conheça nossas unidades e onde nos encontrar"
           rows={3}
         />
@@ -116,7 +170,10 @@ export function LocationBlockSettings({ data, onUpdate }: LocationBlockSettingsP
         <Label>Layout</Label>
         <RadioGroup
           value={layout}
-          onValueChange={setLayout}
+          onValueChange={(value) => {
+            setLayout(value);
+            updateParent({ layout: value });
+          }}
           className="flex flex-col space-y-1"
         >
           <div className="flex items-center space-x-2">
@@ -134,7 +191,11 @@ export function LocationBlockSettings({ data, onUpdate }: LocationBlockSettingsP
         <Checkbox
           id="show-map"
           checked={showMap}
-          onCheckedChange={(checked) => setShowMap(checked === true)}
+          onCheckedChange={(checked) => {
+            const newShowMap = checked === true;
+            setShowMap(newShowMap);
+            updateParent({ show_map: newShowMap });
+          }}
         />
         <Label htmlFor="show-map">Mostrar mapa</Label>
       </div>
@@ -177,29 +238,34 @@ export function LocationBlockSettings({ data, onUpdate }: LocationBlockSettingsP
         ) : (
           <ScrollArea className="h-60 border rounded-md">
             <div className="p-4 space-y-2">
-              {locations.map((location) => (
-                <div
-                  key={location.id}
-                  className="flex items-start space-x-2 p-2 hover:bg-muted/50 rounded-md"
-                >
-                  <Checkbox
-                    id={`location-${location.id}`}
-                    checked={selectedLocations.includes(location.id)}
-                    onCheckedChange={() => toggleLocation(location.id)}
-                  />
-                  <div className="flex-1">
-                    <Label
-                      htmlFor={`location-${location.id}`}
-                      className="font-medium cursor-pointer"
-                    >
-                      {location.name}
-                    </Label>
-                    <p className="text-xs text-muted-foreground">
-                      {location.address}
-                    </p>
+              {locations.map((location, index) => {
+                // Skip rendering if location has no valid ID
+                if (!location || !location.id) return null;
+                
+                return (
+                  <div
+                    key={`location-${location.id || index}`}
+                    className="flex items-start space-x-2 p-2 hover:bg-muted/50 rounded-md"
+                  >
+                    <Checkbox
+                      id={`location-check-${location.id || index}`}
+                      checked={selectedLocationIds.includes(location.id)}
+                      onCheckedChange={() => toggleLocation(location.id)}
+                    />
+                    <div className="flex-1">
+                      <Label
+                        htmlFor={`location-check-${location.id || index}`}
+                        className="font-medium cursor-pointer"
+                      >
+                        {location.name || "Localização sem nome"}
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        {location.address || "Sem endereço"}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </ScrollArea>
         )}

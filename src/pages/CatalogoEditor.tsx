@@ -119,6 +119,16 @@ const CatalogoEditor = () => {
     const block = blocks.find(b => b.id === blockId);
     console.log("Found block:", block);
     
+    // Special handling for location blocks - DEBUG
+    if (block?.type === "location") {
+      console.log("🗺️ LOCATION BLOCK UPDATE:");
+      console.log("  - Block ID:", blockId);
+      console.log("  - Updates:", JSON.stringify(updates, null, 2));
+      console.log("  - Selected locations:", updates.data?.selected_locations);
+      console.log("  - Title:", updates.data?.title);
+      console.log("  - Description:", updates.data?.description);
+    }
+    
     // Special handling for testimonials blocks
     const isTestimonialBlock = block?.type === "testimonials" || updates.type === "testimonials";
     console.log("Is testimonial block?", isTestimonialBlock);

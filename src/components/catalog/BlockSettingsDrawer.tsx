@@ -40,6 +40,10 @@ export const BlockSettingsDrawer = ({
   const [availableTags, setAvailableTags] = useState<string[]>([]);
 
   useEffect(() => {
+    console.log("🔧 BlockSettingsDrawer - Block changed:", block);
+    console.log("  - Block type:", block?.type);
+    console.log("  - Block data:", block?.data);
+    
     setFormData(block?.data || {});
     loadProfile();
     if (block?.type === "product_grid") {
@@ -1741,7 +1745,10 @@ export const BlockSettingsDrawer = ({
       case "location":
         return (          <LocationBlockSettings
             data={formData}
-            onUpdate={(updatedData) => setFormData(updatedData)}
+            onUpdate={(updatedData) => {
+              console.log("🗺️ LocationBlockSettings onUpdate called with:", updatedData);
+              setFormData(updatedData);
+            }}
           />
         );
         
