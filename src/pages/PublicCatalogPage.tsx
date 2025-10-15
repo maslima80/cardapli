@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
 
 const PublicCatalogPage = () => {
-  const { slug } = useParams();
+  const { slug, catalog_slug } = useParams();
   const [loading, setLoading] = useState(true);
   const [catalog, setCatalog] = useState<any>(null);
   const [blocks, setBlocks] = useState<any[]>([]);
@@ -17,15 +17,29 @@ const PublicCatalogPage = () => {
 
   useEffect(() => {
     loadCatalog();
-  }, [slug]);
+  }, [slug, catalog_slug]);
 
   const loadCatalog = async () => {
     try {
-      // Get catalog by slug
+      // Get profile by slug
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("slug", slug)
+        .single();
+
+      if (profileError || !profileData) {
+        setUnavailable(true);
+        setLoading(false);
+        return;
+      }
+
+      // Get catalog by user_id and catalog slug
       const { data: catalogData, error: catalogError } = await supabase
         .from("catalogs")
-        .select("*, profiles!inner(*)")
-        .eq("slug", slug)
+        .select("*")
+        .eq("user_id", profileData.id)
+        .eq("slug", catalog_slug)
         .single();
 
       if (catalogError || !catalogData) {
@@ -57,7 +71,7 @@ const PublicCatalogPage = () => {
 
       setCatalog(catalogData);
       setBlocks(blocksData || []);
-      setProfile(catalogData.profiles);
+      setProfile(profileData);
       setLoading(false);
     } catch (error) {
       console.error("Error loading catalog:", error);

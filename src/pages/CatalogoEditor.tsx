@@ -242,17 +242,20 @@ const CatalogoEditor = () => {
     toast.success("Ordem atualizada ✓");
   };
 
-  const handlePublish = async (status: "public" | "unlisted") => {
+  const handlePublish = async (data: { status: string; link_ativo: boolean; no_perfil: boolean }) => {
     const { error } = await supabase
       .from("catalogs")
-      .update({ status })
+      .update(data)
       .eq("id", id);
 
     if (error) {
       toast.error("Erro ao publicar");
     } else {
-      setCatalog({ ...catalog, status });
-      toast.success("Catálogo publicado! ✨");
+      setCatalog({ ...catalog, ...data });
+      const message = data.status === "publicado" 
+        ? "Catálogo publicado! ✨" 
+        : "Salvo como rascunho";
+      toast.success(message);
     }
   };
 
@@ -472,7 +475,9 @@ const CatalogoEditor = () => {
         onOpenChange={setPublishModalOpen}
         catalogSlug={catalog?.slug}
         profileSlug={profile?.slug}
-        currentStatus={catalog?.status}
+        currentStatus={catalog?.status || "rascunho"}
+        linkAtivo={catalog?.link_ativo || false}
+        noPerfil={catalog?.no_perfil || false}
         onPublish={handlePublish}
       />
     </div>
