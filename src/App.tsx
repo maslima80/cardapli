@@ -14,6 +14,7 @@ import Catalogos from "./pages/Catalogos";
 import CatalogoEditor from "./pages/CatalogoEditor";
 import PublicCatalog from "./pages/PublicCatalog";
 import PublicCatalogPage from "./pages/PublicCatalogPage";
+import PublicProfilePage from "./pages/PublicProfilePage";
 import EscolherSlug from "./pages/EscolherSlug";
 import NotFound from "./pages/NotFound";
 import LegacyRedirect from "./pages/LegacyRedirect";
@@ -45,8 +46,8 @@ const App = () => (
           
           {/* Public routes - /u/:userSlug for profiles and catalogs */}
           <Route path="/u/:userSlug" element={<PublicUserLayout />}>
-            {/* /u/user → profile (will be implemented in Phase 2) */}
-            <Route index element={<NotFound />} />
+            {/* /u/user → profile */}
+            <Route index element={<PublicProfilePage />} />
             {/* /u/user/:catalogSlug → catalog */}
             <Route path=":catalogSlug" element={<PublicCatalogPage />} />
           </Route>
