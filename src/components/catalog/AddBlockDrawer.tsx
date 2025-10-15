@@ -19,6 +19,9 @@ import {
   Video,
   ImagePlus,
   ListOrdered,
+  MapPin,
+  Tag,
+  Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -34,6 +37,9 @@ const blockTypes = [
   { type: "image", icon: ImageIcon, label: "Imagem", description: "Foto única com legenda" },
   { type: "video", icon: Video, label: "Vídeo", description: "Vídeo do YouTube ou Vimeo" },
   { type: "product_grid", icon: LayoutGrid, label: "Grade de Produtos", description: "Mostre seus produtos" },
+  { type: "category_grid", icon: Layers, label: "Categorias", description: "Navegação por categorias" },
+  { type: "tag_grid", icon: Tag, label: "Tags", description: "Navegação por tags" },
+  { type: "location", icon: MapPin, label: "Localizações", description: "Mostre suas unidades/lojas" },
   { type: "about_business", icon: Info, label: "Sobre o Negócio", description: "Apresente a história e o propósito do seu negócio" },
   { type: "contact", icon: Phone, label: "Contato", description: "WhatsApp, email, telefone" },
   { type: "socials", icon: Share2, label: "Redes Sociais", description: "Links para suas redes" },

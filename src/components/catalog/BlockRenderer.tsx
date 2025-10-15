@@ -13,6 +13,9 @@ import { FaqBlock } from "./blocks/FaqBlock";
 import { BenefitsBlock } from "./blocks/BenefitsBlock";
 import { StepByStepBlock } from "./blocks/StepByStepBlock";
 import { ImportantInfoBlock } from "./blocks/ImportantInfoBlock";
+import { LocationBlock } from "./blocks/LocationBlock";
+import { CategoryGridBlock } from "./blocks/CategoryGridBlock";
+import { TagGridBlock } from "./blocks/TagGridBlock";
 import { BlockWrapper } from "./BlockWrapper";
 import { getBlockBackground } from "./BlockBackgroundMapper";
 
@@ -40,6 +43,15 @@ export const BlockRenderer = ({ block, profile, userId }: BlockRendererProps) =>
     
     case "product_grid":
       return <ProductGridBlockV2 data={block.data} userId={userId} />;
+    
+    case "category_grid":
+      return <CategoryGridBlock data={block.data} userId={userId} />;
+      
+    case "tag_grid":
+      return <TagGridBlock data={block.data} userId={userId} />;
+    
+    case "location":
+      return <LocationBlock data={block.data} profile={profile} />;
     
     case "about":
       return <AboutBlock data={block.data} profileAbout={profile?.about} />;

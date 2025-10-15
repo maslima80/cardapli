@@ -11,6 +11,9 @@ import { SimpleImageUploader } from "./SimpleImageUploader";
 import { ProductPickerModal } from "./ProductPickerModal";
 import { MultiSelectChips } from "./MultiSelectChips";
 import { ProductGridBlockSettings } from "./ProductGridBlockSettings";
+import { LocationBlockSettings } from "./settings/LocationBlockSettings";
+import { CategoryGridBlockSettings } from "./settings/CategoryGridBlockSettings";
+import { TagGridBlockSettings } from "./settings/TagGridBlockSettings";
 import { supabase } from "@/integrations/supabase/client";
 import { extractVideoInfo } from "@/lib/external-media";
 
@@ -1735,6 +1738,29 @@ export const BlockSettingsDrawer = ({
       case "divider":
         return <p className="text-sm text-muted-foreground">Este bloco não tem configurações.</p>;
 
+      case "location":
+        return (          <LocationBlockSettings
+            data={formData}
+            onUpdate={(updatedData) => setFormData(updatedData)}
+          />
+        );
+        
+      case "category_grid":
+        return (
+          <CategoryGridBlockSettings
+            data={formData}
+            onUpdate={(updatedData) => setFormData(updatedData)}
+          />
+        );
+        
+      case "tag_grid":
+        return (
+          <TagGridBlockSettings
+            data={formData}
+            onUpdate={(updatedData) => setFormData(updatedData)}
+          />
+        );
+
       default:
         return (
           <div className="space-y-2">
@@ -1762,6 +1788,9 @@ export const BlockSettingsDrawer = ({
              block.type === "image" ? "Editar Imagem" :
              block.type === "video" ? "Editar Vídeo" :
              block.type === "product_grid" ? "Editar Grade de Produtos" :
+             block.type === "category_grid" ? "Editar Categorias" :
+             block.type === "tag_grid" ? "Editar Tags" :
+             block.type === "location" ? "Editar Localizações" :
              block.type === "about" ? "Editar Sobre" :
              block.type === "about_business" ? "Editar Sobre o Negócio" :
              block.type === "contact" ? "Editar Contato" :
