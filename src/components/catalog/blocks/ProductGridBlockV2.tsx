@@ -11,9 +11,10 @@ interface ProductGridBlockProps {
   data: any;
   className?: string;
   preview?: boolean;
+  userId?: string;
 }
 
-export function ProductGridBlockV2({ data, className = "", preview = false }: ProductGridBlockProps) {
+export function ProductGridBlockV2({ data, className = "", preview = false, userId }: ProductGridBlockProps) {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -30,76 +31,184 @@ export function ProductGridBlockV2({ data, className = "", preview = false }: Pr
     }
 
     // Get current user
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    let currentUserId = userId;
+    if (!currentUserId) {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        currentUserId = user?.id;
+      } catch (error) {
+        console.error("Error getting user:", error);
+      }
+    }
+    
+    if (!currentUserId) {
       setLoading(false);
       return;
     }
 
+    console.log("ProductGridBlock data:", data);
+    console.log("Selected categories:", data.selected_categories);
+    console.log("Selected tags:", data.selected_tags);
+    console.log("Source type:", data.source_type);
+
     let query = supabase
       .from("products")
       .select("*")
-      .eq("user_id", user.id);
+      .eq("user_id", currentUserId);
 
     // Handle different source types
     if (data.source_type === "manual" && data.selected_product_ids?.length) {
+      console.log("Using manual selection with IDs:", data.selected_product_ids);
       query = query.in("id", data.selected_product_ids);
     }
     else if (data.source_type === "combined") {
+      console.log("Using combined filtering");
       if (data.selected_categories?.length && data.selected_tags?.length) {
         // Both categories and tags selected
+        console.log("Both categories and tags selected");
         if (data.combine_logic === "and") {
           // "AND" logic - must match both categories AND tags
-          query = query.overlaps("categories", data.selected_categories);
+          console.log("Using AND logic for categories and tags");
           
+          // For categories, we need to check if any of the product's categories match any of the selected categories
+          // We can't use contains() directly with an array on both sides
+          if (data.selected_categories.length === 1) {
+            // If only one category, we can use a simpler approach
+            query = query.contains("categories", [data.selected_categories[0]]);
+            console.log("Single category filter:", data.selected_categories[0]);
+          } else {
+            // For multiple categories, we need to check if any of them are in the product's categories
+            // This is a bit tricky with Supabase, we'll use a raw SQL filter
+            const categoryFilter = data.selected_categories.map((c: string) => `'${c}' = ANY(categories)`).join(" OR ");
+            query = query.or(categoryFilter);
+            console.log("Multiple categories filter:", categoryFilter);
+          }
+          
+          // For tags with AND logic
           if (data.selected_tags.length > 1) {
             // For multiple tags with AND logic, each tag must be present
             data.selected_tags.forEach((tag: string) => {
               query = query.contains("quality_tags", [tag]);
+              console.log("Adding tag filter (AND):", tag);
             });
           } else {
-            // For single tag, simple contains is enough
-            query = query.contains("quality_tags", data.selected_tags);
+            // For single tag
+            query = query.contains("quality_tags", [data.selected_tags[0]]);
+            console.log("Single tag filter:", data.selected_tags[0]);
           }
         } else {
           // "OR" logic - match either categories OR tags
-          const categoryIds = data.selected_categories.map((c: string) => c);
-          const tagIds = data.selected_tags.map((t: string) => t);
+          console.log("Using OR logic for categories and tags");
           
-          // Use or() for OR logic between categories and tags
-          query = query.or(`categories.ov.{${categoryIds.join(',')}},quality_tags.ov.{${tagIds.join(',')}}`);
+          // Build an array of conditions for the OR clause
+          const conditions = [];
+          
+          // Add category conditions
+          if (data.selected_categories.length > 0) {
+            data.selected_categories.forEach((category: string) => {
+              conditions.push(`categories.cs.{${category}}`);
+            });
+          }
+          
+          // Add tag conditions
+          if (data.selected_tags.length > 0) {
+            data.selected_tags.forEach((tag: string) => {
+              conditions.push(`quality_tags.cs.{${tag}}`);
+            });
+          }
+          
+          // Join all conditions with OR
+          if (conditions.length > 0) {
+            const filterString = conditions.join(',');
+            query = query.or(filterString);
+            console.log("OR filter string:", filterString);
+          }
         }
       }
       else if (data.selected_categories?.length) {
         // Only categories selected
-        query = query.contains("categories", data.selected_categories);
+        console.log("Only categories selected:", data.selected_categories);
+        
+        if (data.selected_categories.length === 1) {
+          // If only one category, use simple contains
+          query = query.contains("categories", [data.selected_categories[0]]);
+          console.log("Using single category filter");
+        } else {
+          // For multiple categories with OR logic (default)
+          const categoryConditions = data.selected_categories.map((category: string) => 
+            `categories.cs.{${category}}`
+          ).join(',');
+          query = query.or(categoryConditions);
+          console.log("Using multiple categories OR filter:", categoryConditions);
+        }
       }
       else if (data.selected_tags?.length) {
         // Only tags selected
+        console.log("Only tags selected:", data.selected_tags);
+        
         if (data.combine_logic === "and" && data.selected_tags.length > 1) {
           // For "and" logic with multiple tags
+          console.log("Using AND logic for multiple tags");
           data.selected_tags.forEach((tag: string) => {
             query = query.contains("quality_tags", [tag]);
+            console.log("Adding tag filter (AND):", tag);
           });
         } else {
           // For "or" logic or single tag
-          query = query.contains("quality_tags", data.selected_tags);
+          if (data.selected_tags.length === 1) {
+            query = query.contains("quality_tags", [data.selected_tags[0]]);
+            console.log("Using single tag filter");
+          } else {
+            // For multiple tags with OR logic
+            const tagConditions = data.selected_tags.map((tag: string) => 
+              `quality_tags.cs.{${tag}}`
+            ).join(',');
+            query = query.or(tagConditions);
+            console.log("Using multiple tags OR filter:", tagConditions);
+          }
         }
       }
     }
     else if (data.source_type === "category" && data.selected_categories?.length) {
-      query = query.contains("categories", data.selected_categories);
+      console.log("Category source type with categories:", data.selected_categories);
+      
+      if (data.selected_categories.length === 1) {
+        // If only one category, use simple contains
+        query = query.contains("categories", [data.selected_categories[0]]);
+        console.log("Using single category filter");
+      } else {
+        // For multiple categories with OR logic (default)
+        const categoryConditions = data.selected_categories.map((category: string) => 
+          `categories.cs.{${category}}`
+        ).join(',');
+        query = query.or(categoryConditions);
+        console.log("Using multiple categories OR filter:", categoryConditions);
+      }
     } 
     else if (data.source_type === "tag" && data.selected_tags?.length) {
+      console.log("Tag source type with tags:", data.selected_tags);
+      
       // Handle tag filtering based on match type
       if (data.combine_logic === "and" && data.selected_tags.length > 1) {
         // For "all" match type, we need to check that each tag is present
+        console.log("Using AND logic for multiple tags");
         data.selected_tags.forEach((tag: string) => {
           query = query.contains("quality_tags", [tag]);
+          console.log("Adding tag filter (AND):", tag);
         });
       } else {
         // For "any" match type (default), any of the selected tags will match
-        query = query.contains("quality_tags", data.selected_tags);
+        if (data.selected_tags.length === 1) {
+          query = query.contains("quality_tags", [data.selected_tags[0]]);
+          console.log("Using single tag filter");
+        } else {
+          // For multiple tags with OR logic
+          const tagConditions = data.selected_tags.map((tag: string) => 
+            `quality_tags.cs.{${tag}}`
+          ).join(',');
+          query = query.or(tagConditions);
+          console.log("Using multiple tags OR filter:", tagConditions);
+        }
       }
     }
 
@@ -107,8 +216,10 @@ export function ProductGridBlockV2({ data, className = "", preview = false }: Pr
     if (data.status_filter) {
       if (data.status_filter === "disponivel") {
         query = query.eq("status", "Disponível");
+        console.log("Filtering by status: Disponível");
       } else if (data.status_filter === "sob_encomenda") {
         query = query.eq("status", "Sob encomenda");
+        console.log("Filtering by status: Sob encomenda");
       }
       // If "ambos" or undefined, don't filter by status
     }
@@ -117,43 +228,55 @@ export function ProductGridBlockV2({ data, className = "", preview = false }: Pr
     switch (data.sort_order) {
       case "preco_asc":
         query = query.order("price", { ascending: true, nullsFirst: false });
+        console.log("Sorting by price ascending");
         break;
       case "preco_desc":
         query = query.order("price", { ascending: false, nullsFirst: false });
+        console.log("Sorting by price descending");
         break;
       case "nome_az":
         query = query.order("title", { ascending: true });
+        console.log("Sorting by title ascending");
         break;
       case "antigos":
         query = query.order("created_at", { ascending: true });
+        console.log("Sorting by created_at ascending");
         break;
       case "recentes":
       default:
         query = query.order("created_at", { ascending: false });
+        console.log("Sorting by created_at descending");
         break;
     }
 
     query = query.limit(data.limit || 12);
 
-    const { data: productsData, error } = await query;
-    
-    if (error) {
-      console.error("Error loading products:", error);
+    try {
+      const { data: productsData, error, count } = await query;
+      
+      if (error) {
+        console.error("Error loading products:", error);
+        setLoading(false);
+        return;
+      }
+
+      console.log("Products loaded:", productsData?.length || 0);
+      console.log("First few products:", productsData?.slice(0, 3));
+
+      // If manual, preserve order
+      if (data.source_type === "manual" && data.selected_product_ids?.length) {
+        const ordered = data.selected_product_ids
+          .map(id => productsData?.find(p => p.id === id))
+          .filter(Boolean);
+        setProducts(ordered as any[]);
+      } else {
+        setProducts(productsData || []);
+      }
+    } catch (error) {
+      console.error("Error in query execution:", error);
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // If manual, preserve order
-    if (data.source_type === "manual" && data.selected_product_ids?.length) {
-      const ordered = data.selected_product_ids
-        .map(id => productsData?.find(p => p.id === id))
-        .filter(Boolean);
-      setProducts(ordered as any[]);
-    } else {
-      setProducts(productsData || []);
-    }
-
-    setLoading(false);
   };
 
   // Render functions for different layouts
