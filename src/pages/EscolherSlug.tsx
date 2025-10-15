@@ -113,7 +113,7 @@ export default function EscolherSlug() {
 
       toast({
         title: "Nome de usuário definido!",
-        description: `Seu link público: cardapli.com/@${slug}`,
+        description: `Seu link público: cardapli.com/u/${slug}`,
       });
 
       // Check if we came from the profile page
@@ -236,7 +236,7 @@ export default function EscolherSlug() {
               <div className="bg-muted/50 rounded-lg p-3 text-center">
                 <p className="text-sm text-muted-foreground">Seu link será:</p>
                 <p className="font-medium text-foreground mt-1">
-                  cardapli.com/@{slug}
+                  cardapli.com/u/{slug}
                 </p>
               </div>
             )}

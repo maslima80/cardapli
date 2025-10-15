@@ -6,18 +6,23 @@ import { SectionNavigation } from "@/components/catalog/SectionNavigation";
 import { getEffectiveTheme, generateThemeVariables } from "@/lib/theme-utils";
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
+import { useMetaTags } from "@/hooks/useMetaTags";
+import { publicProfileUrl, publicCatalogFullUrl } from "@/lib/urls";
 
 const PublicCatalogPage = () => {
-  const { slug, catalog_slug } = useParams();
+  const { userSlug, catalogSlug } = useParams();
   const [loading, setLoading] = useState(true);
   const [catalog, setCatalog] = useState<any>(null);
   const [blocks, setBlocks] = useState<any[]>([]);
   const [profile, setProfile] = useState<any>(null);
   const [unavailable, setUnavailable] = useState(false);
 
+  // Debug logging to verify route matching
+  console.log('PublicCatalogPage params:', { userSlug, catalogSlug });
+
   useEffect(() => {
     loadCatalog();
-  }, [slug, catalog_slug]);
+  }, [userSlug, catalogSlug]);
 
   const loadCatalog = async () => {
     try {
@@ -25,28 +30,34 @@ const PublicCatalogPage = () => {
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("*")
-        .eq("slug", slug)
+        .eq("slug", userSlug)
         .single();
 
       if (profileError || !profileData) {
+        console.error('Profile not found:', { userSlug, profileError });
         setUnavailable(true);
         setLoading(false);
         return;
       }
+
+      console.log('Profile found:', profileData);
 
       // Get catalog by user_id and catalog slug
       const { data: catalogData, error: catalogError } = await supabase
         .from("catalogs")
         .select("*")
         .eq("user_id", profileData.id)
-        .eq("slug", catalog_slug)
+        .eq("slug", catalogSlug)
         .single();
 
       if (catalogError || !catalogData) {
+        console.error('Catalog not found:', { catalogSlug, catalogError });
         setUnavailable(true);
         setLoading(false);
         return;
       }
+
+      console.log('Catalog found:', catalogData);
 
       // Check if catalog is accessible
       // Status must be 'publicado' or old 'public'/'unlisted'
@@ -90,12 +101,21 @@ const PublicCatalogPage = () => {
     }
   };
 
-  // Set page title
-  useEffect(() => {
-    if (catalog?.title) {
-      document.title = `${catalog.title} | Cardapli`;
-    }
-  }, [catalog]);
+  // Set meta tags for SEO and social sharing
+  const catalogUrl = catalog && profile 
+    ? publicCatalogFullUrl(profile.slug, catalog.slug)
+    : undefined;
+
+  const coverImageUrl = catalog?.cover?.url || catalog?.cover?.image_url;
+  const metaDescription = catalog?.description || profile?.slogan || `Catálogo de ${profile?.business_name || 'produtos'}`;
+
+  useMetaTags({
+    title: catalog?.title ? `${catalog.title} | Cardapli` : "Cardapli",
+    description: metaDescription,
+    image: coverImageUrl,
+    url: catalogUrl,
+    type: "website",
+  });
 
   if (loading) {
     return (
@@ -124,7 +144,7 @@ const PublicCatalogPage = () => {
           
           {profile?.slug && (
             <Button asChild>
-              <Link to={`/@${profile.slug}`}>
+              <Link to={publicProfileUrl(profile.slug)}>
                 <Home className="w-4 h-4 mr-2" />
                 Visitar perfil
               </Link>

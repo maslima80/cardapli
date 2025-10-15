@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Copy, Check } from "lucide-react";
 import { toast } from "sonner";
+import { publicCatalogUrl } from "@/lib/urls";
 
 interface PublishModalProps {
   open: boolean;
@@ -31,9 +32,9 @@ export const PublishModal = ({
   const [showInProfile, setShowInProfile] = useState(false); // Default to not on profile
   const [copied, setCopied] = useState(false);
 
-  // URL format: /@user-slug/catalog-slug
+  // URL format: /u/user-slug/catalog-slug
   const publicUrl = profileSlug 
-    ? `${window.location.origin}/@${profileSlug}/${catalogSlug}`
+    ? `${window.location.origin}${publicCatalogUrl(profileSlug, catalogSlug)}`
     : `${window.location.origin}/c/${catalogSlug}`;
 
   const handleCopy = () => {

@@ -9,13 +9,14 @@ import { CreateCatalogDialog } from "@/components/catalog/CreateCatalogDialog";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { publicCatalogUrl } from "@/lib/urls";
 
 interface Catalog {
   id: string;
   title: string;
   description: string | null;
   slug: string;
-  status: "draft" | "public" | "unlisted";
+  status: "draft" | "public" | "unlisted" | "rascunho" | "publicado";
   updated_at: string;
   cover: any;
 }
@@ -126,8 +127,23 @@ const Catalogos = () => {
     }
   };
 
-  const handleCopyLink = (catalog: Catalog) => {
-    const url = `${window.location.origin}/@/${catalog.slug}`;
+  const handleCopyLink = async (catalog: Catalog) => {
+    // Get user profile to build correct URL
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("slug")
+      .eq("id", user.id)
+      .single();
+    
+    if (!profile?.slug) {
+      toast.error("Configure seu nome de usuário primeiro");
+      return;
+    }
+    
+    const url = `${window.location.origin}${publicCatalogUrl(profile.slug, catalog.slug)}`;
     navigator.clipboard.writeText(url);
     toast.success("Link copiado");
   };
@@ -264,11 +280,22 @@ const Catalogos = () => {
                       <Edit className="w-3 h-3 mr-1" />
                       Editar
                     </Button>
-                    {(catalog.status === "public" || catalog.status === "unlisted") && (
+                    {(catalog.status === "public" || catalog.status === "unlisted" || catalog.status === "publicado") && (
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => window.open(`/@/${catalog.slug}`, "_blank")}
+                        onClick={async () => {
+                          const { data: { user } } = await supabase.auth.getUser();
+                          if (!user) return;
+                          const { data: profile } = await supabase
+                            .from("profiles")
+                            .select("slug")
+                            .eq("id", user.id)
+                            .single();
+                          if (profile?.slug) {
+                            window.open(publicCatalogUrl(profile.slug, catalog.slug), "_blank");
+                          }
+                        }}
                       >
                         <ExternalLink className="w-3 h-3" />
                       </Button>

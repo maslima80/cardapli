@@ -322,7 +322,7 @@ export default function Perfil() {
                 <div className="flex items-center gap-2">
                   <div className="bg-muted/50 rounded-lg p-3 flex-1">
                     <div className="flex items-center gap-1">
-                      <span className="text-muted-foreground">cardapli.com/@</span>
+                      <span className="text-muted-foreground">cardapli.com/u/</span>
                       <span className="font-medium">{profile.slug || '—'}</span>
                     </div>
                   </div>
