@@ -1,7 +1,7 @@
 import { CoverBlock } from "./blocks/CoverBlock";
 import { TextBlock } from "./blocks/TextBlock";
 import { ImageBlock } from "./blocks/ImageBlock";
-import { ProductGridBlock } from "./blocks/ProductGridBlockV2";
+import { ProductGridBlockV2 } from "./blocks/ProductGridBlockV2";
 import { AboutBlock } from "./blocks/AboutBlock";
 import { AboutBusinessBlock } from "./blocks/AboutBusinessBlock";
 import { ContactBlock } from "./blocks/ContactBlock";
@@ -39,7 +39,7 @@ export const BlockRenderer = ({ block, profile, userId }: BlockRendererProps) =>
       return <VideoBlock data={block.data} />;
     
     case "product_grid":
-      return <ProductGridBlock data={block.data} userId={userId} />;
+      return <ProductGridBlockV2 data={block.data} userId={userId} />;
     
     case "about":
       return <AboutBlock data={block.data} profileAbout={profile?.about} />;

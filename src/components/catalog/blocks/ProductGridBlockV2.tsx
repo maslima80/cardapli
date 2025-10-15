@@ -1,37 +1,19 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Package } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface ProductGridBlockProps {
-  data: {
-    title?: string;
-    // Source configuration
-    source_type?: "manual" | "category" | "tag" | "combined";
-    selected_product_ids?: string[];
-    selected_categories?: string[];
-    selected_tags?: string[];
-    
-    // Advanced filters
-    combine_logic?: "and" | "or";
-    variation_filter?: string;
-    status_filter?: "disponivel" | "sob_encomenda" | "ambos";
-    sort_order?: "recentes" | "antigos" | "nome_az" | "preco_asc" | "preco_desc";
-    
-    // Display options
-    layout?: "grid" | "list" | "carousel";
-    show_price?: boolean;
-    show_tags?: boolean;
-    show_button?: boolean;
-    limit?: number;
-  };
-  userId?: string;
-  profile?: any;
+  data: any;
+  className?: string;
+  preview?: boolean;
 }
 
-export const ProductGridBlock = ({ data, userId }: ProductGridBlockProps) => {
+export function ProductGridBlockV2({ data, className = "", preview = false }: ProductGridBlockProps) {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -40,69 +22,85 @@ export const ProductGridBlock = ({ data, userId }: ProductGridBlockProps) => {
   }, [data]);
 
   const loadProducts = async () => {
-    if (!userId) return;
+    setLoading(true);
+
+    if (!data) {
+      setLoading(false);
+      return;
+    }
+
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
     let query = supabase
       .from("products")
       .select("*")
-      .eq("user_id", userId);
+      .eq("user_id", user.id);
 
-    // Filter by source type
+    // Handle different source types
     if (data.source_type === "manual" && data.selected_product_ids?.length) {
       query = query.in("id", data.selected_product_ids);
-    } 
+    }
     else if (data.source_type === "combined") {
-      // Combined filtering with categories and tags
       if (data.selected_categories?.length && data.selected_tags?.length) {
+        // Both categories and tags selected
         if (data.combine_logic === "and") {
-          // AND logic: must match both categories AND tags
+          // "AND" logic - must match both categories AND tags
           query = query.overlaps("categories", data.selected_categories);
           
-          // For tags, we need to ensure ALL selected tags are present
-          data.selected_tags.forEach(tag => {
-            query = query.contains("quality_tags", [tag]);
-          });
+          if (data.selected_tags.length > 1) {
+            // For multiple tags with AND logic, each tag must be present
+            data.selected_tags.forEach((tag: string) => {
+              query = query.contains("quality_tags", [tag]);
+            });
+          } else {
+            // For single tag, simple contains is enough
+            query = query.contains("quality_tags", data.selected_tags);
+          }
         } else {
-          // OR logic: match either categories OR tags
-          query = query.or(`categories.overlaps.{${data.selected_categories.join(',')}},quality_tags.overlaps.{${data.selected_tags.join(',')}}`);
+          // "OR" logic - match either categories OR tags
+          const categoryIds = data.selected_categories.map((c: string) => c);
+          const tagIds = data.selected_tags.map((t: string) => t);
+          
+          // Use or() for OR logic between categories and tags
+          query = query.or(`categories.ov.{${categoryIds.join(',')}},quality_tags.ov.{${tagIds.join(',')}}`);
         }
       }
       else if (data.selected_categories?.length) {
         // Only categories selected
-        query = query.overlaps("categories", data.selected_categories);
+        query = query.contains("categories", data.selected_categories);
       }
       else if (data.selected_tags?.length) {
         // Only tags selected
         if (data.combine_logic === "and" && data.selected_tags.length > 1) {
           // For "and" logic with multiple tags
-          data.selected_tags.forEach(tag => {
+          data.selected_tags.forEach((tag: string) => {
             query = query.contains("quality_tags", [tag]);
           });
         } else {
           // For "or" logic or single tag
-          query = query.overlaps("quality_tags", data.selected_tags);
+          query = query.contains("quality_tags", data.selected_tags);
         }
       }
     }
     else if (data.source_type === "category" && data.selected_categories?.length) {
-      query = query.overlaps("categories", data.selected_categories);
+      query = query.contains("categories", data.selected_categories);
     } 
     else if (data.source_type === "tag" && data.selected_tags?.length) {
       // Handle tag filtering based on match type
       if (data.combine_logic === "and" && data.selected_tags.length > 1) {
         // For "all" match type, we need to check that each tag is present
-        data.selected_tags.forEach(tag => {
+        data.selected_tags.forEach((tag: string) => {
           query = query.contains("quality_tags", [tag]);
         });
       } else {
         // For "any" match type (default), any of the selected tags will match
-        query = query.overlaps("quality_tags", data.selected_tags);
+        query = query.contains("quality_tags", data.selected_tags);
       }
-    }
-
-    // Filter by variation if specified
-    if (data.variation_filter) {
-      query = query.contains("variations", [{ name: data.variation_filter }]);
     }
 
     // Filter by status
@@ -173,53 +171,59 @@ export const ProductGridBlock = ({ data, userId }: ProductGridBlockProps) => {
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <span className="text-muted-foreground text-sm">Sem imagem</span>
+                  <Package className="h-12 w-12 text-muted-foreground opacity-50" />
                 </div>
               )}
-              {product.status === "Sob encomenda" && (
-                <Badge className="absolute top-2 right-2 bg-primary text-white">
-                  Sob encomenda
-                </Badge>
-              )}
             </div>
-            <div className="p-4 flex-1 flex flex-col">
-              <h3 className="font-semibold line-clamp-2 mb-2">{product.title}</h3>
+            <CardContent className="p-4 flex-1">
+              <h3 className="font-medium text-base line-clamp-2">{product.title}</h3>
               
-              {data.show_price && !product.price_hidden && (
-                <p className="text-primary font-bold">
-                  {product.price_on_request
-                    ? product.price_on_request_label || "Sob consulta"
-                    : `R$ ${product.price?.toFixed(2)}`}
-                </p>
-              )}
-              
-              {data.show_tags && product.quality_tags && product.quality_tags.length > 0 && (
+              {data.show_tags && product.quality_tags?.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-2">
-                  {product.quality_tags.slice(0, 2).map((tag, i) => (
-                    <Badge key={i} variant="secondary" className="text-xs">
+                  {product.quality_tags.slice(0, 3).map((tag: string) => (
+                    <Badge key={tag} variant="outline" className="text-xs">
                       {tag}
                     </Badge>
                   ))}
-                  {product.quality_tags.length > 2 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{product.quality_tags.length - 2}
-                    </Badge>
+                </div>
+              )}
+            </CardContent>
+            <CardFooter className="p-4 pt-0 flex items-center justify-between">
+              {data.show_price !== false && (
+                <div className="text-sm">
+                  {product.price_on_request ? (
+                    <span className="text-muted-foreground">
+                      {product.price_on_request_label || "Sob consulta"}
+                    </span>
+                  ) : product.price_hidden ? (
+                    <span className="text-muted-foreground">Preço sob consulta</span>
+                  ) : product.price ? (
+                    <span className="font-medium">
+                      R$ {product.price.toFixed(2)}
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">Sem preço</span>
                   )}
                 </div>
               )}
               
               {data.show_button !== false && (
                 <Button 
-                  variant="outline" 
                   size="sm" 
-                  className="mt-auto pt-2 w-full gap-1.5 mt-3"
-                  onClick={() => window.open(`/p/${product.id}`, "_blank")}
+                  variant="outline"
+                  asChild={!preview}
+                  className="ml-auto"
                 >
-                  Ver produto
-                  <ExternalLink className="w-3.5 h-3.5" />
+                  {preview ? (
+                    <span>Ver produto</span>
+                  ) : (
+                    <Link to={`/p/${product.slug || product.id}`}>
+                      Ver produto
+                    </Link>
+                  )}
                 </Button>
               )}
-            </div>
+            </CardFooter>
           </Card>
         </div>
       ))}
@@ -229,58 +233,69 @@ export const ProductGridBlock = ({ data, userId }: ProductGridBlockProps) => {
   const renderListLayout = () => (
     <div className="space-y-4">
       {products.map((product) => (
-        <Card key={product.id} className="overflow-hidden hover:shadow-md transition-shadow">
+        <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
           <div className="flex flex-col sm:flex-row">
-            <div className="w-full sm:w-48 h-48 bg-muted relative">
+            <div className="w-full sm:w-48 h-48 bg-muted relative overflow-hidden">
               {product.photos?.[0]?.url ? (
                 <img
                   src={product.photos[0].url}
                   alt={product.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <span className="text-muted-foreground text-sm">Sem imagem</span>
+                  <Package className="h-12 w-12 text-muted-foreground opacity-50" />
                 </div>
               )}
-              {product.status === "Sob encomenda" && (
-                <Badge className="absolute top-2 right-2 bg-primary text-white">
-                  Sob encomenda
-                </Badge>
-              )}
             </div>
-            <div className="p-4 flex-1 flex flex-col">
-              <h3 className="font-semibold mb-2">{product.title}</h3>
+            <div className="flex-1 p-4 flex flex-col">
+              <h3 className="font-medium text-lg">{product.title}</h3>
               
-              {data.show_price && !product.price_hidden && (
-                <p className="text-primary font-bold">
-                  {product.price_on_request
-                    ? product.price_on_request_label || "Sob consulta"
-                    : `R$ ${product.price?.toFixed(2)}`}
-                </p>
-              )}
-              
-              {data.show_tags && product.quality_tags && product.quality_tags.length > 0 && (
+              {data.show_tags && product.quality_tags?.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-2">
-                  {product.quality_tags.map((tag, i) => (
-                    <Badge key={i} variant="secondary" className="text-xs">
+                  {product.quality_tags.slice(0, 5).map((tag: string) => (
+                    <Badge key={tag} variant="outline" className="text-xs">
                       {tag}
                     </Badge>
                   ))}
                 </div>
               )}
               
-              {data.show_button !== false && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="mt-auto w-full sm:w-auto gap-1.5 mt-3"
-                  onClick={() => window.open(`/p/${product.id}`, "_blank")}
-                >
-                  Ver produto
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </Button>
-              )}
+              <div className="mt-auto flex items-center justify-between pt-4">
+                {data.show_price !== false && (
+                  <div>
+                    {product.price_on_request ? (
+                      <span className="text-muted-foreground">
+                        {product.price_on_request_label || "Sob consulta"}
+                      </span>
+                    ) : product.price_hidden ? (
+                      <span className="text-muted-foreground">Preço sob consulta</span>
+                    ) : product.price ? (
+                      <span className="font-medium text-lg">
+                        R$ {product.price.toFixed(2)}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">Sem preço</span>
+                    )}
+                  </div>
+                )}
+                
+                {data.show_button !== false && (
+                  <Button 
+                    variant="outline"
+                    asChild={!preview}
+                    className="ml-auto"
+                  >
+                    {preview ? (
+                      <span>Ver produto</span>
+                    ) : (
+                      <Link to={`/p/${product.slug || product.id}`}>
+                        Ver produto
+                      </Link>
+                    )}
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </Card>
@@ -288,55 +303,76 @@ export const ProductGridBlock = ({ data, userId }: ProductGridBlockProps) => {
     </div>
   );
 
-  if (loading) {
-    return (
-      <div className="py-8">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="aspect-square bg-muted animate-pulse rounded-xl" />
+  // Loading skeleton
+  const renderSkeleton = () => {
+    const layout = data?.layout || "grid";
+    
+    if (layout === "list") {
+      return (
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="flex flex-col sm:flex-row border rounded-lg overflow-hidden">
+              <Skeleton className="w-full sm:w-48 h-48" />
+              <div className="flex-1 p-4">
+                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-1/2 mb-4" />
+                <div className="flex justify-between items-center mt-auto">
+                  <Skeleton className="h-6 w-24" />
+                  <Skeleton className="h-10 w-28" />
+                </div>
+              </div>
+            </div>
           ))}
         </div>
-      </div>
-    );
-  }
-
-  if (products.length === 0) {
+      );
+    }
+    
     return (
-      <div className="py-12 text-center">
-        <div className="container max-w-6xl mx-auto px-4">
-          {data.title && (
-            <h2 id={`title-${data.title.toLowerCase().replace(/\s+/g, '-')}`} className="text-3xl font-bold text-center mb-8">
-              {data.title}
-            </h2>
-          )}
-          <div className="py-8 text-muted-foreground border border-dashed rounded-xl p-8">
-            <p className="text-lg mb-2">Nenhum produto encontrado</p>
-            <p className="text-sm max-w-md mx-auto">
-              {data.source_type === "manual" 
-                ? "Selecione produtos manualmente nas configurações do bloco."
-                : data.source_type === "category" 
-                  ? "Verifique se existem produtos nas categorias selecionadas."
-                  : data.source_type === "tag"
-                    ? "Verifique se existem produtos com as tags selecionadas."
-                    : "Verifique os filtros aplicados e tente novamente."}
-            </p>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        {[...Array(8)].map((_, i) => (
+          <div key={i} className="border rounded-lg overflow-hidden">
+            <Skeleton className="aspect-square" />
+            <div className="p-4">
+              <Skeleton className="h-5 w-full mb-2" />
+              <Skeleton className="h-4 w-2/3" />
+              <div className="flex justify-between items-center mt-4">
+                <Skeleton className="h-5 w-16" />
+                <Skeleton className="h-9 w-24" />
+              </div>
+            </div>
           </div>
-        </div>
+        ))}
       </div>
     );
-  }
+  };
 
-  return (
-    <div className="py-12">
-      <div className="container max-w-6xl mx-auto px-4">
-        {data.title && (
-          <h2 id={`title-${data.title.toLowerCase().replace(/\s+/g, '-')}`} className="text-3xl font-bold text-center mb-8">
-            {data.title}
-          </h2>
-        )}
-        
-        {data.layout === "list" ? renderListLayout() : renderGridLayout()}
-      </div>
+  // Empty state
+  const renderEmpty = () => (
+    <div className="text-center py-12 border rounded-lg">
+      <Package className="mx-auto h-12 w-12 text-muted-foreground opacity-50 mb-4" />
+      <h3 className="text-lg font-medium mb-2">Nenhum produto encontrado</h3>
+      <p className="text-muted-foreground max-w-md mx-auto">
+        Não há produtos disponíveis com os filtros selecionados.
+      </p>
     </div>
   );
-};
+
+  // Main render
+  return (
+    <div className={className}>
+      {data?.title && (
+        <h2 className="text-2xl font-bold mb-6">{data.title}</h2>
+      )}
+      
+      {loading ? (
+        renderSkeleton()
+      ) : products.length === 0 ? (
+        renderEmpty()
+      ) : data?.layout === "list" ? (
+        renderListLayout()
+      ) : (
+        renderGridLayout()
+      )}
+    </div>
+  );
+}
