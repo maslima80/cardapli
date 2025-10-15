@@ -113,6 +113,12 @@ export const PublishModal = ({
                   link_ativo: linkActive,
                   // no_perfil: deprecated - visibility controlled by profile_blocks 'catalogs' block
                 });
+                
+                // Show warning if link is being deactivated
+                if (!linkActive) {
+                  toast.info("Link desativado. O catálogo não aparecerá mais na sua página pública.");
+                }
+                
                 onOpenChange(false);
               }}
               className="gap-2"
