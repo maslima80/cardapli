@@ -25,6 +25,17 @@ export function CategoryGridBlockSettings({ data, onUpdate }: CategoryGridBlockS
   const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Sync state with data prop when it changes (when dialog reopens)
+  useEffect(() => {
+    setTitle(data?.title || "Categorias");
+    setDescription(data?.description || "");
+    setColumns(data?.columns || 3);
+    setShowCount(data?.show_count !== false);
+    setShowButton(data?.show_button !== false);
+    setButtonText(data?.button_text || "Ver produtos");
+    setSelectedCategories(data?.selected_categories || []);
+  }, [data]);
+
   // Load all unique categories from products
   useEffect(() => {
     async function loadCategories() {
@@ -67,10 +78,9 @@ export function CategoryGridBlockSettings({ data, onUpdate }: CategoryGridBlockS
     loadCategories();
   }, []);
 
-  // Update parent component when settings change
-  useEffect(() => {
+  // Helper function to update parent with current state
+  const updateParent = (overrides = {}) => {
     const updatedData = {
-      ...data,
       title,
       description,
       columns,
@@ -78,29 +88,33 @@ export function CategoryGridBlockSettings({ data, onUpdate }: CategoryGridBlockS
       show_button: showButton,
       button_text: buttonText,
       selected_categories: selectedCategories,
+      ...overrides,
     };
     onUpdate(updatedData);
-  }, [title, description, columns, showCount, showButton, buttonText, selectedCategories]);
+  };
 
   // Toggle category selection
   const toggleCategory = (category: string) => {
     setSelectedCategories(prev => {
-      if (prev.includes(category)) {
-        return prev.filter(c => c !== category);
-      } else {
-        return [...prev, category];
-      }
+      const newCategories = prev.includes(category)
+        ? prev.filter(c => c !== category)
+        : [...prev, category];
+      updateParent({ selected_categories: newCategories });
+      return newCategories;
     });
   };
 
   // Select all categories
   const selectAllCategories = () => {
-    setSelectedCategories([...categories]);
+    const allCategories = [...categories];
+    setSelectedCategories(allCategories);
+    updateParent({ selected_categories: allCategories });
   };
 
   // Clear all selected categories
   const clearSelectedCategories = () => {
     setSelectedCategories([]);
+    updateParent({ selected_categories: [] });
   };
 
   return (
@@ -110,7 +124,11 @@ export function CategoryGridBlockSettings({ data, onUpdate }: CategoryGridBlockS
         <Input
           id="title"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => {
+            const newTitle = e.target.value;
+            setTitle(newTitle);
+            updateParent({ title: newTitle });
+          }}
           placeholder="Categorias"
         />
       </div>
@@ -120,7 +138,11 @@ export function CategoryGridBlockSettings({ data, onUpdate }: CategoryGridBlockS
         <Textarea
           id="description"
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={(e) => {
+            const newDesc = e.target.value;
+            setDescription(newDesc);
+            updateParent({ description: newDesc });
+          }}
           placeholder="Explore nossos produtos por categoria"
           rows={3}
         />
@@ -136,7 +158,11 @@ export function CategoryGridBlockSettings({ data, onUpdate }: CategoryGridBlockS
           max={4}
           step={1}
           value={[columns]}
-          onValueChange={(value) => setColumns(value[0])}
+          onValueChange={(value) => {
+            const newColumns = value[0];
+            setColumns(newColumns);
+            updateParent({ columns: newColumns });
+          }}
           className="w-full"
         />
         <div className="flex justify-between text-xs text-muted-foreground">
@@ -151,7 +177,11 @@ export function CategoryGridBlockSettings({ data, onUpdate }: CategoryGridBlockS
         <Checkbox
           id="show-count"
           checked={showCount}
-          onCheckedChange={(checked) => setShowCount(checked === true)}
+          onCheckedChange={(checked) => {
+            const newShowCount = checked === true;
+            setShowCount(newShowCount);
+            updateParent({ show_count: newShowCount });
+          }}
         />
         <Label htmlFor="show-count">Mostrar contagem de produtos</Label>
       </div>
@@ -160,7 +190,11 @@ export function CategoryGridBlockSettings({ data, onUpdate }: CategoryGridBlockS
         <Checkbox
           id="show-button"
           checked={showButton}
-          onCheckedChange={(checked) => setShowButton(checked === true)}
+          onCheckedChange={(checked) => {
+            const newShowButton = checked === true;
+            setShowButton(newShowButton);
+            updateParent({ show_button: newShowButton });
+          }}
         />
         <Label htmlFor="show-button">Mostrar botão</Label>
       </div>
@@ -171,7 +205,11 @@ export function CategoryGridBlockSettings({ data, onUpdate }: CategoryGridBlockS
           <Input
             id="button-text"
             value={buttonText}
-            onChange={(e) => setButtonText(e.target.value)}
+            onChange={(e) => {
+              const newButtonText = e.target.value;
+              setButtonText(newButtonText);
+              updateParent({ button_text: newButtonText });
+            }}
             placeholder="Ver produtos"
           />
         </div>

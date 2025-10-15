@@ -27,6 +27,18 @@ export function TagGridBlockSettings({ data, onUpdate }: TagGridBlockSettingsPro
   const [tags, setTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Sync state with data prop when it changes (when dialog reopens)
+  useEffect(() => {
+    setTitle(data?.title || "Tags");
+    setDescription(data?.description || "");
+    setColumns(data?.columns || 3);
+    setShowCount(data?.show_count !== false);
+    setShowButton(data?.show_button !== false);
+    setButtonText(data?.button_text || "Ver produtos");
+    setStyle(data?.style || "card");
+    setSelectedTags(data?.selected_tags || []);
+  }, [data]);
+
   // Load all unique tags from products
   useEffect(() => {
     async function loadTags() {
@@ -69,10 +81,9 @@ export function TagGridBlockSettings({ data, onUpdate }: TagGridBlockSettingsPro
     loadTags();
   }, []);
 
-  // Update parent component when settings change
-  useEffect(() => {
+  // Helper function to update parent with current state
+  const updateParent = (overrides = {}) => {
     const updatedData = {
-      ...data,
       title,
       description,
       columns,
@@ -81,29 +92,33 @@ export function TagGridBlockSettings({ data, onUpdate }: TagGridBlockSettingsPro
       button_text: buttonText,
       style,
       selected_tags: selectedTags,
+      ...overrides,
     };
     onUpdate(updatedData);
-  }, [title, description, columns, showCount, showButton, buttonText, style, selectedTags]);
+  };
 
   // Toggle tag selection
   const toggleTag = (tag: string) => {
     setSelectedTags(prev => {
-      if (prev.includes(tag)) {
-        return prev.filter(t => t !== tag);
-      } else {
-        return [...prev, tag];
-      }
+      const newTags = prev.includes(tag)
+        ? prev.filter(t => t !== tag)
+        : [...prev, tag];
+      updateParent({ selected_tags: newTags });
+      return newTags;
     });
   };
 
   // Select all tags
   const selectAllTags = () => {
-    setSelectedTags([...tags]);
+    const allTags = [...tags];
+    setSelectedTags(allTags);
+    updateParent({ selected_tags: allTags });
   };
 
   // Clear all selected tags
   const clearSelectedTags = () => {
     setSelectedTags([]);
+    updateParent({ selected_tags: [] });
   };
 
   return (
@@ -113,7 +128,11 @@ export function TagGridBlockSettings({ data, onUpdate }: TagGridBlockSettingsPro
         <Input
           id="title"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => {
+            const newTitle = e.target.value;
+            setTitle(newTitle);
+            updateParent({ title: newTitle });
+          }}
           placeholder="Tags"
         />
       </div>
@@ -123,7 +142,11 @@ export function TagGridBlockSettings({ data, onUpdate }: TagGridBlockSettingsPro
         <Textarea
           id="description"
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={(e) => {
+            const newDesc = e.target.value;
+            setDescription(newDesc);
+            updateParent({ description: newDesc });
+          }}
           placeholder="Explore nossos produtos por tag"
           rows={3}
         />
@@ -133,7 +156,10 @@ export function TagGridBlockSettings({ data, onUpdate }: TagGridBlockSettingsPro
         <Label>Estilo</Label>
         <RadioGroup
           value={style}
-          onValueChange={setStyle}
+          onValueChange={(value) => {
+            setStyle(value);
+            updateParent({ style: value });
+          }}
           className="flex flex-col space-y-1"
         >
           <div className="flex items-center space-x-2">
@@ -158,7 +184,11 @@ export function TagGridBlockSettings({ data, onUpdate }: TagGridBlockSettingsPro
             max={4}
             step={1}
             value={[columns]}
-            onValueChange={(value) => setColumns(value[0])}
+            onValueChange={(value) => {
+              const newColumns = value[0];
+              setColumns(newColumns);
+              updateParent({ columns: newColumns });
+            }}
             className="w-full"
           />
           <div className="flex justify-between text-xs text-muted-foreground">
@@ -174,7 +204,11 @@ export function TagGridBlockSettings({ data, onUpdate }: TagGridBlockSettingsPro
         <Checkbox
           id="show-count"
           checked={showCount}
-          onCheckedChange={(checked) => setShowCount(checked === true)}
+          onCheckedChange={(checked) => {
+            const newShowCount = checked === true;
+            setShowCount(newShowCount);
+            updateParent({ show_count: newShowCount });
+          }}
         />
         <Label htmlFor="show-count">Mostrar contagem de produtos</Label>
       </div>
@@ -184,7 +218,11 @@ export function TagGridBlockSettings({ data, onUpdate }: TagGridBlockSettingsPro
           <Checkbox
             id="show-button"
             checked={showButton}
-            onCheckedChange={(checked) => setShowButton(checked === true)}
+            onCheckedChange={(checked) => {
+              const newShowButton = checked === true;
+              setShowButton(newShowButton);
+              updateParent({ show_button: newShowButton });
+            }}
           />
           <Label htmlFor="show-button">Mostrar botão</Label>
         </div>
@@ -196,7 +234,11 @@ export function TagGridBlockSettings({ data, onUpdate }: TagGridBlockSettingsPro
           <Input
             id="button-text"
             value={buttonText}
-            onChange={(e) => setButtonText(e.target.value)}
+            onChange={(e) => {
+              const newButtonText = e.target.value;
+              setButtonText(newButtonText);
+              updateParent({ button_text: newButtonText });
+            }}
             placeholder="Ver produtos"
           />
         </div>
