@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, Eye, Settings, FileDown } from "lucide-react";
+import { ArrowLeft, Plus, Eye, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { BlockCard } from "@/components/catalog/BlockCard";
 import { AddBlockDrawer } from "@/components/catalog/AddBlockDrawer";
@@ -10,7 +10,6 @@ import { BlockSettingsDrawer } from "@/components/catalog/BlockSettingsDrawer";
 import { BlockRenderer } from "@/components/catalog/BlockRenderer";
 import { PublishModal } from "@/components/catalog/PublishModal";
 import { CatalogSettingsDialog } from "@/components/catalog/CatalogSettingsDialog";
-import { GeneratePdfModal } from "@/components/catalog/GeneratePdfModal";
 import { getEffectiveTheme, generateThemeVariables } from "@/lib/theme-utils";
 import {
   DndContext,
@@ -39,7 +38,6 @@ const CatalogoEditor = () => {
   const [previewMode, setPreviewMode] = useState(false);
   const [publishModalOpen, setPublishModalOpen] = useState(false);
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
-  const [pdfModalOpen, setPdfModalOpen] = useState(false);
   const [profile, setProfile] = useState<any>(null);
 
   const sensors = useSensors(
@@ -335,17 +333,6 @@ const CatalogoEditor = () => {
                 {previewMode ? "Editar" : "Preview"}
               </Button>
               <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPdfModalOpen(true)}
-                className="gap-2"
-                disabled={!canPublish}
-                title="Gerar PDF"
-              >
-                <FileDown className="w-4 h-4" />
-                PDF
-              </Button>
-              <Button
                 size="sm"
                 onClick={() => setPublishModalOpen(true)}
                 disabled={!canPublish}
@@ -477,13 +464,6 @@ const CatalogoEditor = () => {
         profileSlug={profile?.slug}
         currentStatus={catalog?.status}
         onPublish={handlePublish}
-      />
-      
-      <GeneratePdfModal
-        open={pdfModalOpen}
-        onOpenChange={setPdfModalOpen}
-        catalogTitle={catalog?.title || "Meu Catálogo"}
-        businessName={profile?.business_name}
       />
     </div>
   );
