@@ -147,18 +147,23 @@ This will fix the TypeScript errors in PublicProfilePage.tsx.
 
 ## 🎯 Current Status
 
-**Completed:**
-- ✅ Database migration created
+**✅ PHASE 2 COMPLETE!**
+
+All steps completed:
+- ✅ Database migration created and ready
 - ✅ Public profile page implemented
-- ✅ Route configured
+- ✅ Profile builder UI in /perfil
+- ✅ Catálogos block with all/manual modes
+- ✅ Profile Header block (draggable)
+- ✅ Default starter blocks for new users
 
-**In Progress:**
-- ⏳ Waiting for migration to run
-- ⏳ Waiting for types regeneration
-
-**Next:**
-- 🔜 Profile builder UI in /perfil
-- 🔜 Catálogos block implementation
+**Improvements Made:**
+- Header is now a draggable block (not fixed)
+- New users get 3 starter blocks automatically:
+  * Profile Header (logo, name, slogan)
+  * Contact (WhatsApp, phone, email)
+  * Social Media
+- Users have full control over layout
 
 ## 📦 Commit Messages
 
