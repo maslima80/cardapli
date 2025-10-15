@@ -13,7 +13,8 @@ interface Product {
   price: number;
   photos: any[];
   category: string | null;
-  tags?: any;
+  categories?: any; // JSONB
+  quality_tags?: any; // Could be text or array
 }
 
 export default function Compartilhar() {
@@ -54,13 +55,42 @@ export default function Compartilhar() {
 
       setProducts((data || []) as Product[]);
 
-      // Extract unique categories and tags
-      const uniqueCategories = [...new Set(data?.map(p => p.category).filter(Boolean) as string[])];
-      const uniqueTags = [...new Set(data?.flatMap(p => {
-        const productTags = (p as any).tags;
-        if (Array.isArray(productTags)) return productTags;
-        return [];
-      }))];
+      // Extract unique categories - handle both 'category' (text) and 'categories' (jsonb)
+      const allCategories: string[] = [];
+      data?.forEach(p => {
+        // Check 'category' field (text)
+        if (p.category && typeof p.category === 'string' && p.category.trim() !== '') {
+          allCategories.push(p.category);
+        }
+        // Check 'categories' field (jsonb - could be array or object)
+        const cats = (p as any).categories;
+        if (Array.isArray(cats)) {
+          allCategories.push(...cats.filter(c => c && typeof c === 'string'));
+        } else if (cats && typeof cats === 'object') {
+          // If it's an object, try to extract values
+          Object.values(cats).forEach(val => {
+            if (val && typeof val === 'string') allCategories.push(val);
+          });
+        }
+      });
+      const uniqueCategories = [...new Set(allCategories)];
+      
+      // Extract unique tags - handle both text and array
+      const allTags: string[] = [];
+      data?.forEach(p => {
+        const tags = (p as any).quality_tags;
+        if (typeof tags === 'string' && tags.trim() !== '') {
+          // If it's a comma-separated string
+          allTags.push(...tags.split(',').map(t => t.trim()).filter(Boolean));
+        } else if (Array.isArray(tags)) {
+          allTags.push(...tags.filter(t => t && typeof t === 'string'));
+        }
+      });
+      const uniqueTags = [...new Set(allTags)];
+      
+      console.log('Categories found:', uniqueCategories);
+      console.log('Tags found:', uniqueTags);
+      console.log('Sample product:', data?.[0]);
       
       setCategories(uniqueCategories);
       setTags(uniqueTags);
@@ -84,12 +114,31 @@ export default function Compartilhar() {
 
     // Category filter
     if (selectedCategory) {
-      filtered = filtered.filter(p => p.category === selectedCategory);
+      filtered = filtered.filter(p => {
+        // Check 'category' field (text)
+        if (p.category === selectedCategory) return true;
+        // Check 'categories' field (jsonb)
+        const cats = (p as any).categories;
+        if (Array.isArray(cats) && cats.includes(selectedCategory)) return true;
+        if (cats && typeof cats === 'object' && Object.values(cats).includes(selectedCategory)) return true;
+        return false;
+      });
     }
 
     // Tag filter
     if (selectedTag) {
-      filtered = filtered.filter(p => p.tags?.includes(selectedTag));
+      filtered = filtered.filter(p => {
+        const tags = (p as any).quality_tags;
+        // If it's a string, split by comma
+        if (typeof tags === 'string') {
+          return tags.split(',').map(t => t.trim()).includes(selectedTag);
+        }
+        // If it's an array
+        if (Array.isArray(tags)) {
+          return tags.includes(selectedTag);
+        }
+        return false;
+      });
     }
 
     setFilteredProducts(filtered);
