@@ -9,6 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import { ArrowLeft, Check, Upload, Instagram, Facebook, Youtube, Globe } from "lucide-react";
 import { debounce } from "@/lib/utils";
 import { LogoUploader } from "@/components/profile/LogoUploader";
+import { ProfileBuilder } from "@/components/profile/ProfileBuilder";
 
 type Profile = {
   logo_url: string | null;
@@ -57,6 +58,7 @@ export default function Perfil() {
   const [saving, setSaving] = useState(false);
   const [showLocations, setShowLocations] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [userId, setUserId] = useState<string>("");
 
   useEffect(() => {
     fetchProfile();
@@ -69,6 +71,8 @@ export default function Perfil() {
         navigate("/entrar");
         return;
       }
+
+      setUserId(user.id);
 
       const { data, error } = await supabase
         .from("profiles")
@@ -340,6 +344,16 @@ export default function Perfil() {
               </div>
             </div>
           </section>
+
+          {/* Profile Builder */}
+          {profile.slug && userId && (
+            <section className="space-y-6">
+              <ProfileBuilder 
+                userSlug={profile.slug} 
+                userId={userId}
+              />
+            </section>
+          )}
 
           {/* 2. Contato */}
           <section className="space-y-6">

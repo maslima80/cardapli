@@ -382,6 +382,47 @@ export type Database = {
           },
         ]
       }
+      profile_blocks: {
+        Row: {
+          created_at: string
+          data: Json
+          id: string
+          sort: number
+          type: string
+          updated_at: string
+          user_id: string
+          visible: boolean
+        }
+        Insert: {
+          created_at?: string
+          data?: Json
+          id?: string
+          sort?: number
+          type: string
+          updated_at?: string
+          user_id: string
+          visible?: boolean
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          id?: string
+          sort?: number
+          type?: string
+          updated_at?: string
+          user_id?: string
+          visible?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_blocks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           about: string | null
