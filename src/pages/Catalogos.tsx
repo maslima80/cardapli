@@ -4,13 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, ExternalLink, Copy, Files, Trash2, Edit, ArrowLeft, Share2, Eye, Zap } from "lucide-react";
+import { Plus, Search, ExternalLink, Copy, Files, Trash2, Edit, ArrowLeft, Share2, Eye, Zap, UserPlus, UserMinus } from "lucide-react";
 import { CreateCatalogDialog } from "@/components/catalog/CreateCatalogDialog";
 import { PublishSuccessModal } from "@/components/catalog/PublishSuccessModal";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { publicCatalogUrl, whatsappShareCatalog } from "@/lib/urls";
+import { addCatalogToProfile, removeCatalogFromProfile, isCatalogInProfile } from "@/lib/profileBlockHelpers";
 
 interface Catalog {
   id: string;
@@ -33,6 +34,8 @@ const Catalogos = () => {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [selectedCatalog, setSelectedCatalog] = useState<Catalog | null>(null);
   const [userSlug, setUserSlug] = useState<string>("");
+  const [catalogsInProfile, setCatalogsInProfile] = useState<Set<string>>(new Set());
+  const [userId, setUserId] = useState<string>("");
 
   useEffect(() => {
     loadCatalogs();
@@ -56,6 +59,8 @@ const Catalogos = () => {
       navigate("/entrar");
       return;
     }
+
+    setUserId(session.user.id);
 
     // Load user profile slug
     const { data: profileData } = await supabase
@@ -102,7 +107,25 @@ const Catalogos = () => {
         }
       }
     }
+
+    // Load which catalogs are in profile
+    await loadProfileCatalogs(session.user.id);
+    
     setLoading(false);
+  };
+
+  const loadProfileCatalogs = async (uid: string) => {
+    const { data: profileBlock } = await supabase
+      .from("profile_blocks")
+      .select("data")
+      .eq("user_id", uid)
+      .eq("type", "catalogs")
+      .single();
+
+    if (profileBlock) {
+      const catalogIds = (profileBlock.data as any)?.catalog_ids || [];
+      setCatalogsInProfile(new Set(catalogIds));
+    }
   };
 
   const handleDuplicate = async (catalog: Catalog) => {
@@ -160,6 +183,39 @@ const Catalogos = () => {
     const url = `${window.location.origin}${publicCatalogUrl(userSlug, catalog.slug)}`;
     navigator.clipboard.writeText(url);
     toast.success("Link copiado!");
+  };
+
+  const handleToggleProfile = async (catalog: Catalog) => {
+    const isInProfile = catalogsInProfile.has(catalog.id);
+    const isEligible = catalog.status === "publicado" && (catalog as any).link_ativo === true;
+
+    if (!isInProfile) {
+      // Adding to profile
+      if (!isEligible) {
+        // Show guard modal - for now just show toast
+        toast.error("⚠️ Para adicionar ao perfil, o catálogo precisa estar publicado e com link ativo.");
+        return;
+      }
+
+      const success = await addCatalogToProfile(userId, catalog.id);
+      if (success) {
+        setCatalogsInProfile(new Set([...catalogsInProfile, catalog.id]));
+        toast.success("Adicionado à sua página pública. Veja em /perfil → Página Pública.");
+      } else {
+        toast.error("Erro ao adicionar ao perfil");
+      }
+    } else {
+      // Removing from profile
+      const success = await removeCatalogFromProfile(userId, catalog.id);
+      if (success) {
+        const newSet = new Set(catalogsInProfile);
+        newSet.delete(catalog.id);
+        setCatalogsInProfile(newSet);
+        toast.success("Removido do seu perfil");
+      } else {
+        toast.error("Erro ao remover do perfil");
+      }
+    }
   };
 
   const getStatusBadge = (status: Catalog["status"]) => {
@@ -323,6 +379,26 @@ const Catalogos = () => {
                         
                         {isPublished && (
                           <>
+                            {/* Profile Toggle Button */}
+                            <Button
+                              size="sm"
+                              variant={catalogsInProfile.has(catalog.id) ? "default" : "outline"}
+                              onClick={() => handleToggleProfile(catalog)}
+                              className="gap-1.5"
+                            >
+                              {catalogsInProfile.has(catalog.id) ? (
+                                <>
+                                  <UserMinus className="w-3.5 h-3.5" />
+                                  <span className="hidden sm:inline">Remover do perfil</span>
+                                </>
+                              ) : (
+                                <>
+                                  <UserPlus className="w-3.5 h-3.5" />
+                                  <span className="hidden sm:inline">Adicionar ao perfil</span>
+                                </>
+                              )}
+                            </Button>
+
                             <Button
                               size="sm"
                               variant="outline"
