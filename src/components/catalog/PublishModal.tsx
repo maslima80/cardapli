@@ -55,7 +55,7 @@ export const PublishModal = ({
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label>Status do Conteúdo</Label>
+            <Label>Status</Label>
             <select
               className="w-full border rounded-xl p-2"
               value={status}
@@ -78,59 +78,41 @@ export const PublishModal = ({
                       onChange={(e) => setLinkActive(e.target.checked)}
                       className="w-4 h-4"
                     />
-                    <span className="text-sm">{linkActive ? "Ativo" : "Desativado"}</span>
+                    <span className="text-sm font-medium">
+                      {linkActive ? "Ativo ✓" : "Desativado"}
+                    </span>
                   </label>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {linkActive 
-                    ? "Qualquer pessoa com o link pode acessar" 
+                    ? "✓ Qualquer pessoa com o link pode acessar" 
                     : "O link não funcionará até ser ativado"}
                 </p>
               </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label>Mostrar no Perfil</Label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={showInProfile}
-                      onChange={(e) => setShowInProfile(e.target.checked)}
-                      className="w-4 h-4"
-                      disabled={!linkActive}
-                    />
-                    <span className="text-sm">{showInProfile ? "Sim" : "Não"}</span>
-                  </label>
+              {linkActive && (
+                <div className="space-y-2">
+                  <Label>URL para Compartilhar</Label>
+                  <div className="flex gap-2">
+                    <Input value={publicUrl} readOnly className="flex-1" />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handleCopy}
+                    >
+                      {copied ? (
+                        <Check className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <Copy className="w-4 h-4" />
+                      )}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    💡 Dica: Adicione ao seu perfil depois usando o construtor de perfil
+                  </p>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {!linkActive 
-                    ? "Ative o link primeiro para mostrar no perfil" 
-                    : showInProfile
-                    ? "Aparecerá na sua página @" + (profileSlug || "seu-perfil")
-                    : "Não aparecerá no seu perfil público"}
-                </p>
-              </div>
+              )}
             </>
-          )}
-
-          {status === "publicado" && linkActive && (
-            <div className="space-y-2">
-              <Label>URL para Compartilhar</Label>
-              <div className="flex gap-2">
-                <Input value={publicUrl} readOnly className="flex-1" />
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handleCopy}
-                >
-                  {copied ? (
-                    <Check className="w-4 h-4 text-green-600" />
-                  ) : (
-                    <Copy className="w-4 h-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
           )}
 
           <div className="flex gap-2 justify-end pt-4">
@@ -142,7 +124,7 @@ export const PublishModal = ({
                 onPublish({
                   status,
                   link_ativo: status === "publicado" ? linkActive : false,
-                  no_perfil: status === "publicado" && linkActive ? showInProfile : false,
+                  no_perfil: false, // Will be managed by profile builder later
                 });
                 onOpenChange(false);
               }}
