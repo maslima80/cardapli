@@ -107,10 +107,13 @@ const PublicCatalogPage = () => {
     : undefined;
 
   const coverImageUrl = catalog?.cover?.url || catalog?.cover?.image_url;
-  const metaDescription = catalog?.description || profile?.slogan || `Catálogo de ${profile?.business_name || 'produtos'}`;
+  const metaDescription = catalog?.description || profile?.slogan || "";
+  const pageTitle = catalog?.title && profile?.business_name
+    ? `${catalog.title} — ${profile.business_name}`
+    : catalog?.title || "Cardapli";
 
   useMetaTags({
-    title: catalog?.title ? `${catalog.title} | Cardapli` : "Cardapli",
+    title: pageTitle,
     description: metaDescription,
     image: coverImageUrl,
     url: catalogUrl,
@@ -138,15 +141,15 @@ const PublicCatalogPage = () => {
             </div>
             <h1 className="text-3xl font-bold mb-2">Catálogo indisponível</h1>
             <p className="text-muted-foreground mb-6">
-              Este catálogo não está disponível no momento ou foi definido como privado.
+              Este catálogo não está acessível no momento.
             </p>
           </div>
           
-          {profile?.slug && (
-            <Button asChild>
+          {profile?.slug && profile?.business_name && (
+            <Button asChild size="lg">
               <Link to={publicProfileUrl(profile.slug)}>
                 <Home className="w-4 h-4 mr-2" />
-                Visitar perfil
+                Ver página de {profile.business_name}
               </Link>
             </Button>
           )}

@@ -9,6 +9,7 @@ import { AddBlockDrawer } from "@/components/catalog/AddBlockDrawer";
 import { BlockSettingsDrawer } from "@/components/catalog/BlockSettingsDrawer";
 import { BlockRenderer } from "@/components/catalog/BlockRenderer";
 import { PublishModal } from "@/components/catalog/PublishModal";
+import { PublishSuccessModal } from "@/components/catalog/PublishSuccessModal";
 import { CatalogSettingsDialog } from "@/components/catalog/CatalogSettingsDialog";
 import { getEffectiveTheme, generateThemeVariables } from "@/lib/theme-utils";
 import {
@@ -37,6 +38,7 @@ const CatalogoEditor = () => {
   const [editingBlock, setEditingBlock] = useState<any>(null);
   const [previewMode, setPreviewMode] = useState(false);
   const [publishModalOpen, setPublishModalOpen] = useState(false);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
   const [profile, setProfile] = useState<any>(null);
 
@@ -252,10 +254,16 @@ const CatalogoEditor = () => {
       toast.error("Erro ao publicar");
     } else {
       setCatalog({ ...catalog, ...data });
-      const message = data.status === "publicado" 
-        ? "Catálogo publicado! ✨" 
-        : "Salvo como rascunho";
-      toast.success(message);
+      
+      // If publishing with active link, show success modal
+      if (data.status === "publicado" && data.link_ativo) {
+        setSuccessModalOpen(true);
+      } else {
+        const message = data.status === "publicado" 
+          ? "Catálogo publicado! ✨" 
+          : "Salvo como rascunho";
+        toast.success(message);
+      }
     }
   };
 
@@ -301,7 +309,15 @@ const CatalogoEditor = () => {
     );
   }
 
-  const canPublish = catalog?.title && blocks.length > 0;
+  // Publish requirements: must have a Capa block AND at least 1 additional block
+  const hasCapa = blocks.some(b => b.type === "cover");
+  const hasAdditionalBlock = blocks.filter(b => b.type !== "cover").length > 0;
+  const canPublish = hasCapa && hasAdditionalBlock;
+  const publishTooltip = !hasCapa 
+    ? "Adicione uma Capa para publicar"
+    : !hasAdditionalBlock
+    ? "Adicione pelo menos um bloco além da Capa"
+    : "";
 
   // Apply font family based on theme
   const fontClass =
@@ -349,6 +365,7 @@ const CatalogoEditor = () => {
                 size="sm"
                 onClick={() => setPublishModalOpen(true)}
                 disabled={!canPublish}
+                title={publishTooltip}
               >
                 Publicar
               </Button>
@@ -479,6 +496,14 @@ const CatalogoEditor = () => {
         linkAtivo={catalog?.link_ativo || false}
         noPerfil={catalog?.no_perfil || false}
         onPublish={handlePublish}
+      />
+
+      <PublishSuccessModal
+        open={successModalOpen}
+        onOpenChange={setSuccessModalOpen}
+        userSlug={profile?.slug || ""}
+        catalogSlug={catalog?.slug || ""}
+        catalogTitle={catalog?.title || ""}
       />
     </div>
   );
