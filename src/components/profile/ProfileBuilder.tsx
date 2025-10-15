@@ -192,43 +192,15 @@ export const ProfileBuilder = ({ userSlug, userId }: ProfileBuilderProps) => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Montar Página Pública</h2>
-          <p className="text-muted-foreground mt-1">
-            Monte sua página pública com blocos, catálogos e redes sociais
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleCopyLink}
-            className="gap-2"
-          >
-            <Copy className="w-4 h-4" />
-            Copiar link
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleViewPage}
-            className="gap-2"
-          >
-            <Eye className="w-4 h-4" />
-            Ver página
-          </Button>
-        </div>
-      </div>
-
-      {/* URL Display */}
-      <div className="bg-muted/50 rounded-lg p-4">
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Sua página pública:</span>
-          <span className="font-medium">cardapli.com.br{publicProfileUrl(userSlug)}</span>
-        </div>
+    <div className="space-y-4">
+      {/* Helpful Tips */}
+      <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 space-y-2">
+        <p className="text-sm text-blue-900 dark:text-blue-100">
+          💡 <strong>Dica:</strong> Você pode mudar a ordem dos blocos arrastando.
+        </p>
+        <p className="text-sm text-blue-900 dark:text-blue-100">
+          📱 Apenas catálogos publicados com link ativo aparecem no seu perfil.
+        </p>
       </div>
 
       {/* Blocks List */}

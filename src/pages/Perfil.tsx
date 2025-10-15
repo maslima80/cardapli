@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { toast } from "@/hooks/use-toast";
-import { ArrowLeft, Check, Upload, Instagram, Facebook, Youtube, Globe } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner";
+import { ArrowLeft, Eye, Copy, Instagram, Facebook, Youtube, Globe } from "lucide-react";
 import { debounce } from "@/lib/utils";
 import { LogoUploader } from "@/components/profile/LogoUploader";
 import { ProfileBuilder } from "@/components/profile/ProfileBuilder";
+import { publicProfileUrl } from "@/lib/urls";
 
 type Profile = {
   logo_url: string | null;
@@ -19,21 +21,12 @@ type Profile = {
   whatsapp: string | null;
   phone: string | null;
   email_public: string | null;
-  address: string | null;
   socials: any;
-  theme_mode: string | null;
   accent_color: string | null;
+  theme_mode: string | null;
   font_theme: string | null;
   cta_shape: string | null;
-  locations: any;
   slug: string | null;
-};
-
-type Location = {
-  name: string;
-  address: string;
-  hours: string;
-  notes: string;
 };
 
 export default function Perfil() {
@@ -46,18 +39,14 @@ export default function Perfil() {
     whatsapp: null,
     phone: null,
     email_public: null,
-    address: null,
     socials: {},
-    theme_mode: "light",
     accent_color: "#8B5CF6",
+    theme_mode: "light",
     font_theme: "clean",
     cta_shape: "rounded",
-    locations: [],
     slug: null,
   });
   const [saving, setSaving] = useState(false);
-  const [showLocations, setShowLocations] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [userId, setUserId] = useState<string>("");
 
   useEffect(() => {
@@ -91,23 +80,17 @@ export default function Perfil() {
           whatsapp: data.whatsapp,
           phone: data.phone,
           email_public: data.email_public,
-          address: data.address,
           socials: data.socials || {},
-          theme_mode: data.theme_mode || "light",
           accent_color: data.accent_color || "#8B5CF6",
+          theme_mode: data.theme_mode || "light",
           font_theme: data.font_theme || "clean",
           cta_shape: data.cta_shape || "rounded",
-          locations: data.locations || [],
           slug: data.slug,
         });
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
-      toast({
-        title: "Erro ao carregar perfil",
-        description: "Tente novamente mais tarde.",
-        variant: "destructive",
-      });
+      toast.error("Erro ao carregar perfil");
     }
   };
 
@@ -124,16 +107,10 @@ export default function Perfil() {
 
       if (error) throw error;
 
-      toast({
-        title: "Salvo ✓",
-        duration: 1500,
-      });
+      toast.success("Salvo ✓");
     } catch (error) {
       console.error("Error updating profile:", error);
-      toast({
-        title: "Erro ao salvar",
-        variant: "destructive",
-      });
+      toast.error("Erro ao salvar");
     } finally {
       setSaving(false);
     }
@@ -157,116 +134,73 @@ export default function Perfil() {
     debouncedUpdate({ socials: newSocials });
   };
 
-  const handleLogoChange = (url: string) => {
-    handleFieldChange("logo_url", url);
-  };
-
-  const addLocation = () => {
-    if (profile.locations.length >= 3) {
-      toast({
-        title: "Limite atingido",
-        description: "Você pode adicionar até 3 localizações.",
-        variant: "destructive",
-      });
+  const handleCopyLink = () => {
+    if (!profile.slug) {
+      toast.error("Configure seu nome de usuário primeiro");
       return;
     }
-
-    const newLocations = [
-      ...profile.locations,
-      { name: "", address: "", hours: "", notes: "" },
-    ];
-    setProfile((prev) => ({ ...prev, locations: newLocations }));
-    debouncedUpdate({ locations: newLocations });
+    const url = `${window.location.origin}${publicProfileUrl(profile.slug)}`;
+    navigator.clipboard.writeText(url);
+    toast.success("Link copiado!");
   };
 
-  const updateLocation = (index: number, field: keyof Location, value: string) => {
-    const newLocations = [...profile.locations];
-    newLocations[index] = { ...newLocations[index], [field]: value };
-    setProfile((prev) => ({ ...prev, locations: newLocations }));
-    debouncedUpdate({ locations: newLocations });
-  };
-
-  const removeLocation = (index: number) => {
-    const newLocations = profile.locations.filter((_: any, i: number) => i !== index);
-    setProfile((prev) => ({ ...prev, locations: newLocations }));
-    updateProfile({ locations: newLocations });
-  };
-
-  const getFontClass = () => {
-    switch (profile.font_theme) {
-      case "elegant":
-        return "font-serif";
-      case "modern":
-        return "font-sans tracking-wide";
-      default:
-        return "font-sans";
+  const handleViewPage = () => {
+    if (!profile.slug) {
+      toast.error("Configure seu nome de usuário primeiro");
+      return;
     }
-  };
-
-  const getButtonClass = () => {
-    switch (profile.cta_shape) {
-      case "square":
-        return "rounded-none";
-      case "capsule":
-        return "rounded-full";
-      default:
-        return "rounded-2xl";
-    }
+    window.open(publicProfileUrl(profile.slug), "_blank");
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border">
-        <div className="container max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+    <div className="min-h-screen bg-gradient-subtle">
+      <div className="container max-w-4xl mx-auto px-4 py-6 space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-4">
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={() => navigate("/dashboard")}
-            className="gap-2"
           >
-            <ArrowLeft className="w-4 h-4" />
-            Voltar ao Painel
+            <ArrowLeft className="w-5 h-5" />
           </Button>
-          {saving && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Check className="w-4 h-4 text-green-500" />
-              Salvando...
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="container max-w-4xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Perfil & Design ✨</h1>
-          <p className="text-muted-foreground">
-            Personalize a identidade da sua marca — tudo aqui é salvo automaticamente.
-          </p>
+          <div>
+            <h1 className="text-2xl font-bold">Perfil</h1>
+            <p className="text-muted-foreground">
+              Configure seu negócio e página pública
+            </p>
+          </div>
         </div>
 
-        <div className="space-y-12">
-          {/* 1. Identidade */}
-          <section className="space-y-6">
-            <h2 className="text-xl font-semibold border-b border-border pb-2">
-              Identidade
-            </h2>
-
+        {/* Section 1: Business Info */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Informações do Negócio</CardTitle>
+            <CardDescription>
+              Dados básicos que aparecem nos seus catálogos e página pública
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
             {/* Logo */}
             <div className="space-y-2">
               <Label>Logo</Label>
               <div className="flex items-center gap-4">
                 {profile.logo_url && (
-                  <img
-                    src={profile.logo_url}
-                    alt="Logo"
-                    className="w-20 h-20 rounded-xl object-cover border border-border"
-                  />
+                  <div className="flex-shrink-0">
+                    <img
+                      src={profile.logo_url}
+                      alt="Logo"
+                      className="w-16 h-16 rounded-lg object-cover border border-border"
+                    />
+                  </div>
                 )}
                 <div className="flex-1">
                   <LogoUploader
                     currentLogo={profile.logo_url}
-                    onLogoChange={handleLogoChange}
+                    onLogoChange={(url) => {
+                      setProfile((prev) => ({ ...prev, logo_url: url }));
+                      updateProfile({ logo_url: url });
+                    }}
                   />
                 </div>
               </div>
@@ -275,36 +209,39 @@ export default function Perfil() {
             {/* Business Name */}
             <div className="space-y-2">
               <Label htmlFor="business_name">
-                Nome da marca <span className="text-destructive">*</span>
+                Nome do negócio <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="business_name"
-                placeholder="Ateliê da Maria"
                 value={profile.business_name || ""}
                 onChange={(e) => handleFieldChange("business_name", e.target.value)}
+                placeholder="Ex: Doces da Maria"
               />
             </div>
 
             {/* Slogan */}
             <div className="space-y-2">
-              <Label htmlFor="slogan">Slogan (opcional)</Label>
+              <Label htmlFor="slogan">Slogan</Label>
               <Input
                 id="slogan"
-                placeholder="Feito com amor."
                 value={profile.slogan || ""}
                 onChange={(e) => handleFieldChange("slogan", e.target.value)}
-                className="italic"
+                placeholder="Ex: Doces artesanais feitos com amor"
+                maxLength={100}
               />
+              <p className="text-xs text-muted-foreground text-right">
+                {(profile.slogan || "").length}/100
+              </p>
             </div>
 
-            {/* Sobre nós */}
+            {/* About */}
             <div className="space-y-2">
-              <Label htmlFor="about">Sobre nós</Label>
+              <Label htmlFor="about">Sobre o negócio</Label>
               <Textarea
                 id="about"
-                placeholder="Conte um pouco sobre o seu negócio."
                 value={profile.about || ""}
                 onChange={(e) => handleFieldChange("about", e.target.value)}
+                placeholder="Conte um pouco sobre o seu negócio..."
                 maxLength={400}
                 className="min-h-[100px]"
               />
@@ -312,393 +249,290 @@ export default function Perfil() {
                 {(profile.about || "").length}/400
               </p>
             </div>
-          </section>
 
-          {/* Link Público */}
-          <section className="space-y-6">
-            <h2 className="text-xl font-semibold border-b border-border pb-2">
-              Link Público
-            </h2>
-
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="slug">Nome de usuário</Label>
-                <div className="flex items-center gap-2">
-                  <div className="bg-muted/50 rounded-lg p-3 flex-1">
-                    <div className="flex items-center gap-1">
-                      <span className="text-muted-foreground">cardapli.com/u/</span>
-                      <span className="font-medium">{profile.slug || '—'}</span>
-                    </div>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate('/escolher-slug?from=profile')}
-                  >
-                    Editar
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Este é o seu link público que você pode compartilhar com seus clientes.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Profile Builder */}
-          {profile.slug && userId && (
-            <section className="space-y-6">
-              <ProfileBuilder 
-                userSlug={profile.slug} 
-                userId={userId}
-              />
-            </section>
-          )}
-
-          {/* 2. Contato */}
-          <section className="space-y-6">
-            <h2 className="text-xl font-semibold border-b border-border pb-2">
-              Contato
-            </h2>
-
-            <div className="grid gap-6 md:grid-cols-2">
+            {/* Contact */}
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="whatsapp">
                   WhatsApp <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="whatsapp"
-                  placeholder="(11) 91234-5678"
                   value={profile.whatsapp || ""}
                   onChange={(e) => handleFieldChange("whatsapp", e.target.value)}
+                  placeholder="(11) 99999-9999"
                 />
               </div>
-
               <div className="space-y-2">
-                <Label htmlFor="phone">Telefone (opcional)</Label>
+                <Label htmlFor="phone">Telefone</Label>
                 <Input
                   id="phone"
-                  placeholder="(11) 4002-8922"
                   value={profile.phone || ""}
                   onChange={(e) => handleFieldChange("phone", e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="email_public">E-mail público (opcional)</Label>
-                <Input
-                  id="email_public"
-                  type="email"
-                  placeholder="contato@seudominio.com"
-                  value={profile.email_public || ""}
-                  onChange={(e) => handleFieldChange("email_public", e.target.value)}
+                  placeholder="(11) 3333-3333"
                 />
               </div>
             </div>
-          </section>
 
-          {/* 3. Redes Sociais */}
-          <section className="space-y-6">
-            <h2 className="text-xl font-semibold border-b border-border pb-2">
-              Redes Sociais
-            </h2>
+            <div className="space-y-2">
+              <Label htmlFor="email_public">E-mail público</Label>
+              <Input
+                id="email_public"
+                type="email"
+                value={profile.email_public || ""}
+                onChange={(e) => handleFieldChange("email_public", e.target.value)}
+                placeholder="contato@seunegocio.com"
+              />
+            </div>
 
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="instagram" className="flex items-center gap-2">
-                  <Instagram className="w-4 h-4" />
-                  Instagram
-                </Label>
+            {/* Social Media */}
+            <div className="space-y-4">
+              <Label>Redes sociais</Label>
+              <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground">@</span>
+                  <Instagram className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                   <Input
-                    id="instagram"
-                    placeholder="seuperfil"
                     value={profile.socials?.instagram || ""}
                     onChange={(e) => handleSocialChange("instagram", e.target.value)}
+                    placeholder="@seunegocio"
                   />
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="facebook" className="flex items-center gap-2">
-                  <Facebook className="w-4 h-4" />
-                  Facebook
-                </Label>
                 <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground">/</span>
+                  <Facebook className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                   <Input
-                    id="facebook"
-                    placeholder="seuperfil"
                     value={profile.socials?.facebook || ""}
                     onChange={(e) => handleSocialChange("facebook", e.target.value)}
+                    placeholder="facebook.com/seunegocio"
                   />
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="tiktok" className="flex items-center gap-2">
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
-                  </svg>
-                  TikTok
-                </Label>
                 <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground">@</span>
+                  <Youtube className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                   <Input
-                    id="tiktok"
-                    placeholder="seuperfil"
-                    value={profile.socials?.tiktok || ""}
-                    onChange={(e) => handleSocialChange("tiktok", e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="youtube" className="flex items-center gap-2">
-                  <Youtube className="w-4 h-4" />
-                  YouTube
-                </Label>
-                <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground">@</span>
-                  <Input
-                    id="youtube"
-                    placeholder="seucanal"
                     value={profile.socials?.youtube || ""}
                     onChange={(e) => handleSocialChange("youtube", e.target.value)}
+                    placeholder="youtube.com/@seunegocio"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Globe className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                  <Input
+                    value={profile.socials?.website || ""}
+                    onChange={(e) => handleSocialChange("website", e.target.value)}
+                    placeholder="https://seunegocio.com"
                   />
                 </div>
               </div>
-
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="website" className="flex items-center gap-2">
-                  <Globe className="w-4 h-4" />
-                  Site (opcional)
-                </Label>
-                <Input
-                  id="website"
-                  type="url"
-                  placeholder="https://seusite.com"
-                  value={profile.socials?.website || ""}
-                  onChange={(e) => handleSocialChange("website", e.target.value)}
-                />
-              </div>
             </div>
-          </section>
 
-          {/* 4. Localizações */}
-          <section className="space-y-6">
-            <h2 className="text-xl font-semibold border-b border-border pb-2">
-              Localizações (opcional)
-            </h2>
-
-            {profile.locations.length === 0 ? (
-              <div className="text-center py-8 space-y-2">
-                <p className="text-muted-foreground">Sem endereços no momento.</p>
-                <p className="text-sm text-muted-foreground/70">
-                  Adicione um endereço se atender presencialmente.
-                </p>
-                <Button variant="outline" onClick={addLocation} className="mt-4">
-                  + Adicionar localização
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {profile.locations.map((location: Location, index: number) => (
-                  <div
-                    key={index}
-                    className="p-4 border border-border rounded-xl space-y-4"
-                  >
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-semibold">Localização {index + 1}</h3>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeLocation(index)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        Excluir
-                      </Button>
-                    </div>
-
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label>Nome do local</Label>
-                        <Input
-                          placeholder="Loja Central"
-                          value={location.name}
-                          onChange={(e) =>
-                            updateLocation(index, "name", e.target.value)
-                          }
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Endereço completo</Label>
-                        <Input
-                          placeholder="Rua das Flores, 123 – São Paulo"
-                          value={location.address}
-                          onChange={(e) =>
-                            updateLocation(index, "address", e.target.value)
-                          }
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Horário de funcionamento</Label>
-                        <Input
-                          placeholder="Seg–Sex 10h–19h; Sáb 10h–13h"
-                          value={location.hours}
-                          onChange={(e) =>
-                            updateLocation(index, "hours", e.target.value)
-                          }
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Observação (opcional)</Label>
-                        <Input
-                          placeholder="Entrada pela lateral"
-                          value={location.notes}
-                          onChange={(e) =>
-                            updateLocation(index, "notes", e.target.value)
-                          }
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                {profile.locations.length < 3 && (
-                  <Button variant="outline" onClick={addLocation} className="w-full">
-                    + Adicionar localização
-                  </Button>
-                )}
-              </div>
-            )}
-          </section>
-
-          {/* 5. Aparência */}
-          <section className="space-y-6">
-            <h2 className="text-xl font-semibold border-b border-border pb-2">
-              Aparência
-            </h2>
-
-            <div className="grid gap-6 md:grid-cols-2">
-              {/* Tema */}
+            {/* Theme Settings */}
+            <div className="space-y-4 pt-4 border-t">
+              <Label className="text-base font-semibold">Tema</Label>
+              
+              {/* Theme Mode */}
               <div className="space-y-2">
-                <Label>Tema</Label>
-                <div className="flex gap-2">
+                <Label className="text-sm">Modo</Label>
+                <div className="grid grid-cols-2 gap-2">
                   <Button
+                    type="button"
                     variant={profile.theme_mode === "light" ? "default" : "outline"}
                     onClick={() => handleFieldChange("theme_mode", "light")}
-                    className="flex-1"
+                    className="w-full"
                   >
                     Claro
                   </Button>
                   <Button
+                    type="button"
                     variant={profile.theme_mode === "dark" ? "default" : "outline"}
                     onClick={() => handleFieldChange("theme_mode", "dark")}
-                    className="flex-1"
+                    className="w-full"
                   >
                     Escuro
                   </Button>
                 </div>
               </div>
 
-              {/* Cor principal */}
+              {/* Accent Color */}
               <div className="space-y-2">
-                <Label htmlFor="accent_color">Cor principal</Label>
-                <div className="flex gap-2">
+                <Label htmlFor="accent_color" className="text-sm">Cor principal</Label>
+                <div className="flex items-center gap-2">
                   <input
                     type="color"
                     id="accent_color"
                     value={profile.accent_color || "#8B5CF6"}
                     onChange={(e) => handleFieldChange("accent_color", e.target.value)}
-                    className="w-12 h-12 rounded-xl border border-border cursor-pointer"
+                    className="w-12 h-12 rounded-lg border border-border cursor-pointer"
                   />
                   <Input
                     value={profile.accent_color || "#8B5CF6"}
                     onChange={(e) => handleFieldChange("accent_color", e.target.value)}
                     placeholder="#8B5CF6"
+                    className="flex-1"
                   />
                 </div>
               </div>
 
-              {/* Fonte */}
+              {/* Font Theme */}
               <div className="space-y-2">
-                <Label htmlFor="font_theme">Fonte</Label>
+                <Label htmlFor="font_theme" className="text-sm">Fonte</Label>
                 <select
                   id="font_theme"
                   value={profile.font_theme || "clean"}
                   onChange={(e) => handleFieldChange("font_theme", e.target.value)}
-                  className="w-full h-12 px-4 rounded-xl border border-border bg-background"
+                  className="w-full h-10 px-3 rounded-lg border border-border bg-background"
                 >
-                  <option value="clean">Clean (Inter)</option>
+                  <option value="clean">Moderna (Poppins + Nunito)</option>
                   <option value="elegant">Elegante (Playfair + Inter)</option>
-                  <option value="modern">Moderna (Poppins + Nunito)</option>
+                  <option value="modern">Clean (Inter)</option>
                 </select>
               </div>
 
-              {/* Forma dos botões */}
+              {/* Button Shape */}
               <div className="space-y-2">
-                <Label>Forma dos botões</Label>
-                <div className="flex gap-2">
+                <Label className="text-sm">Forma dos botões</Label>
+                <div className="grid grid-cols-3 gap-2">
                   <Button
+                    type="button"
                     variant={profile.cta_shape === "rounded" ? "default" : "outline"}
                     onClick={() => handleFieldChange("cta_shape", "rounded")}
-                    className="flex-1 rounded-2xl"
+                    className="rounded-2xl"
                   >
                     Rounded
                   </Button>
                   <Button
+                    type="button"
                     variant={profile.cta_shape === "square" ? "default" : "outline"}
                     onClick={() => handleFieldChange("cta_shape", "square")}
-                    className="flex-1 rounded-none"
+                    className="rounded-none"
                   >
                     Square
                   </Button>
                   <Button
+                    type="button"
                     variant={profile.cta_shape === "capsule" ? "default" : "outline"}
                     onClick={() => handleFieldChange("cta_shape", "capsule")}
-                    className="flex-1 rounded-full"
+                    className="rounded-full"
                   >
                     Capsule
                   </Button>
                 </div>
               </div>
-            </div>
 
-            {/* Preview */}
-            <div
-              className={`mt-6 p-8 rounded-2xl border border-border ${
-                profile.theme_mode === "dark" ? "bg-gray-900 text-white" : "bg-white"
-              } ${getFontClass()}`}
-            >
-              <div className="text-center space-y-4">
-                {profile.logo_url && (
-                  <img
-                    src={profile.logo_url}
-                    alt="Logo preview"
-                    className="w-16 h-16 mx-auto rounded-xl object-cover"
-                  />
-                )}
-                <h3 className="text-2xl font-bold">
-                  {profile.business_name || "Nome da sua marca"}
-                </h3>
-                {profile.slogan && (
-                  <p className="text-sm italic opacity-70">{profile.slogan}</p>
-                )}
-                <button
-                  className={`px-6 py-3 text-white font-medium transition-all ${getButtonClass()}`}
-                  style={{ backgroundColor: profile.accent_color || "#8B5CF6" }}
-                >
-                  Ver Catálogo
-                </button>
+              {/* Preview */}
+              <div
+                className={`p-6 rounded-lg border border-border ${
+                  profile.theme_mode === "dark" ? "bg-gray-900 text-white" : "bg-white"
+                }`}
+              >
+                <div className="text-center space-y-4">
+                  {profile.logo_url && (
+                    <img
+                      src={profile.logo_url}
+                      alt="Logo preview"
+                      className="w-12 h-12 mx-auto rounded-lg object-cover"
+                    />
+                  )}
+                  <h3 className="text-xl font-bold">
+                    {profile.business_name || "Nome da sua marca"}
+                  </h3>
+                  {profile.slogan && (
+                    <p className="text-sm italic opacity-70">{profile.slogan}</p>
+                  )}
+                  <button
+                    className={`px-6 py-3 text-white font-medium transition-all ${
+                      profile.cta_shape === "capsule"
+                        ? "rounded-full"
+                        : profile.cta_shape === "square"
+                        ? "rounded-none"
+                        : "rounded-2xl"
+                    }`}
+                    style={{ backgroundColor: profile.accent_color || "#8B5CF6" }}
+                  >
+                    Ver Catálogo
+                  </button>
+                </div>
               </div>
             </div>
-          </section>
-        </div>
+
+            {/* Username */}
+            <div className="space-y-2 pt-4 border-t">
+              <Label>Nome de usuário</Label>
+              <div className="flex items-center gap-2">
+                <div className="bg-muted/50 rounded-lg p-3 flex-1">
+                  <div className="flex items-center gap-1">
+                    <span className="text-muted-foreground text-sm">cardapli.com.br/u/</span>
+                    <span className="font-medium">{profile.slug || "—"}</span>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate("/escolher-slug?from=profile")}
+                >
+                  Editar
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Este é o seu link público que você pode compartilhar com seus clientes.
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-wrap gap-2 pt-4 border-t">
+              <Button
+                onClick={() => updateProfile(profile)}
+                disabled={saving}
+                className="gap-2"
+              >
+                {saving ? "Salvando..." : "Salvar"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleViewPage}
+                className="gap-2"
+                disabled={!profile.slug}
+              >
+                <Eye className="w-4 h-4" />
+                Ver página
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleCopyLink}
+                className="gap-2"
+                disabled={!profile.slug}
+              >
+                <Copy className="w-4 h-4" />
+                Copiar link
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Section 2: Public Page Builder */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Página Pública (Link na bio)</CardTitle>
+            <CardDescription>
+              Monte sua página pública e escolha o que aparece em{" "}
+              <span className="font-mono text-foreground">
+                /u/{profile.slug || "seu-usuario"}
+              </span>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {profile.slug && userId ? (
+              <ProfileBuilder userSlug={profile.slug} userId={userId} />
+            ) : (
+              <div className="text-center py-12 border-2 border-dashed border-border rounded-lg">
+                <p className="text-muted-foreground mb-4">
+                  Configure seu nome de usuário primeiro para montar sua página pública
+                </p>
+                <Button onClick={() => navigate("/escolher-slug?from=profile")}>
+                  Escolher nome de usuário
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
