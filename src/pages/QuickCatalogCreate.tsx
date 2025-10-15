@@ -315,7 +315,7 @@ export default function QuickCatalogCreate() {
               onClick={handleCreateCatalog}
               disabled={loading || !title.trim()}
               size="lg"
-              className="w-full gap-2"
+              className="w-full gap-2 transition-all hover:scale-105"
             >
               {loading ? (
                 <>
@@ -324,7 +324,7 @@ export default function QuickCatalogCreate() {
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-5 h-5" />
+                  <Sparkles className="w-5 h-5 animate-pulse" />
                   Gerar Catálogo
                 </>
               )}

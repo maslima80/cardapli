@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, Search, ArrowRight } from "lucide-react";
+import { ArrowLeft, Search, ArrowRight, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 interface Product {
@@ -31,6 +31,11 @@ export default function Compartilhar() {
 
   useEffect(() => {
     loadProducts();
+    // Load last used filters from localStorage
+    const lastCategory = localStorage.getItem('compartilhar_last_category');
+    const lastTag = localStorage.getItem('compartilhar_last_tag');
+    if (lastCategory) setSelectedCategory(lastCategory);
+    if (lastTag) setSelectedTag(lastTag);
   }, []);
 
   useEffect(() => {
@@ -168,6 +173,14 @@ export default function Compartilhar() {
       return;
     }
     
+    // Save filters to localStorage
+    if (selectedCategory) {
+      localStorage.setItem('compartilhar_last_category', selectedCategory);
+    }
+    if (selectedTag) {
+      localStorage.setItem('compartilhar_last_tag', selectedTag);
+    }
+    
     // Navigate to modal or next step with selected products
     const selectedProducts = products.filter(p => selectedIds.has(p.id));
     // Store in sessionStorage for the modal
@@ -267,18 +280,25 @@ export default function Compartilhar() {
 
         {/* Products Grid */}
         {filteredProducts.length === 0 ? (
-          <div className="text-center py-12 bg-card rounded-xl border border-border">
-            <p className="text-muted-foreground">
+          <div className="text-center py-16 bg-card rounded-xl border-2 border-dashed border-border">
+            <div className="text-6xl mb-4">📦</div>
+            <h3 className="text-lg font-semibold mb-2">
               {searchQuery || selectedCategory || selectedTag
-                ? "Nenhum produto encontrado com esses filtros"
-                : "Você ainda não tem produtos cadastrados"}
+                ? "Nenhum produto encontrado"
+                : "Nenhum produto cadastrado"}
+            </h3>
+            <p className="text-muted-foreground mb-6">
+              {searchQuery || selectedCategory || selectedTag
+                ? "Tente ajustar os filtros para encontrar produtos"
+                : "Cadastre seus produtos para começar a criar catálogos"}
             </p>
             {!searchQuery && !selectedCategory && !selectedTag && (
               <Button
                 onClick={() => navigate("/produtos")}
-                className="mt-4"
+                className="gap-2"
               >
-                Cadastrar produtos
+                <Plus className="w-4 h-4" />
+                Cadastrar primeiro produto
               </Button>
             )}
           </div>
@@ -292,10 +312,10 @@ export default function Compartilhar() {
                 <div
                   key={product.id}
                   onClick={() => toggleProduct(product.id)}
-                  className={`bg-card rounded-xl border-2 transition-all cursor-pointer ${
+                  className={`bg-card rounded-xl border-2 transition-all duration-200 cursor-pointer transform hover:scale-[1.02] ${
                     isSelected
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:border-primary/50"
+                      ? "border-primary bg-primary/5 shadow-lg"
+                      : "border-border hover:border-primary/50 hover:shadow-md"
                   }`}
                 >
                   <div className="p-4 flex gap-3">
@@ -347,7 +367,7 @@ export default function Compartilhar() {
 
       {/* Fixed Bottom Bar */}
       {selectedIds.size > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border shadow-lg">
+        <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border shadow-lg animate-in slide-in-from-bottom duration-300">
           <div className="container max-w-4xl mx-auto px-4 py-4">
             <div className="flex items-center justify-between gap-4">
               <div>

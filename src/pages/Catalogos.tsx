@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, ExternalLink, Copy, Files, Trash2, Edit, ArrowLeft, Share2, Eye } from "lucide-react";
+import { Plus, Search, ExternalLink, Copy, Files, Trash2, Edit, ArrowLeft, Share2, Eye, Zap } from "lucide-react";
 import { CreateCatalogDialog } from "@/components/catalog/CreateCatalogDialog";
 import { PublishSuccessModal } from "@/components/catalog/PublishSuccessModal";
 import { toast } from "sonner";
@@ -210,10 +210,23 @@ const Catalogos = () => {
               Crie e gerencie seus catálogos digitais
             </p>
           </div>
-          <Button onClick={() => setCreateDialogOpen(true)} className="gap-2 w-full sm:w-auto">
-            <Plus className="w-4 h-4" />
-            Novo Catálogo
-          </Button>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button 
+              onClick={() => navigate("/compartilhar")} 
+              variant="outline"
+              className="gap-2 flex-1 sm:flex-initial"
+            >
+              <Zap className="w-4 h-4" />
+              Catálogo Rápido
+            </Button>
+            <Button 
+              onClick={() => setCreateDialogOpen(true)} 
+              className="gap-2 flex-1 sm:flex-initial"
+            >
+              <Plus className="w-4 h-4" />
+              Novo Catálogo
+            </Button>
+          </div>
         </div>
 
         {catalogs.length > 0 && (
