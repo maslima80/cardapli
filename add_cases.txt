@@ -1,0 +1,23 @@
+      case "location":
+        return (
+          <LocationBlockSettings
+            data={formData}
+            onUpdate={(updatedData) => setFormData(updatedData)}
+          />
+        );
+        
+      case "category_grid":
+        return (
+          <CategoryGridBlockSettings
+            data={formData}
+            onUpdate={(updatedData) => setFormData(updatedData)}
+          />
+        );
+        
+      case "tag_grid":
+        return (
+          <TagGridBlockSettings
+            data={formData}
+            onUpdate={(updatedData) => setFormData(updatedData)}
+          />
+        );

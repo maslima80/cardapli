@@ -17,39 +17,39 @@ export type Database = {
       catalog_blocks: {
         Row: {
           anchor_slug: string | null
-          catalog_id: string
-          created_at: string
-          data: Json
+          catalog_id: string | null
+          created_at: string | null
+          data: Json | null
           id: string
-          page_break: boolean
-          sort: number
-          type: string
-          updated_at: string
-          visible: boolean
+          page_break: boolean | null
+          sort: number | null
+          type: string | null
+          updated_at: string | null
+          visible: boolean | null
         }
         Insert: {
           anchor_slug?: string | null
-          catalog_id: string
-          created_at?: string
-          data?: Json
+          catalog_id?: string | null
+          created_at?: string | null
+          data?: Json | null
           id?: string
-          page_break?: boolean
-          sort: number
-          type: string
-          updated_at?: string
-          visible?: boolean
+          page_break?: boolean | null
+          sort?: number | null
+          type?: string | null
+          updated_at?: string | null
+          visible?: boolean | null
         }
         Update: {
           anchor_slug?: string | null
-          catalog_id?: string
-          created_at?: string
-          data?: Json
+          catalog_id?: string | null
+          created_at?: string | null
+          data?: Json | null
           id?: string
-          page_break?: boolean
-          sort?: number
-          type?: string
-          updated_at?: string
-          visible?: boolean
+          page_break?: boolean | null
+          sort?: number | null
+          type?: string | null
+          updated_at?: string | null
+          visible?: boolean | null
         }
         Relationships: [
           {
@@ -64,49 +64,201 @@ export type Database = {
       catalogs: {
         Row: {
           cover: Json | null
-          created_at: string
+          created_at: string | null
           description: string | null
           id: string
+          link_ativo: boolean | null
+          no_perfil: boolean | null
           settings: Json | null
-          slug: string
+          slug: string | null
           status: string
           theme_overrides: Json | null
-          title: string
-          updated_at: string
-          user_id: string
+          title: string | null
+          updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           cover?: Json | null
-          created_at?: string
+          created_at?: string | null
           description?: string | null
           id?: string
+          link_ativo?: boolean | null
+          no_perfil?: boolean | null
           settings?: Json | null
-          slug: string
+          slug?: string | null
           status?: string
           theme_overrides?: Json | null
-          title: string
-          updated_at?: string
-          user_id: string
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           cover?: Json | null
-          created_at?: string
+          created_at?: string | null
           description?: string | null
           id?: string
+          link_ativo?: boolean | null
+          no_perfil?: boolean | null
           settings?: Json | null
-          slug?: string
+          slug?: string | null
           status?: string
           theme_overrides?: Json | null
-          title?: string
-          updated_at?: string
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      product_option_values: {
+        Row: {
+          created_at: string | null
+          id: string
+          option_id: string
+          sort: number
+          user_id: string
+          value: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          option_id: string
+          sort?: number
+          user_id: string
+          value: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          option_id?: string
+          sort?: number
+          user_id?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_option_values_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "product_options"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_options: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          product_id: string
+          sort: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          product_id: string
+          sort?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          product_id?: string
+          sort?: number
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "catalogs_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "product_options_product_id_fkey"
+            columns: ["product_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_variant_options: {
+        Row: {
+          option_id: string
+          value_id: string
+          variant_id: string
+        }
+        Insert: {
+          option_id: string
+          value_id: string
+          variant_id: string
+        }
+        Update: {
+          option_id?: string
+          value_id?: string
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variant_options_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "product_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_variant_options_value_id_fkey"
+            columns: ["value_id"]
+            isOneToOne: false
+            referencedRelation: "product_option_values"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_variant_options_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_variants: {
+        Row: {
+          combination_key: string | null
+          created_at: string | null
+          id: string
+          image_url: string | null
+          is_available: boolean
+          price: number | null
+          product_id: string
+          sku: string | null
+          user_id: string
+        }
+        Insert: {
+          combination_key?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_available?: boolean
+          price?: number | null
+          product_id: string
+          sku?: string | null
+          user_id: string
+        }
+        Update: {
+          combination_key?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_available?: boolean
+          price?: number | null
+          product_id?: string
+          sku?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variants_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
@@ -115,10 +267,10 @@ export type Database = {
         Row: {
           accepts_customization: boolean | null
           allergens: string | null
-          categories: string[] | null
+          categories: Json | null
           category: string | null
           conservation: string | null
-          created_at: string
+          created_at: string | null
           customization_instructions: string | null
           description: string | null
           disabled_combinations: Json | null
@@ -140,9 +292,9 @@ export type Database = {
           sku: string | null
           status: string
           title: string
-          updated_at: string
+          updated_at: string | null
           user_id: string
-          variants: string[] | null
+          variants: Json | null
           video_id: string | null
           video_poster_url: string | null
           video_provider: string | null
@@ -151,10 +303,10 @@ export type Database = {
         Insert: {
           accepts_customization?: boolean | null
           allergens?: string | null
-          categories?: string[] | null
+          categories?: Json | null
           category?: string | null
           conservation?: string | null
-          created_at?: string
+          created_at?: string | null
           customization_instructions?: string | null
           description?: string | null
           disabled_combinations?: Json | null
@@ -176,9 +328,9 @@ export type Database = {
           sku?: string | null
           status?: string
           title: string
-          updated_at?: string
+          updated_at?: string | null
           user_id: string
-          variants?: string[] | null
+          variants?: Json | null
           video_id?: string | null
           video_poster_url?: string | null
           video_provider?: string | null
@@ -187,10 +339,10 @@ export type Database = {
         Update: {
           accepts_customization?: boolean | null
           allergens?: string | null
-          categories?: string[] | null
+          categories?: Json | null
           category?: string | null
           conservation?: string | null
-          created_at?: string
+          created_at?: string | null
           customization_instructions?: string | null
           description?: string | null
           disabled_combinations?: Json | null
@@ -212,9 +364,9 @@ export type Database = {
           sku?: string | null
           status?: string
           title?: string
-          updated_at?: string
+          updated_at?: string | null
           user_id?: string
-          variants?: string[] | null
+          variants?: Json | null
           video_id?: string | null
           video_poster_url?: string | null
           video_provider?: string | null
@@ -244,13 +396,13 @@ export type Database = {
           id: string
           locations: Json | null
           logo_url: string | null
-          phone: string | null
+          phone: number | null
           slogan: string | null
           slug: string | null
           socials: Json | null
           theme_mode: string | null
           updated_at: string | null
-          whatsapp: string | null
+          whatsapp: number | null
         }
         Insert: {
           about?: string | null
@@ -262,16 +414,16 @@ export type Database = {
           email?: string | null
           email_public?: string | null
           font_theme?: string | null
-          id: string
+          id?: string
           locations?: Json | null
           logo_url?: string | null
-          phone?: string | null
+          phone?: number | null
           slogan?: string | null
           slug?: string | null
           socials?: Json | null
           theme_mode?: string | null
           updated_at?: string | null
-          whatsapp?: string | null
+          whatsapp?: number | null
         }
         Update: {
           about?: string | null
@@ -286,13 +438,13 @@ export type Database = {
           id?: string
           locations?: Json | null
           logo_url?: string | null
-          phone?: string | null
+          phone?: number | null
           slogan?: string | null
           slug?: string | null
           socials?: Json | null
           theme_mode?: string | null
           updated_at?: string | null
-          whatsapp?: string | null
+          whatsapp?: number | null
         }
         Relationships: []
       }
@@ -301,6 +453,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      build_variant_combination_key: {
+        Args: { p_variant_id: string }
+        Returns: string
+      }
       is_slug_available: {
         Args: { check_slug: string }
         Returns: boolean

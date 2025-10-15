@@ -133,13 +133,17 @@ const Catalogos = () => {
   };
 
   const getStatusBadge = (status: Catalog["status"]) => {
-    const variants = {
-      draft: { label: "Rascunho", variant: "secondary" as const },
-      public: { label: "Público", variant: "default" as const },
-      unlisted: { label: "Não listado", variant: "outline" as const },
+    const variants: Record<string, { label: string; className: string }> = {
+      // New Portuguese values
+      rascunho: { label: "Em edição", className: "bg-yellow-100 text-yellow-800" },
+      publicado: { label: "Publicado", className: "bg-green-100 text-green-800" },
+      // Old English values (for backward compatibility)
+      draft: { label: "Em edição", className: "bg-yellow-100 text-yellow-800" },
+      public: { label: "Publicado", className: "bg-green-100 text-green-800" },
+      unlisted: { label: "Publicado", className: "bg-green-100 text-green-800" },
     };
-    const { label, variant } = variants[status];
-    return <Badge variant={variant}>{label}</Badge>;
+    const statusInfo = variants[status] || { label: "Desconhecido", className: "bg-gray-100 text-gray-800" };
+    return <Badge className={statusInfo.className}>{statusInfo.label}</Badge>;
   };
 
   if (loading) {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -27,11 +27,8 @@ export const PublishModal = ({
   noPerfil,
   onPublish,
 }: PublishModalProps) => {
-  const [status, setStatus] = useState<"rascunho" | "publicado">(
-    currentStatus === "publicado" ? "publicado" : "rascunho"
-  );
-  const [linkActive, setLinkActive] = useState(linkAtivo);
-  const [showInProfile, setShowInProfile] = useState(noPerfil);
+  const [linkActive, setLinkActive] = useState(true); // Default to active
+  const [showInProfile, setShowInProfile] = useState(false); // Default to not on profile
   const [copied, setCopied] = useState(false);
 
   // URL format: /@user-slug/catalog-slug
@@ -50,69 +47,58 @@ export const PublishModal = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Publicar Catálogo</DialogTitle>
+          <DialogTitle>Pronto para compartilhar?</DialogTitle>
+          <DialogDescription>
+            Seu catálogo ficará disponível para enviar por WhatsApp 📱
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>Status</Label>
-            <select
-              className="w-full border rounded-xl p-2"
-              value={status}
-              onChange={(e) => setStatus(e.target.value as "rascunho" | "publicado")}
-            >
-              <option value="rascunho">Rascunho (não publicado)</option>
-              <option value="publicado">Publicado (pronto para compartilhar)</option>
-            </select>
-          </div>
-
-          {status === "publicado" && (
-            <>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label>Link de Compartilhamento</Label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={linkActive}
-                      onChange={(e) => setLinkActive(e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                    <span className="text-sm font-medium">
-                      {linkActive ? "Ativo ✓" : "Desativado"}
-                    </span>
-                  </label>
-                </div>
+          <div className="rounded-lg border p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <Label className="text-base">Permitir acesso por link</Label>
                 <p className="text-xs text-muted-foreground">
-                  {linkActive 
-                    ? "✓ Qualquer pessoa com o link pode acessar" 
-                    : "O link não funcionará até ser ativado"}
+                  Qualquer pessoa com o link poderá ver seu catálogo
                 </p>
               </div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={linkActive}
+                  onChange={(e) => setLinkActive(e.target.checked)}
+                  className="w-5 h-5 rounded"
+                />
+              </label>
+            </div>
+          </div>
 
-              {linkActive && (
-                <div className="space-y-2">
-                  <Label>URL para Compartilhar</Label>
-                  <div className="flex gap-2">
-                    <Input value={publicUrl} readOnly className="flex-1" />
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={handleCopy}
-                    >
-                      {copied ? (
-                        <Check className="w-4 h-4 text-green-600" />
-                      ) : (
-                        <Copy className="w-4 h-4" />
-                      )}
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    💡 Dica: Adicione ao seu perfil depois usando o construtor de perfil
-                  </p>
+          {linkActive && (
+            <div className="space-y-3 animate-in fade-in-50 duration-200">
+              <div className="space-y-2">
+                <Label>Seu link para compartilhar</Label>
+                <div className="flex gap-2">
+                  <Input value={publicUrl} readOnly className="flex-1" />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleCopy}
+                  >
+                    {copied ? (
+                      <Check className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
+                  </Button>
                 </div>
-              )}
-            </>
+              </div>
+
+              <div className="rounded-lg bg-muted/50 p-3">
+                <p className="text-xs text-muted-foreground">
+                  💡 <strong>Dica:</strong> Depois você pode adicionar este catálogo ao seu perfil público usando o construtor de perfil
+                </p>
+              </div>
+            </div>
           )}
 
           <div className="flex gap-2 justify-end pt-4">
@@ -122,14 +108,15 @@ export const PublishModal = ({
             <Button
               onClick={() => {
                 onPublish({
-                  status,
-                  link_ativo: status === "publicado" ? linkActive : false,
+                  status: 'publicado',
+                  link_ativo: linkActive,
                   no_perfil: false, // Will be managed by profile builder later
                 });
                 onOpenChange(false);
               }}
+              className="gap-2"
             >
-              {status === "rascunho" ? "Salvar como Rascunho" : "Publicar"}
+              🎉 Publicar Catálogo
             </Button>
           </div>
         </div>

@@ -35,9 +35,7 @@ export function CreateCatalogDialog({ open, onOpenChange, onSuccess }: CreateCat
   const [description, setDescription] = useState("");
   const [coverImage, setCoverImage] = useState("");
   const [slug, setSlug] = useState("");
-  // Only allow these specific values for status
-  type CatalogStatus = 'draft' | 'public' | 'unlisted';
-  const [status, setStatus] = useState<CatalogStatus>('draft');
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [loading, setLoading] = useState(false);
   const [slugError, setSlugError] = useState("");
 
@@ -104,8 +102,6 @@ export function CreateCatalogDialog({ open, onOpenChange, onSuccess }: CreateCat
     }
 
     const finalSlug = slug.trim() || `catalogo-${Date.now()}`;
-    
-    console.log('Creating catalog with status:', status);
 
     const { data, error } = await supabase
       .from("catalogs")
@@ -114,7 +110,9 @@ export function CreateCatalogDialog({ open, onOpenChange, onSuccess }: CreateCat
         title: title.trim(),
         description: description.trim() || null,
         slug: finalSlug,
-        status: status, // This is already typed as CatalogStatus
+        status: 'rascunho', // Always start as draft
+        link_ativo: false, // Not active until published
+        no_perfil: false, // Not on profile until added
       })
       .select()
       .single();
@@ -153,7 +151,7 @@ export function CreateCatalogDialog({ open, onOpenChange, onSuccess }: CreateCat
       setCoverImage("");
       setSlug("");
       setSlugError("");
-      setStatus("draft");
+      setShowAdvanced(false);
       setLoading(false);
       onOpenChange(false);
       
@@ -174,88 +172,77 @@ export function CreateCatalogDialog({ open, onOpenChange, onSuccess }: CreateCat
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Novo Catálogo</DialogTitle>
+          <DialogTitle>Criar Catálogo</DialogTitle>
           <DialogDescription>
-            Preencha as informações básicas do seu catálogo
+            Vamos criar algo bonito para você compartilhar ✨
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
             <Label htmlFor="title">
-              Título <span className="text-destructive">*</span>
+              Como quer chamar seu catálogo? <span className="text-destructive">*</span>
             </Label>
             <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Ex: Catálogo de Verão 2025"
+              placeholder="Ex: Catálogo de Páscoa 2025"
               autoFocus
             />
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="description">Descrição</Label>
+            <Label htmlFor="description">Descrição (opcional)</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Uma breve descrição do catálogo (opcional)"
+              placeholder="Conte em poucas palavras o que seus clientes vão encontrar"
               rows={3}
             />
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="cover-image">Imagem de Capa</Label>
+            <Label htmlFor="cover-image">Imagem de Capa (opcional)</Label>
             <SimpleImageUploader
               currentImageUrl={coverImage}
               onImageChange={setCoverImage}
             />
             <p className="text-xs text-muted-foreground">
-              Opcional — você pode trocar depois na Capa
+              💡 Você pode adicionar ou trocar depois
             </p>
           </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="slug">Slug (URL)</Label>
-            <Input
-              id="slug"
-              value={slug}
-              onChange={(e) => setSlug(e.target.value)}
-              placeholder="cardapio-verao-2024"
-              className={slugError ? "border-destructive" : ""}
-            />
-            {slugError ? (
-              <p className="text-xs text-destructive">{slugError}</p>
-            ) : (
-              <p className="text-xs text-muted-foreground">
-                Este será o endereço do seu catálogo
-              </p>
-            )}
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="status">Visibilidade</Label>
-            <Select 
-              value={status} 
-              onValueChange={(value) => {
-                // Ensure only valid values are accepted
-                if (value === 'draft' || value === 'public' || value === 'unlisted') {
-                  setStatus(value);
-                } else {
-                  setStatus('draft');
-                }
-              }}
+          {/* Advanced options - collapsed by default */}
+          <div className="border-t pt-4">
+            <button
+              type="button"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
             >
-              <SelectTrigger id="status">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="draft">Rascunho</SelectItem>
-                <SelectItem value="public">Público</SelectItem>
-                <SelectItem value="unlisted">Não listado</SelectItem>
-              </SelectContent>
-            </Select>
+              {showAdvanced ? "▼" : "▶"} Opções avançadas
+            </button>
+            
+            {showAdvanced && (
+              <div className="grid gap-2 mt-3">
+                <Label htmlFor="slug">Endereço personalizado (URL)</Label>
+                <Input
+                  id="slug"
+                  value={slug}
+                  onChange={(e) => setSlug(e.target.value)}
+                  placeholder="catalogo-pascoa-2025"
+                  className={slugError ? "border-destructive" : ""}
+                />
+                {slugError ? (
+                  <p className="text-xs text-destructive">{slugError}</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    Deixe em branco para gerar automaticamente
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -268,7 +255,7 @@ export function CreateCatalogDialog({ open, onOpenChange, onSuccess }: CreateCat
             Cancelar
           </Button>
           <Button onClick={handleCreate} disabled={!title.trim() || loading || !!slugError}>
-            {loading ? "Criando..." : "Criar Catálogo"}
+            {loading ? "Criando..." : "Criar e Começar"}
           </Button>
         </DialogFooter>
       </DialogContent>

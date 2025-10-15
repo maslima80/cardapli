@@ -54,8 +54,6 @@ export interface Product {
   categories: string[] | null;
   quality_tags: string[] | null;
   variants: string[] | null;
-  option_groups: any;
-  disabled_combinations: any;
   photos: any;
   external_media: any;
   created_at: string;

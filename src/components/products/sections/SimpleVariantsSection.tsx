@@ -70,15 +70,23 @@ export function SimpleVariantsSection({
   // Delete an entire option group
   const deleteGroup = (index: number) => {
     const groupName = optionGroups[index].name;
-    const newGroups = optionGroups.filter((_, i) => i !== index);
+    
+    // Create a new array without the group to be deleted
+    const newGroups = [...optionGroups];
+    newGroups.splice(index, 1);
     
     // Remove any disabled combinations that reference this group
     const newDisabledCombinations = disabledCombinations.filter(combo => {
       return !Object.keys(combo).includes(groupName);
     });
     
+    // Update parent component with the new arrays
     onOptionGroupsChange(newGroups);
     onDisabledCombinationsChange(newDisabledCombinations);
+    
+    // Force update the local state to ensure UI reflects changes
+    setHasVariations(newGroups.length > 0);
+    
     console.log("Deleted group:", groupName);
   };
 

@@ -1,0 +1,2 @@
+      case "divider":
+        return <p className="text-sm text-muted-foreground">Este bloco não tem configurações.</p>;

@@ -132,8 +132,6 @@ export function ProductPickerModal({
   const [tempSelectedIds, setTempSelectedIds] = useState<string[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<any[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [variations, setVariations] = useState<string[]>([]);
-  const [selectedVariation, setSelectedVariation] = useState<string>("all");
 
   // DnD sensors for reordering
   const sensors = useSensors(
@@ -149,7 +147,6 @@ export function ProductPickerModal({
       setTempSelectedIds(selectedIds);
       loadProducts();
       loadCategories();
-      loadVariations();
     }
   }, [open, selectedIds]);
 
@@ -157,7 +154,7 @@ export function ProductPickerModal({
     if (open) {
       loadProducts();
     }
-  }, [search, category, status, sortOrder, selectedVariation, page]);
+  }, [search, category, status, sortOrder, page]);
 
   const loadCategories = async () => {
     // Use the provided userId or try to get it from auth
@@ -198,63 +195,6 @@ export function ProductPickerModal({
     setCategories(uniqueCategories);
   };
 
-  const loadVariations = async () => {
-    // Use the provided userId or try to get it from auth
-    let currentUserId = userId;
-    
-    if (!currentUserId) {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          currentUserId = user.id;
-        }
-      } catch (error) {
-        console.error("Error getting user:", error);
-        return;
-      }
-    }
-    
-    if (!currentUserId) return;
-
-    try {
-      // Get all unique variation names from products
-      const { data } = await supabase
-        .from("products")
-        .select("variations")
-        .eq("user_id", currentUserId)
-        .not("variations", "is", null);
-
-      if (data && Array.isArray(data)) {
-        // Extract all variation names
-        const allVariations = data
-          .flatMap(product => {
-            // First check if product is null or undefined
-            if (!product) return [];
-            
-            // Then check if it has variations and it's an array
-            if (typeof product === 'object' && 
-                'variations' in product && 
-                product.variations && 
-                Array.isArray(product.variations)) {
-              
-              return product.variations
-                .filter(v => v && typeof v === 'object' && 'name' in v)
-                .map(v => v.name)
-                .filter(Boolean);
-            }
-            return [];
-          });
-
-        // Remove duplicates
-        const uniqueVariations = [...new Set(allVariations)].sort();
-        setVariations(uniqueVariations);
-      }
-    } catch (error) {
-      console.error("Error loading variations:", error);
-      setVariations([]);
-    }
-  };
-
   const loadProducts = async () => {
     console.log("Loading products...");
     
@@ -290,7 +230,7 @@ export function ProductPickerModal({
 
     let query = supabase
       .from("products")
-      .select("id, title, photos, category, price, status, created_at, price_on_request, price_hidden, price_on_request_label, categories, quality_tags, variations", { count: "exact" })
+      .select("id, title, photos, category, price, status, created_at, price_on_request, price_hidden, price_on_request_label, categories, quality_tags", { count: "exact" })
       .eq("user_id", currentUserId);
 
     // Apply search filter
@@ -306,11 +246,6 @@ export function ProductPickerModal({
     // Apply status filter
     if (status && status !== "all") {
       query = query.eq("status", status === "disponivel" ? "Disponível" : "Sob encomenda");
-    }
-
-    // Apply variation filter
-    if (selectedVariation && selectedVariation !== "all") {
-      query = query.contains("variations", [{ name: selectedVariation }]);
     }
     
     // Apply sorting
@@ -411,13 +346,13 @@ export function ProductPickerModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-[700px] h-[90vh] max-h-[90vh] flex flex-col p-0 overflow-hidden">
         <DialogHeader>
           <DialogTitle>Selecionar Produtos</DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue="browse" className="w-full flex-1 flex flex-col min-h-0">
-          <TabsList className="grid w-full grid-cols-2 mb-4">
+        <Tabs defaultValue="browse" className="w-full flex-1 flex flex-col overflow-hidden px-4 pt-2">
+          <TabsList className="grid w-full grid-cols-2 mb-2">
             <TabsTrigger value="browse">Navegar produtos</TabsTrigger>
             <TabsTrigger value="selected" disabled={tempSelectedIds.length === 0}>
               Selecionados ({tempSelectedIds.length})
@@ -514,35 +449,10 @@ export function ProductPickerModal({
                     </SelectContent>
                   </Select>
                 </div>
-
-                {variations.length > 0 && (
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">Variação</label>
-                    <Select
-                      value={selectedVariation}
-                      onValueChange={(value) => {
-                        setSelectedVariation(value);
-                        setPage(1);
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Todas as variações" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">Todas as variações</SelectItem>
-                        {variations.map((variation) => (
-                          <SelectItem key={variation} value={variation}>
-                            {variation}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
               </div>
             )}
 
-            <ScrollArea className="flex-1 pr-4">
+            <div className="flex-1 overflow-y-auto pr-4" style={{ height: "calc(80vh - 180px)" }}>
               {loading ? (
                 <div className="flex justify-center items-center py-8">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -553,7 +463,7 @@ export function ProductPickerModal({
                   <p>Nenhum produto encontrado</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-4">
                   {products.map((product) => (
                     <div
                       key={product.id}
@@ -600,7 +510,7 @@ export function ProductPickerModal({
                                 : "Sem preço"}
                             </p>
                             {product.status === "Sob encomenda" && (
-                              <Badge variant="outline" className="text-xs">
+                              <Badge className="text-xs border border-border">
                                 Sob encomenda
                               </Badge>
                             )}
@@ -611,7 +521,7 @@ export function ProductPickerModal({
                   ))}
                 </div>
               )}
-            </ScrollArea>
+            </div>
 
             {/* Pagination */}
             {totalPages > 1 && (
@@ -639,8 +549,8 @@ export function ProductPickerModal({
             )}
           </TabsContent>
 
-          <TabsContent value="selected" className="flex-1 flex flex-col min-h-0">
-            <ScrollArea className="flex-1">
+          <TabsContent value="selected" className="flex-1 flex flex-col">
+            <div className="flex-1 overflow-y-auto" style={{ height: "calc(80vh - 180px)" }}>
               {selectedProducts.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <p>Nenhum produto selecionado</p>
@@ -668,18 +578,18 @@ export function ProductPickerModal({
                   </SortableContext>
                 </DndContext>
               )}
-            </ScrollArea>
+            </div>
           </TabsContent>
         </Tabs>
 
-        <DialogFooter>
+        <div className="sticky bottom-0 left-0 right-0 p-4 border-t bg-background flex justify-end gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
           <Button onClick={handleSave} disabled={loading}>
             Salvar seleção
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
