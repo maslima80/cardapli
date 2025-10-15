@@ -5,23 +5,26 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import {
-  Image as ImageIcon,
+  Plus,
   Type,
-  LayoutGrid,
+  Image as ImageIcon,
+  ImagePlus,
+  Video,
+  Box,
+  Tag,
+  MapPin,
   Info,
   Phone,
   Share2,
-  Minus,
   Star,
   List,
-  HelpCircle,
-  AlertCircle,
-  Video,
-  ImagePlus,
   ListOrdered,
-  MapPin,
-  Tag,
+  AlertCircle,
+  Minus,
+  Folder,
+  LayoutGrid,
   Layers,
+  HelpCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -48,6 +51,7 @@ const blockTypes = [
   { type: "step_by_step", icon: ListOrdered, label: "Passo a passo", description: "Guia de instruções sequenciais" },
   { type: "faq", icon: HelpCircle, label: "Perguntas Frequentes", description: "Dúvidas comuns" },
   { type: "important_info", icon: AlertCircle, label: "Info Importante", description: "Destaque informações" },
+  { type: "catalogs", icon: Folder, label: "Catálogos", description: "Mostre seus catálogos" },
   { type: "divider", icon: Minus, label: "Divisor", description: "Linha de separação" },
 ];
 

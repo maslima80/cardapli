@@ -16,6 +16,7 @@ import { ImportantInfoBlock } from "./blocks/ImportantInfoBlock";
 import { LocationBlock } from "./blocks/LocationBlock";
 import { CategoryGridBlock } from "./blocks/CategoryGridBlock";
 import { TagGridBlock } from "./blocks/TagGridBlock";
+import { CatalogosBlock } from "./blocks/CatalogosBlock";
 import { BlockWrapper } from "./BlockWrapper";
 import { getBlockBackground } from "./BlockBackgroundMapper";
 
@@ -82,6 +83,9 @@ export const BlockRenderer = ({ block, profile, userId }: BlockRendererProps) =>
     
     case "important_info":
       return <ImportantInfoBlock data={block.data} />;
+    
+    case "catalogs":
+      return <CatalogosBlock data={block.data} profile={profile} />;
     
       default:
         return null;

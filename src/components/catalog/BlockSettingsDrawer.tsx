@@ -14,6 +14,7 @@ import { ProductGridBlockSettings } from "./ProductGridBlockSettings";
 import { LocationBlockSettings } from "./settings/LocationBlockSettings";
 import { CategoryGridBlockSettings } from "./settings/CategoryGridBlockSettings";
 import { TagGridBlockSettings } from "./settings/TagGridBlockSettings";
+import { CatalogosBlockSettings } from "./blocks/CatalogosBlockSettings";
 import { supabase } from "@/integrations/supabase/client";
 import { extractVideoInfo } from "@/lib/external-media";
 
@@ -1766,6 +1767,19 @@ export const BlockSettingsDrawer = ({
             data={formData}
             onUpdate={(updatedData) => setFormData(updatedData)}
           />
+        );
+      
+      case "catalogs":
+        return userId ? (
+          <CatalogosBlockSettings
+            data={formData}
+            onUpdate={(updatedData) => setFormData(updatedData)}
+            userId={userId}
+          />
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">Carregando...</p>
+          </div>
         );
 
       default:
