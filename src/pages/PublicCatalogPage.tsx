@@ -49,13 +49,23 @@ const PublicCatalogPage = () => {
       }
 
       // Check if catalog is accessible
-      // Rascunho = not accessible publicly
-      // Link desativado = not accessible
-      // For backward compatibility, also check old status values
-      const isRascunho = catalogData.status === "rascunho" || catalogData.status === "draft";
-      const linkDesativado = catalogData.link_ativo === false;
+      // Status must be 'publicado' or old 'public'/'unlisted'
+      const isPublished = catalogData.status === "publicado" || 
+                         catalogData.status === "public" || 
+                         catalogData.status === "unlisted";
+      
+      // Link must be active (or undefined for backward compat with old catalogs)
+      const linkActive = catalogData.link_ativo !== false;
 
-      if (isRascunho || linkDesativado) {
+      console.log("Catalog access check:", {
+        status: catalogData.status,
+        link_ativo: catalogData.link_ativo,
+        isPublished,
+        linkActive,
+        willShow: isPublished && linkActive
+      });
+
+      if (!isPublished || !linkActive) {
         setUnavailable(true);
         setLoading(false);
         return;
