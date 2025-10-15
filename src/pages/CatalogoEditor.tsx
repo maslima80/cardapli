@@ -244,7 +244,8 @@ const CatalogoEditor = () => {
     toast.success("Ordem atualizada ✓");
   };
 
-  const handlePublish = async (data: { status: string; link_ativo: boolean; no_perfil: boolean }) => {
+  const handlePublish = async (data: { status: string; link_ativo: boolean }) => {
+    // no_perfil: deprecated - visibility controlled by profile_blocks 'catalogs' block
     const { error } = await supabase
       .from("catalogs")
       .update(data)
@@ -494,7 +495,6 @@ const CatalogoEditor = () => {
         profileSlug={profile?.slug}
         currentStatus={catalog?.status || "rascunho"}
         linkAtivo={catalog?.link_ativo || false}
-        noPerfil={catalog?.no_perfil || false}
         onPublish={handlePublish}
       />
 

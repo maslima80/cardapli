@@ -100,7 +100,7 @@ export default function QuickCatalogCreate() {
           slug: catalogSlug,
           status: 'publicado',
           link_ativo: true,
-          no_perfil: false,
+          // no_perfil: deprecated - visibility controlled by profile_blocks 'catalogs' block
           cover: coverImage ? { url: coverImage } : null,
         })
         .select()

@@ -112,7 +112,7 @@ export function CreateCatalogDialog({ open, onOpenChange, onSuccess }: CreateCat
         slug: finalSlug,
         status: 'rascunho', // Always start as draft
         link_ativo: false, // Not active until published
-        no_perfil: false, // Not on profile until added
+        // no_perfil: deprecated - visibility controlled by profile_blocks 'catalogs' block
       })
       .select()
       .single();

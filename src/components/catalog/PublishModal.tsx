@@ -14,8 +14,8 @@ interface PublishModalProps {
   profileSlug?: string;
   currentStatus: string;
   linkAtivo: boolean;
-  noPerfil: boolean;
-  onPublish: (data: { status: string; link_ativo: boolean; no_perfil: boolean }) => void;
+  // noPerfil: deprecated - visibility controlled by profile_blocks 'catalogs' block
+  onPublish: (data: { status: string; link_ativo: boolean }) => void;
 }
 
 export const PublishModal = ({
@@ -25,7 +25,7 @@ export const PublishModal = ({
   profileSlug,
   currentStatus,
   linkAtivo,
-  noPerfil,
+  // noPerfil: deprecated
   onPublish,
 }: PublishModalProps) => {
   const [linkActive, setLinkActive] = useState(true); // Default to active
@@ -111,7 +111,7 @@ export const PublishModal = ({
                 onPublish({
                   status: 'publicado',
                   link_ativo: linkActive,
-                  no_perfil: false, // Will be managed by profile builder later
+                  // no_perfil: deprecated - visibility controlled by profile_blocks 'catalogs' block
                 });
                 onOpenChange(false);
               }}
