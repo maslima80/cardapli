@@ -95,7 +95,7 @@ export const CatalogosBlock = ({ data, profile }: CatalogosBlockProps) => {
             <a
               key={catalog.id}
               href={publicCatalogUrl(profile.slug, catalog.slug)}
-              className="group block bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-all"
+              className="group block block-surface-ring rounded-xl overflow-hidden hover:shadow-lg transition-all"
             >
               {/* Cover Image */}
               <div className="aspect-video bg-gradient-to-br from-primary/10 to-primary/5 relative overflow-hidden">

@@ -40,7 +40,8 @@ export const BlockRendererPremium = ({
   index = 0 
 }: BlockRendererProps) => {
   // Determine if this block should have alternating background
-  const useAltBackground = index % 2 === 1;
+  // Disabled for better dark mode support
+  const useAltBackground = false;
   
   // Determine if this is a full-bleed block (no container padding)
   const isFullBleed = (block.type === "cover" && block.data?.layout === "full") ||
