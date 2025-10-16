@@ -34,7 +34,6 @@ interface Product {
 interface Profile {
   slug: string;
   business_name: string | null;
-  avatar_url: string | null;
 }
 
 export default function PublicProductPage() {
@@ -50,16 +49,25 @@ export default function PublicProductPage() {
     loadProductAndProfile();
   }, [userSlug, productSlug]);
 
+  // Set document title for SEO
+  useEffect(() => {
+    if (product && profile) {
+      const displayName = profile.business_name || userSlug;
+      document.title = `${product.title} — ${displayName}`;
+    }
+  }, [product, profile, userSlug]);
+
   const loadProductAndProfile = async () => {
     try {
-      // Load profile
+      // Load profile with id in one query
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
-        .select("slug, business_name, avatar_url")
+        .select("id, slug, business_name")
         .eq("slug", userSlug)
         .single();
 
       if (profileError || !profileData) {
+        console.error("Profile error:", profileError);
         setError("Perfil não encontrado");
         setLoading(false);
         return;
@@ -67,24 +75,11 @@ export default function PublicProductPage() {
 
       setProfile(profileData as any);
 
-      // Get user ID from profile
-      const { data: userProfile } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("slug", userSlug)
-        .single();
-
-      if (!userProfile) {
-        setError("Perfil não encontrado");
-        setLoading(false);
-        return;
-      }
-
       // Load product
       const { data: productData, error: productError } = await supabase
         .from("products")
         .select("*")
-        .eq("user_id", userProfile.id)
+        .eq("user_id", profileData.id)
         .eq("slug", productSlug)
         .single();
 
@@ -168,13 +163,6 @@ export default function PublicProductPage() {
   const displayName = profile.business_name || userSlug;
   const whatsappUrl = whatsappShareProduct(profile.slug, product.slug, product.title);
   const absoluteUrl = absolute(publicProductUrl(profile.slug, product.slug));
-
-  // Set document title for SEO
-  useEffect(() => {
-    if (product && profile) {
-      document.title = `${product.title} — ${displayName}`;
-    }
-  }, [product, profile, displayName]);
 
   return (
     <>
