@@ -113,6 +113,32 @@ export function ProductGridBlockV2Premium({
 
       let filteredProducts = productsData || [];
       
+      // Load variant prices for all products
+      if (filteredProducts.length > 0) {
+        const productIds = filteredProducts.map(p => p.id);
+        const { data: variantsData } = await supabase
+          .from("product_variants")
+          .select("product_id, price")
+          .in("product_id", productIds)
+          .eq("is_available", true)
+          .not("price", "is", null);
+
+        if (variantsData) {
+          // Group variant prices by product_id
+          const variantPricesByProduct = variantsData.reduce((acc, v) => {
+            if (!acc[v.product_id]) acc[v.product_id] = [];
+            acc[v.product_id].push(Number(v.price));
+            return acc;
+          }, {} as Record<string, number[]>);
+
+          // Add variantPrices to each product
+          filteredProducts = filteredProducts.map(product => ({
+            ...product,
+            variantPrices: variantPricesByProduct[product.id] || [],
+          }));
+        }
+      }
+      
       // Client-side filtering for categories and tags
       if (data.source_type === "category" && data.selected_categories?.length) {
         filteredProducts = filteredProducts.filter(product => {

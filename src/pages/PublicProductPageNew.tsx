@@ -65,9 +65,26 @@ export default function PublicProductPageNew() {
   
   // Share modal state
   const [shareModalOpen, setShareModalOpen] = useState(false);
+  
+  // Get referrer to determine back navigation
+  const [backUrl, setBackUrl] = useState<string>("");
 
   useEffect(() => {
     loadProductAndProfile();
+    
+    // Detect if user came from a catalog
+    const referrer = document.referrer;
+    if (referrer && referrer.includes(`/u/${userSlug}/`)) {
+      // Extract catalog slug from referrer if present
+      const catalogMatch = referrer.match(/\/u\/[^/]+\/([^/?#]+)/);
+      if (catalogMatch && catalogMatch[1] !== 'p') {
+        // User came from a catalog, set back URL to that catalog
+        setBackUrl(`/u/${userSlug}/${catalogMatch[1]}`);
+        return;
+      }
+    }
+    // Default: go back to profile
+    setBackUrl(publicProfileUrl(userSlug || ""));
   }, [userSlug, productSlug]);
 
   // Set document title for SEO
@@ -281,7 +298,7 @@ export default function PublicProductPageNew() {
       <header className="bg-background/95 backdrop-blur border-b border-border sticky top-0 z-40 w-full">
         <div className="w-full max-w-6xl mx-auto px-4 py-3 flex items-center justify-between min-w-0">
           <Link 
-            to={publicProfileUrl(profile.slug)} 
+            to={backUrl || publicProfileUrl(profile.slug)} 
             className="flex items-center gap-2 hover:opacity-80 transition-opacity"
           >
             <ArrowLeft className="w-5 h-5" />

@@ -15,10 +15,12 @@ interface ProductCardProps {
     price_on_request?: boolean;
     price_on_request_label?: string;
     price_unit?: string;
+    price_unit_custom?: string;
     photos?: Array<{ url: string; alt?: string }>;
     categories?: string[];
     quality_tags?: string[];
     variants_count?: number;
+    variantPrices?: number[];
   };
   layout?: "grid" | "list";
   showPrice?: boolean;
@@ -63,16 +65,37 @@ export function ProductCard({
     }
     
     if (product.price) {
+      // Check if product has variants with different prices
+      const variantPrices = product.variantPrices || [];
+      const allPrices = [
+        Number(product.price),
+        ...variantPrices.map(p => Number(p))
+      ].filter(p => !isNaN(p) && p > 0);
+
+      const minPrice = allPrices.length > 0 ? Math.min(...allPrices) : product.price;
+      const maxPrice = allPrices.length > 0 ? Math.max(...allPrices) : product.price;
+      const hasRange = minPrice !== maxPrice;
+
+      const priceStr = new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      }).format(minPrice);
+
+      const unit = product.price_unit === "Outro" && product.price_unit_custom
+        ? product.price_unit_custom
+        : product.price_unit || "Unidade";
+
       return (
         <div className="flex items-baseline gap-1 mt-1">
-          <span className="text-[15px] font-semibold text-emerald-600">
-            R$ {product.price.toFixed(2)}
-          </span>
-          {product.price_unit && (
-            <span className="text-[11px] text-slate-500">
-              /{product.price_unit}
-            </span>
+          {hasRange && variantPrices.length > 0 && (
+            <span className="text-[11px] text-slate-500">A partir de</span>
           )}
+          <span className="text-[15px] font-semibold text-emerald-600">
+            {priceStr}
+          </span>
+          <span className="text-[11px] text-slate-500">
+            / {unit}
+          </span>
         </div>
       );
     }
@@ -87,8 +110,8 @@ export function ProductCard({
         className="group block rounded-2xl bg-white shadow-sm ring-1 ring-black/5 hover:shadow-md transition-all"
       >
         <div className="grid grid-cols-[96px,1fr] gap-3 items-start p-3">
-          {/* Thumbnail */}
-          <div className="w-24 h-24 bg-muted rounded-lg overflow-hidden flex-shrink-0">
+          {/* Thumbnail - Square */}
+          <div className="w-24 h-24 bg-muted rounded-xl overflow-hidden flex-shrink-0">
             {imageUrl ? (
               <img
                 src={getImageUrl(imageUrl, 320)}
