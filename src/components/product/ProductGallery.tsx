@@ -102,30 +102,31 @@ export const ProductGallery = ({ photos, productTitle }: ProductGalleryProps) =>
 
   return (
     <>
-      <div className="space-y-3">
+      <div className="w-full space-y-3">
         {/* Main Gallery with Embla */}
-        <div className="relative group">
-          <div className="overflow-hidden rounded-2xl" ref={emblaRef}>
-            <div className="flex touch-pan-y">
+        <div className="relative group w-full">
+          <div className="overflow-hidden rounded-2xl min-w-0" ref={emblaRef}>
+            <div className="flex touch-pan-y min-w-0">
               {photos.map((photo, index) => (
                 <div
                   key={index}
                   className="flex-[0_0_100%] min-w-0 relative"
                   style={{ aspectRatio: '4/3' }}
                 >
-                  {/* Blur depth layer */}
+                  {/* Blur depth layer - uses contain to match foreground */}
                   <div
-                    className="absolute inset-0 blur-2xl scale-110 opacity-30"
+                    className="absolute inset-0 blur-3xl scale-125 opacity-20"
                     style={{
                       backgroundImage: `url(${photo.url})`,
-                      backgroundSize: 'cover',
+                      backgroundSize: 'contain',
+                      backgroundRepeat: 'no-repeat',
                       backgroundPosition: 'center',
                     }}
                     aria-hidden="true"
                   />
                   
                   {/* Foreground container */}
-                  <div className="absolute inset-0 flex items-center justify-center p-4">
+                  <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-6">
                     <img
                       key={`${photo.url}-${index}`}
                       src={photo.url}
@@ -184,7 +185,7 @@ export const ProductGallery = ({ photos, productTitle }: ProductGalleryProps) =>
         {/* Thumbnails with scroll fade */}
         {photos.length > 1 && (
           <div
-            className="relative overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-1 -mx-1 px-1"
+            className="relative overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-1 w-full min-w-0"
             style={{
               WebkitMaskImage:
                 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
@@ -192,7 +193,7 @@ export const ProductGallery = ({ photos, productTitle }: ProductGalleryProps) =>
                 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
             }}
           >
-            <div className="flex gap-2 min-w-max px-2">
+            <div className="flex gap-2 min-w-max px-1">
               {photos.map((photo, index) => (
                 <button
                   key={index}

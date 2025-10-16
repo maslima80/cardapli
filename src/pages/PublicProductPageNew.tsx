@@ -277,10 +277,10 @@ export default function PublicProductPageNew() {
   const hasVariants = variantsData.options.length > 0;
 
   return (
-    <div className="min-h-screen bg-gradient-subtle pb-24 md:pb-8">
+    <div className="min-h-screen bg-gradient-subtle pb-28 md:pb-8 w-full overflow-x-hidden">
       {/* Header */}
-      <header className="bg-background/95 backdrop-blur border-b border-border sticky top-0 z-40">
-        <div className="container max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <header className="bg-background/95 backdrop-blur border-b border-border sticky top-0 z-40 w-full">
+        <div className="w-full max-w-6xl mx-auto px-4 py-3 flex items-center justify-between min-w-0">
           <Link 
             to={publicProfileUrl(profile.slug)} 
             className="flex items-center gap-2 hover:opacity-80 transition-opacity"
@@ -302,10 +302,10 @@ export default function PublicProductPageNew() {
       </header>
 
       {/* Main Content */}
-      <main className="container max-w-6xl mx-auto px-4 py-6 md:py-8">
-        <div className="grid md:grid-cols-2 gap-6 md:gap-8">
+      <main className="w-full max-w-6xl mx-auto px-4 py-6 md:py-8 min-w-0">
+        <div className="grid md:grid-cols-2 gap-6 md:gap-8 min-w-0">
           {/* Left Column - Gallery & Media */}
-          <div className="space-y-6">
+          <div className="space-y-6 min-w-0 w-full">
             <ProductGallery 
               photos={photos.map(p => ({ url: p.url, alt: p.alt }))} 
               productTitle={product.title}
@@ -320,7 +320,7 @@ export default function PublicProductPageNew() {
           </div>
 
           {/* Right Column - Product Info */}
-          <div className="space-y-6">
+          <div className="space-y-6 min-w-0 w-full">
             {/* Title & Price */}
             <div>
               <h1 className="text-2xl md:text-3xl font-bold mb-2">{product.title}</h1>
@@ -334,9 +334,9 @@ export default function PublicProductPageNew() {
 
             {/* Categories & Tags */}
             {(product.categories?.length || product.quality_tags?.length) && (
-              <div className="space-y-2">
+              <div className="space-y-2 min-w-0">
                 {product.categories && product.categories.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2 min-w-0">
                     <span className="text-xs font-semibold text-muted-foreground uppercase">Categorias:</span>
                     {product.categories.map((cat, i) => (
                       <Badge key={i} className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
@@ -347,7 +347,7 @@ export default function PublicProductPageNew() {
                 )}
 
                 {product.quality_tags && product.quality_tags.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2 min-w-0">
                     <span className="text-xs font-semibold text-muted-foreground uppercase">Tags:</span>
                     {product.quality_tags.map((tag, i) => (
                       <Badge key={i} className="border-2 border-primary/50 text-primary bg-transparent">
@@ -433,8 +433,8 @@ export default function PublicProductPageNew() {
       </main>
 
       {/* Sticky WhatsApp CTA */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur border-t border-border p-4 z-40">
-        <div className="container max-w-6xl mx-auto">
+      <div className="fixed inset-x-0 bottom-0 bg-background/95 backdrop-blur border-t border-border z-40 w-full">
+        <div className="w-full max-w-6xl mx-auto px-4 py-4 pb-[max(env(safe-area-inset-bottom),16px)] min-w-0">
           <a
             href={getWhatsAppUrl()}
             target="_blank"
