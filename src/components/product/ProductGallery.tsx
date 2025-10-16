@@ -32,6 +32,14 @@ export const ProductGallery = ({ photos, productTitle }: ProductGalleryProps) =>
     align: 'center',
   });
 
+  // Embla carousel for thumbnails
+  const [emblaThumbnailRef, emblaThumbnailApi] = useEmblaCarousel({
+    loop: false,
+    align: 'start',
+    containScroll: 'keepSnaps',
+    dragFree: true,
+  });
+
   // Update selected index when embla scrolls
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -77,7 +85,8 @@ export const ProductGallery = ({ photos, productTitle }: ProductGalleryProps) =>
 
   const scrollTo = useCallback((index: number) => {
     if (emblaApi) emblaApi.scrollTo(index);
-  }, [emblaApi]);
+    if (emblaThumbnailApi) emblaThumbnailApi.scrollTo(index);
+  }, [emblaApi, emblaThumbnailApi]);
 
   if (!photos || photos.length === 0) {
     return (
@@ -182,18 +191,19 @@ export const ProductGallery = ({ photos, productTitle }: ProductGalleryProps) =>
           )}
         </div>
 
-        {/* Thumbnails with scroll fade */}
+        {/* Thumbnails with Embla carousel */}
         {photos.length > 1 && (
           <div
-            className="relative overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-1 w-full min-w-0"
+            className="relative overflow-hidden w-full min-w-0"
             style={{
               WebkitMaskImage:
                 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
               maskImage:
                 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
             }}
+            ref={emblaThumbnailRef}
           >
-            <div className="flex gap-2 min-w-max px-1">
+            <div className="flex gap-2 touch-pan-y">
               {photos.map((photo, index) => (
                 <button
                   key={index}
