@@ -295,7 +295,7 @@ const CatalogoEditor = () => {
     }
   };
 
-  // Calculate effective theme
+  // Calculate effective theme (only for preview mode)
   const effectiveTheme = getEffectiveTheme(catalog?.theme_overrides, profile);
   const themeVars = generateThemeVariables(effectiveTheme);
 
@@ -320,7 +320,7 @@ const CatalogoEditor = () => {
     ? "Adicione pelo menos um bloco além da Capa"
     : "";
 
-  // Apply font family based on theme
+  // Apply font family based on theme (only in preview mode)
   const fontClass =
     effectiveTheme.font === "elegant"
       ? "font-playfair"
@@ -329,7 +329,7 @@ const CatalogoEditor = () => {
       : "font-inter";
 
   return (
-    <div className={`min-h-screen bg-gradient-subtle ${fontClass}`} style={themeVars as any}>
+    <div className="min-h-screen bg-gradient-subtle">
       {/* Top Bar */}
       <div className="border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
@@ -406,7 +406,10 @@ const CatalogoEditor = () => {
             </div>
           </div>
         ) : previewMode ? (
-          <div className="space-y-6 bg-background rounded-2xl shadow-lg overflow-hidden">
+          <div 
+            className={`space-y-6 bg-background rounded-2xl shadow-lg overflow-hidden ${fontClass}`}
+            style={themeVars as any}
+          >
             {blocks.filter(b => b.visible).map((block) => (
               <div key={block.id} className="catalog-preview-block">
                 <BlockRenderer
