@@ -607,56 +607,113 @@ export const BlockSettingsDrawer = ({
       case "contact":
         return (
           <>
-            <div className="flex items-center justify-between mb-4">
-              <Label>Sincronizar com Perfil</Label>
-              <Switch
-                checked={formData.sync_profile !== false}
-                onCheckedChange={(checked) => setFormData({ ...formData, sync_profile: checked })}
-              />
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label>Mostrar WhatsApp</Label>
-                <Checkbox
-                  checked={formData.show_whatsapp !== false}
-                  onCheckedChange={(checked) => setFormData({ ...formData, show_whatsapp: checked })}
+            <div className="space-y-4">
+              {/* Title */}
+              <div>
+                <Label>Título</Label>
+                <Input
+                  value={formData.title || "Entre em contato"}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  placeholder="Entre em contato"
                 />
               </div>
-              {formData.show_whatsapp !== false && (
+
+              {/* Subtitle (optional) */}
+              <div>
+                <Label>Subtítulo (opcional)</Label>
                 <Input
-                  value={formData.whatsapp_label || "Falar no WhatsApp"}
-                  onChange={(e) => setFormData({ ...formData, whatsapp_label: e.target.value })}
-                  placeholder="Rótulo do botão"
-                />
-              )}
-              <div className="flex items-center justify-between">
-                <Label>Mostrar Email</Label>
-                <Checkbox
-                  checked={formData.show_email !== false}
-                  onCheckedChange={(checked) => setFormData({ ...formData, show_email: checked })}
+                  value={formData.subtitle || ""}
+                  onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
+                  placeholder="Como podemos ajudar?"
                 />
               </div>
-              {formData.show_email !== false && (
-                <Input
-                  value={formData.email_label || "Enviar email"}
-                  onChange={(e) => setFormData({ ...formData, email_label: e.target.value })}
-                  placeholder="Rótulo do botão"
-                />
-              )}
-              <div className="flex items-center justify-between">
-                <Label>Mostrar Telefone</Label>
-                <Checkbox
-                  checked={formData.show_phone !== false}
-                  onCheckedChange={(checked) => setFormData({ ...formData, show_phone: checked })}
+
+              {/* Message (optional) */}
+              <div>
+                <Label>Mensagem (opcional)</Label>
+                <Textarea
+                  value={formData.message || ""}
+                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                  placeholder="Respondemos em até 24 horas"
+                  rows={2}
                 />
               </div>
-              {formData.show_phone !== false && (
-                <Input
-                  value={formData.phone_label || "Ligar"}
-                  onChange={(e) => setFormData({ ...formData, phone_label: e.target.value })}
-                  placeholder="Rótulo do botão"
-                />
-              )}
+
+              <div className="border-t pt-4 space-y-4">
+                <p className="text-sm font-medium">Canais de Contato</p>
+                
+                {/* WhatsApp */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>Mostrar WhatsApp</Label>
+                    <Checkbox
+                      checked={formData.whatsapp?.enabled !== false}
+                      onCheckedChange={(checked) => setFormData({ 
+                        ...formData, 
+                        whatsapp: { ...formData.whatsapp, enabled: checked }
+                      })}
+                    />
+                  </div>
+                  {formData.whatsapp?.enabled !== false && (
+                    <Input
+                      value={formData.whatsapp?.label || "Enviar mensagem no WhatsApp"}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        whatsapp: { ...formData.whatsapp, label: e.target.value }
+                      })}
+                      placeholder="Enviar mensagem no WhatsApp"
+                    />
+                  )}
+                </div>
+
+                {/* Email */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>Mostrar Email</Label>
+                    <Checkbox
+                      checked={formData.email?.enabled !== false}
+                      onCheckedChange={(checked) => setFormData({ 
+                        ...formData, 
+                        email: { ...formData.email, enabled: checked }
+                      })}
+                    />
+                  </div>
+                  {formData.email?.enabled !== false && (
+                    <Input
+                      value={formData.email?.label || "E-mail"}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        email: { ...formData.email, label: e.target.value }
+                      })}
+                      placeholder="E-mail"
+                    />
+                  )}
+                </div>
+
+                {/* Phone */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>Mostrar Telefone</Label>
+                    <Checkbox
+                      checked={formData.phone?.enabled !== false}
+                      onCheckedChange={(checked) => setFormData({ 
+                        ...formData, 
+                        phone: { ...formData.phone, enabled: checked }
+                      })}
+                    />
+                  </div>
+                  {formData.phone?.enabled !== false && (
+                    <Input
+                      value={formData.phone?.label || "Telefone"}
+                      onChange={(e) => setFormData({ 
+                        ...formData, 
+                        phone: { ...formData.phone, label: e.target.value }
+                      })}
+                      placeholder="Telefone"
+                    />
+                  )}
+                </div>
+              </div>
             </div>
           </>
         );
