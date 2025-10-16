@@ -9,7 +9,7 @@ import { ExternalMedia } from "@/components/product/ExternalMedia";
 import { VariantSelector } from "@/components/product/VariantSelector";
 import { ProductInfoAccordion } from "@/components/product/ProductInfoAccordion";
 import { ProductShareModal } from "@/components/product/ProductShareModal";
-import { PublicThemeProvider } from "@/components/theme/PublicThemeProvider";
+import { SimpleThemeProvider } from "@/components/theme/SimpleThemeProvider";
 import { buildVariants, ProductVariant, getPriceRange } from "@/lib/variants";
 import { publicProfileUrl, absolute, publicProductUrl, publicProductFullUrl } from "@/lib/urls";
 import { toast } from "sonner";
@@ -294,7 +294,7 @@ export default function PublicProductPageNew() {
   const hasVariants = variantsData.options.length > 0;
 
   return (
-    <PublicThemeProvider userSlug={userSlug!}>
+    <SimpleThemeProvider userSlug={userSlug!}>
       <div className="pb-28 md:pb-8 w-full overflow-x-hidden">
       {/* Header */}
       <header className="bg-background/95 backdrop-blur border-b border-border sticky top-0 z-40 w-full">
@@ -484,6 +484,6 @@ export default function PublicProductPageNew() {
         publicLink={true}
       />
       </div>
-    </PublicThemeProvider>
+    </SimpleThemeProvider>
   );
 }

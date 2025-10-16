@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { BlockRendererPremium } from "@/components/catalog/BlockRendererPremium";
 import { SectionNavigation } from "@/components/catalog/SectionNavigation";
-import { PublicThemeProvider } from "@/components/theme/PublicThemeProvider";
+import { SimpleThemeProvider } from "@/components/theme/SimpleThemeProvider";
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
 import { useMetaTags } from "@/hooks/useMetaTags";
@@ -169,11 +169,8 @@ const PublicCatalogPage = () => {
 
   const showSectionNav = catalog?.settings?.show_section_nav && sections.length > 0;
 
-  // Extract catalog theme overrides
-  const catalogOverrides = catalog?.theme_overrides || null;
-
   return (
-    <PublicThemeProvider userSlug={userSlug!} catalogOverrides={catalogOverrides}>
+    <SimpleThemeProvider userSlug={userSlug!}>
       {showSectionNav && <SectionNavigation sections={sections} />}
       
       {blocks.map((block, index) => (
@@ -220,7 +217,7 @@ const PublicCatalogPage = () => {
           </p>
         </div>
       </div>
-    </PublicThemeProvider>
+    </SimpleThemeProvider>
   );
 };
 
