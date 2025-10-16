@@ -69,12 +69,6 @@ export function ContactBlockPremium({ data, profile, catalogTitle }: ContactBloc
         subtitle={data.subtitle}
       />
 
-      {data.message && (
-        <p className="text-sm text-muted-foreground mb-6">
-          {data.message}
-        </p>
-      )}
-
       <div className="space-y-3">
         {/* Primary WhatsApp CTA */}
         {showWhatsapp && (
@@ -113,12 +107,13 @@ export function ContactBlockPremium({ data, profile, catalogTitle }: ContactBloc
         </div>
       </div>
 
-      {/* Optional response time message */}
-      {!data.message && (
-        <p className="text-xs text-center text-muted-foreground mt-4">
-          Respondemos em até 24 horas
+      {/* Optional message at bottom */}
+      {data.message && (
+        <p className="text-sm text-center text-muted-foreground mt-4">
+          {data.message}
         </p>
       )}
+
     </div>
   );
 }
