@@ -219,7 +219,7 @@ export function ExternalMediaUploader({
       <div className="flex gap-2">
         <Input
           ref={inputRef}
-          placeholder="Cole o link do YouTube, TikTok ou Instagram Reels"
+          placeholder="Cole o link do YouTube"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           onKeyDown={(e) => {

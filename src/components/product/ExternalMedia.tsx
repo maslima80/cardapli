@@ -2,10 +2,13 @@ import { useState } from "react";
 import { Play, ExternalLink } from "lucide-react";
 
 interface ExternalMediaItem {
-  type: "video" | "link";
+  type?: "video" | "link";
+  provider?: "youtube" | "vimeo";
   url: string;
+  embedUrl?: string;
   thumbnail?: string;
   title?: string;
+  videoId?: string;
 }
 
 interface ExternalMediaProps {
@@ -50,7 +53,7 @@ export const ExternalMedia = ({ videoUrl, externalMedia = [] }: ExternalMediaPro
     allMedia.push({
       type: "video",
       url: videoUrl,
-      title: "Vídeo do produto",
+      title: "Vídeo",
     });
   }
 
@@ -65,59 +68,64 @@ export const ExternalMedia = ({ videoUrl, externalMedia = [] }: ExternalMediaPro
   return (
     <div className="space-y-3">
       <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-        Mídia
+        Vídeo
       </h3>
 
-      <div className="space-y-3">
+      {/* Show active video in full width if playing */}
+      {activeVideo && (
+        <div className="aspect-video bg-black rounded-lg overflow-hidden mb-3">
+          <iframe
+            src={getVideoEmbedUrl(activeVideo) || ""}
+            title="Vídeo"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="w-full h-full"
+          />
+        </div>
+      )}
+
+      {/* Grid of video thumbnails */}
+      <div className="grid grid-cols-2 gap-2">
         {allMedia.map((item, index) => {
-          const embedUrl = item.type === "video" ? getVideoEmbedUrl(item.url) : null;
+          // Handle both old format (type: "video") and new format (provider: "youtube")
+          const isVideo = item.type === "video" || item.provider === "youtube" || item.provider === "vimeo";
+          const embedUrl = item.embedUrl || (isVideo ? getVideoEmbedUrl(item.url) : null);
           const isActive = activeVideo === item.url;
 
-          if (item.type === "video" && embedUrl) {
+          if (isVideo && embedUrl) {
             return (
-              <div key={index} className="space-y-2">
-                {isActive ? (
-                  <div className="aspect-video bg-black rounded-lg overflow-hidden">
-                    <iframe
-                      src={embedUrl}
-                      title={item.title || `Vídeo ${index + 1}`}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      className="w-full h-full"
-                    />
-                  </div>
+              <button
+                key={index}
+                onClick={() => setActiveVideo(isActive ? null : item.url)}
+                className={`relative aspect-video bg-muted rounded-lg overflow-hidden group hover:ring-2 hover:ring-primary transition-all ${
+                  isActive ? "ring-2 ring-primary" : ""
+                }`}
+              >
+                {item.thumbnail ? (
+                  <img
+                    src={item.thumbnail}
+                    alt={item.title || "Thumbnail do vídeo"}
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
-                  <button
-                    onClick={() => setActiveVideo(item.url)}
-                    className="relative w-full aspect-video bg-muted rounded-lg overflow-hidden group hover:ring-2 hover:ring-primary transition-all"
-                  >
-                    {item.thumbnail ? (
-                      <img
-                        src={item.thumbnail}
-                        alt={item.title || "Thumbnail do vídeo"}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
-                        <Play className="w-16 h-16 text-white/80" />
-                      </div>
-                    )}
-                    
-                    {/* Play Button Overlay */}
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40 transition-colors">
-                      <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <Play className="w-8 h-8 text-gray-900 ml-1" fill="currentColor" />
-                      </div>
-                    </div>
-
-                    {item.title && (
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
-                        <p className="text-white text-sm font-medium">{item.title}</p>
-                      </div>
-                    )}
-                  </button>
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
+                    <Play className="w-12 h-12 text-white/80" />
+                  </div>
                 )}
-              </div>
+                
+                {/* Play Button Overlay */}
+                <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40 transition-colors">
+                  <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Play className="w-6 h-6 text-gray-900 ml-0.5" fill="currentColor" />
+                  </div>
+                </div>
+
+                {item.title && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                    <p className="text-white text-xs font-medium truncate">{item.title}</p>
+                  </div>
+                )}
+              </button>
             );
           }
 

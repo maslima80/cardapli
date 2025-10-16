@@ -42,9 +42,9 @@ export function MediaSection({
       {/* External Media Section */}
       <Card className="p-6 space-y-4">
         <div>
-          <Label>Mídia externa (opcional)</Label>
+          <Label>Vídeo (opcional)</Label>
           <p className="text-sm text-muted-foreground mt-1">
-            Adicione vídeos do YouTube, TikTok ou Instagram Reels
+            Adicione vídeos do YouTube
           </p>
         </div>
         <ExternalMediaUploader
