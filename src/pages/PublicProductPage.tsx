@@ -34,7 +34,6 @@ interface Product {
 interface Profile {
   slug: string;
   business_name: string | null;
-  full_name: string | null;
   avatar_url: string | null;
 }
 
@@ -56,7 +55,7 @@ export default function PublicProductPage() {
       // Load profile
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
-        .select("slug, business_name, full_name, avatar_url")
+        .select("slug, business_name, avatar_url")
         .eq("slug", userSlug)
         .single();
 
@@ -66,13 +65,26 @@ export default function PublicProductPage() {
         return;
       }
 
-      setProfile(profileData);
+      setProfile(profileData as any);
+
+      // Get user ID from profile
+      const { data: userProfile } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("slug", userSlug)
+        .single();
+
+      if (!userProfile) {
+        setError("Perfil não encontrado");
+        setLoading(false);
+        return;
+      }
 
       // Load product
       const { data: productData, error: productError } = await supabase
         .from("products")
         .select("*")
-        .eq("user_id", (await supabase.from("profiles").select("id").eq("slug", userSlug).single()).data?.id)
+        .eq("user_id", userProfile.id)
         .eq("slug", productSlug)
         .single();
 
@@ -82,15 +94,15 @@ export default function PublicProductPage() {
         return;
       }
 
-      // Check if product is publicly available
-      if (!productData.public_link) {
+      // Check if product is publicly available (will work after migration)
+      if ((productData as any).public_link === false) {
         setError("unavailable");
-        setProduct(productData);
+        setProduct(productData as any);
         setLoading(false);
         return;
       }
 
-      setProduct(productData);
+      setProduct(productData as any);
       setLoading(false);
     } catch (err) {
       console.error("Error loading product:", err);
@@ -153,32 +165,19 @@ export default function PublicProductPage() {
   }
 
   const mainImage = product.photos?.[selectedImage]?.url || product.photos?.[0]?.url;
-  const displayName = profile.business_name || profile.full_name || userSlug;
+  const displayName = profile.business_name || userSlug;
   const whatsappUrl = whatsappShareProduct(profile.slug, product.slug, product.title);
   const absoluteUrl = absolute(publicProductUrl(profile.slug, product.slug));
 
+  // Set document title for SEO
+  useEffect(() => {
+    if (product && profile) {
+      document.title = `${product.title} — ${displayName}`;
+    }
+  }, [product, profile, displayName]);
+
   return (
     <>
-      <Helmet>
-        <title>{product.title} — {displayName}</title>
-        <meta name="description" content={product.description?.substring(0, 160) || `Produto ${product.title}`} />
-        
-        {/* Open Graph */}
-        <meta property="og:title" content={`${product.title} — ${displayName}`} />
-        <meta property="og:description" content={product.description?.substring(0, 160) || `Produto ${product.title}`} />
-        <meta property="og:image" content={mainImage || ""} />
-        <meta property="og:url" content={absoluteUrl} />
-        <meta property="og:type" content="product" />
-        
-        {/* Twitter Card */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`${product.title} — ${displayName}`} />
-        <meta name="twitter:description" content={product.description?.substring(0, 160) || `Produto ${product.title}`} />
-        <meta name="twitter:image" content={mainImage || ""} />
-        
-        {/* Canonical */}
-        <link rel="canonical" href={absoluteUrl} />
-      </Helmet>
 
       <div className="min-h-screen bg-gradient-subtle">
         {/* Header */}
@@ -263,10 +262,10 @@ export default function PublicProductPage() {
                 {(product.categories || product.quality_tags) && (
                   <div className="flex flex-wrap gap-2 mb-4">
                     {product.categories?.map((cat, i) => (
-                      <Badge key={`cat-${i}`} variant="secondary">{cat}</Badge>
+                      <Badge key={`cat-${i}`}>{cat}</Badge>
                     ))}
                     {product.quality_tags?.map((tag, i) => (
-                      <Badge key={`tag-${i}`} variant="outline">{tag}</Badge>
+                      <Badge key={`tag-${i}`} className="border">{tag}</Badge>
                     ))}
                   </div>
                 )}
@@ -302,7 +301,7 @@ export default function PublicProductPage() {
                 {product.status && (
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Status:</span>
-                    <Badge variant={product.status === "Disponível" ? "default" : "secondary"}>
+                    <Badge className={product.status === "Disponível" ? "" : "bg-muted"}>
                       {product.status}
                     </Badge>
                   </div>

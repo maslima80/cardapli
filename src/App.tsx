@@ -19,6 +19,7 @@ import QuickCatalogSuccess from "./pages/QuickCatalogSuccess";
 import PublicCatalog from "./pages/PublicCatalog";
 import PublicCatalogPage from "./pages/PublicCatalogPage";
 import PublicProfilePage from "./pages/PublicProfilePage";
+import PublicProductPage from "./pages/PublicProductPage";
 import EscolherSlug from "./pages/EscolherSlug";
 import NotFound from "./pages/NotFound";
 import LegacyRedirect from "./pages/LegacyRedirect";
@@ -56,6 +57,8 @@ const App = () => (
             <Route path="/u/:userSlug" element={<PublicUserLayout />}>
               {/* /u/user → profile */}
               <Route index element={<PublicProfilePage />} />
+              {/* /u/user/p/:productSlug → product */}
+              <Route path="p/:productSlug" element={<PublicProductPage />} />
               {/* /u/user/:catalogSlug → catalog */}
               <Route path=":catalogSlug" element={<PublicCatalogPage />} />
             </Route>
