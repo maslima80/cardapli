@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, ExternalLink, Copy, Files, Trash2, Edit, ArrowLeft, Share2, Eye, Zap, ToggleLeft, ToggleRight } from "lucide-react";
+import { Plus, Search, ExternalLink, Copy, Files, Trash2, Edit, ArrowLeft, Share2, Eye, Zap } from "lucide-react";
 import { CreateCatalogDialog } from "@/components/catalog/CreateCatalogDialog";
 import { PublishSuccessModal } from "@/components/catalog/PublishSuccessModal";
 import { toast } from "sonner";
@@ -209,28 +209,36 @@ const Catalogos = () => {
     toast.success("Link copiado!");
   };
 
-  const getStatusChip = (status: Catalog["status"]) => {
-    const isPublished = status === "publicado" || status === "public" || status === "unlisted";
+  const getStatusChip = (catalog: Catalog, onClick: () => void) => {
+    const isPublished = catalog.status === "publicado" || catalog.status === "public" || catalog.status === "unlisted";
     return (
-      <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
-        isPublished 
-          ? "bg-emerald-100 text-emerald-800" 
-          : "bg-amber-100 text-amber-800"
-      }`}>
+      <button
+        onClick={onClick}
+        className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium transition-all hover:scale-105 active:scale-95 cursor-pointer ${
+          isPublished 
+            ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200" 
+            : "bg-amber-100 text-amber-800 hover:bg-amber-200"
+        }`}
+        title={isPublished ? "Clique para voltar ao rascunho" : "Clique para publicar"}
+      >
         {isPublished ? "🟢 Publicado" : "🟣 Rascunho"}
-      </span>
+      </button>
     );
   };
 
-  const getLinkChip = (linkAtivo: boolean) => {
+  const getLinkChip = (catalog: Catalog, onClick: () => void) => {
     return (
-      <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
-        linkAtivo 
-          ? "bg-sky-100 text-sky-800" 
-          : "bg-gray-100 text-gray-700"
-      }`}>
-        {linkAtivo ? "🔵 Link ativo" : "⚪️ Link desativado"}
-      </span>
+      <button
+        onClick={onClick}
+        className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium transition-all hover:scale-105 active:scale-95 cursor-pointer ${
+          catalog.link_ativo 
+            ? "bg-sky-100 text-sky-800 hover:bg-sky-200" 
+            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+        }`}
+        title={catalog.link_ativo ? "Clique para desativar link" : "Clique para ativar link"}
+      >
+        {catalog.link_ativo ? "🔵 Link ativo" : "⚪️ Link desativado"}
+      </button>
     );
   };
 
@@ -365,34 +373,10 @@ const Catalogos = () => {
                         })}
                       </p>
                       
-                      {/* Chips Row */}
+                      {/* Clickable Status/Link Chips */}
                       <div className="flex flex-wrap gap-2 mb-3 min-w-0">
-                        {getStatusChip(catalog.status)}
-                        {getLinkChip(catalog.link_ativo)}
-                      </div>
-
-                      {/* Quick Toggles */}
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleToggleStatus(catalog)}
-                          className="gap-1.5 h-8 px-2"
-                          title={isPublished ? "Voltar para rascunho" : "Publicar"}
-                        >
-                          {isPublished ? <ToggleRight className="w-4 h-4 text-emerald-600" /> : <ToggleLeft className="w-4 h-4 text-amber-600" />}
-                          <span className="text-xs">Status</span>
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleToggleLink(catalog)}
-                          className="gap-1.5 h-8 px-2"
-                          title={catalog.link_ativo ? "Desativar link" : "Ativar link"}
-                        >
-                          {catalog.link_ativo ? <ToggleRight className="w-4 h-4 text-sky-600" /> : <ToggleLeft className="w-4 h-4 text-gray-600" />}
-                          <span className="text-xs">Link</span>
-                        </Button>
+                        {getStatusChip(catalog, () => handleToggleStatus(catalog))}
+                        {getLinkChip(catalog, () => handleToggleLink(catalog))}
                       </div>
 
                       {/* Actions */}
