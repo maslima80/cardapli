@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { BottomNav } from "./components/layout/BottomNav";
 import Landing from "./pages/Landing";
 import CriarConta from "./pages/CriarConta";
 import Entrar from "./pages/Entrar";
@@ -35,38 +36,41 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/criar-conta" element={<CriarConta />} />
-          <Route path="/entrar" element={<Entrar />} />
-          <Route path="/recuperar" element={<Recuperar />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/perfil" element={<Perfil />} />
-          <Route path="/produtos" element={<Produtos />} />
-          <Route path="/catalogos" element={<Catalogos />} />
-          <Route path="/catalogos/:id/editor" element={<CatalogoEditor />} />
-          <Route path="/compartilhar" element={<Compartilhar />} />
-          <Route path="/compartilhar/criar" element={<QuickCatalogCreate />} />
-          <Route path="/compartilhar/sucesso" element={<QuickCatalogSuccess />} />
-          <Route path="/escolher-slug" element={<EscolherSlug />} />
-          
-          {/* Public routes - /u/:userSlug for profiles and catalogs */}
-          <Route path="/u/:userSlug" element={<PublicUserLayout />}>
-            {/* /u/user → profile */}
-            <Route index element={<PublicProfilePage />} />
-            {/* /u/user/:catalogSlug → catalog */}
-            <Route path=":catalogSlug" element={<PublicCatalogPage />} />
-          </Route>
-          
-          {/* Legacy redirects - old /@user URLs redirect to /u/user */}
-          <Route path="/@:userSlug" element={<PublicUserLayout />}>
-            <Route index element={<LegacyRedirect />} />
-            <Route path=":catalogSlug" element={<LegacyRedirect />} />
-          </Route>
-          
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <div className="pb-16 md:pb-0">
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/criar-conta" element={<CriarConta />} />
+            <Route path="/entrar" element={<Entrar />} />
+            <Route path="/recuperar" element={<Recuperar />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/perfil" element={<Perfil />} />
+            <Route path="/produtos" element={<Produtos />} />
+            <Route path="/catalogos" element={<Catalogos />} />
+            <Route path="/catalogos/:id/editor" element={<CatalogoEditor />} />
+            <Route path="/compartilhar" element={<Compartilhar />} />
+            <Route path="/compartilhar/criar" element={<QuickCatalogCreate />} />
+            <Route path="/compartilhar/sucesso" element={<QuickCatalogSuccess />} />
+            <Route path="/escolher-slug" element={<EscolherSlug />} />
+            
+            {/* Public routes - /u/:userSlug for profiles and catalogs */}
+            <Route path="/u/:userSlug" element={<PublicUserLayout />}>
+              {/* /u/user → profile */}
+              <Route index element={<PublicProfilePage />} />
+              {/* /u/user/:catalogSlug → catalog */}
+              <Route path=":catalogSlug" element={<PublicCatalogPage />} />
+            </Route>
+            
+            {/* Legacy redirects - old /@user URLs redirect to /u/user */}
+            <Route path="/@:userSlug" element={<PublicUserLayout />}>
+              <Route index element={<LegacyRedirect />} />
+              <Route path=":catalogSlug" element={<LegacyRedirect />} />
+            </Route>
+            
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </div>
+        <BottomNav />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
