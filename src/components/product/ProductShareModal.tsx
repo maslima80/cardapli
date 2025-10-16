@@ -54,7 +54,7 @@ export const ProductShareModal = ({
 
   const handleEmailShare = () => {
     const subject = encodeURIComponent(`Confira: ${productTitle}`);
-    const body = encodeURIComponent(`Oi! Tenho interesse no produto "${productTitle}".\n\n${productUrl}`);
+    const body = encodeURIComponent(`Olá!\n\nConfira este produto: "${productTitle}"\n\n${productUrl}\n\nEspero que goste!`);
     window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
   };
 

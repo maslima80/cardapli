@@ -45,8 +45,15 @@ export const whatsappShareCatalog = (userSlug: string, catalogSlug: string, cust
   return whatsappShareUrl(message, url);
 };
 
+// WhatsApp share for product (from seller to customer)
 export const whatsappShareProduct = (userSlug: string, productSlug: string, productTitle: string) => {
   const url = publicProductFullUrl(userSlug, productSlug);
-  const message = `Oi! Tenho interesse no produto "${productTitle}".`;
+  const message = `Olá! Confira este produto: "${productTitle}"`;
   return whatsappShareUrl(message, url);
+};
+
+// WhatsApp CTA for customer to contact seller
+export const whatsappContactSeller = (phone: string, productTitle: string, productUrl: string) => {
+  const message = `Oi! Tenho interesse no produto "${productTitle}". ${productUrl}`;
+  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 };
