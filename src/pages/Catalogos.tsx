@@ -19,6 +19,8 @@ interface Catalog {
   description: string | null;
   slug: string;
   status: "draft" | "public" | "unlisted" | "rascunho" | "publicado";
+  link_ativo: boolean;
+  no_perfil: boolean;
   updated_at: string;
   cover: any;
 }
@@ -218,18 +220,41 @@ const Catalogos = () => {
     }
   };
 
-  const getStatusBadge = (status: Catalog["status"]) => {
-    const variants: Record<string, { label: string; className: string }> = {
-      // New Portuguese values
-      rascunho: { label: "Em edição", className: "bg-yellow-100 text-yellow-800" },
-      publicado: { label: "Publicado", className: "bg-green-100 text-green-800" },
-      // Old English values (for backward compatibility)
-      draft: { label: "Em edição", className: "bg-yellow-100 text-yellow-800" },
-      public: { label: "Publicado", className: "bg-green-100 text-green-800" },
-      unlisted: { label: "Publicado", className: "bg-green-100 text-green-800" },
-    };
-    const statusInfo = variants[status] || { label: "Desconhecido", className: "bg-gray-100 text-gray-800" };
-    return <Badge className={statusInfo.className}>{statusInfo.label}</Badge>;
+  const getStatusChip = (status: Catalog["status"]) => {
+    const isPublished = status === "publicado" || status === "public" || status === "unlisted";
+    return (
+      <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
+        isPublished 
+          ? "bg-emerald-100 text-emerald-800" 
+          : "bg-amber-100 text-amber-800"
+      }`}>
+        {isPublished ? "🟢 Publicado" : "🟣 Rascunho"}
+      </span>
+    );
+  };
+
+  const getLinkChip = (linkAtivo: boolean) => {
+    return (
+      <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
+        linkAtivo 
+          ? "bg-sky-100 text-sky-800" 
+          : "bg-gray-100 text-gray-700"
+      }`}>
+        {linkAtivo ? "🔵 Link ativo" : "⚪️ Link desativado"}
+      </span>
+    );
+  };
+
+  const getPerfilChip = (noPerfil: boolean) => {
+    return (
+      <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
+        noPerfil 
+          ? "bg-violet-100 text-violet-800" 
+          : "bg-gray-100 text-gray-700"
+      }`}>
+        {noPerfil ? "🟣 No perfil" : "⚪️ Fora do perfil"}
+      </span>
+    );
   };
 
   if (loading) {
@@ -348,22 +373,26 @@ const Catalogos = () => {
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <h3
-                          className="font-semibold text-base sm:text-lg leading-tight cursor-pointer hover:text-primary transition-colors line-clamp-2"
-                          onClick={() => navigate(`/catalogos/${catalog.id}/editor`)}
-                        >
-                          {catalog.title}
-                        </h3>
-                        {getStatusBadge(catalog.status)}
-                      </div>
-                      <p className="text-xs text-muted-foreground mb-3">
+                      <h3
+                        className="font-semibold text-base sm:text-lg leading-tight cursor-pointer hover:text-primary transition-colors line-clamp-2 mb-1"
+                        onClick={() => navigate(`/catalogos/${catalog.id}/editor`)}
+                      >
+                        {catalog.title}
+                      </h3>
+                      <p className="text-xs text-muted-foreground mb-2">
                         Atualizado{" "}
                         {formatDistanceToNow(new Date(catalog.updated_at), {
                           addSuffix: true,
                           locale: ptBR,
                         })}
                       </p>
+                      
+                      {/* Chips Row */}
+                      <div className="flex flex-wrap gap-2 mb-3 min-w-0">
+                        {getStatusChip(catalog.status)}
+                        {getLinkChip(catalog.link_ativo)}
+                        {getPerfilChip(catalog.no_perfil)}
+                      </div>
 
                       {/* Actions */}
                       <div className="flex flex-wrap gap-2">
