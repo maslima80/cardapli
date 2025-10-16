@@ -36,6 +36,36 @@
   color: var(--theme-muted, rgba(17, 17, 17, 0.6));
 }
 
+/* Override Tailwind text colors in dark mode for proper contrast */
+[data-theme-mode="dark"] h1,
+[data-theme-mode="dark"] h2,
+[data-theme-mode="dark"] h3,
+[data-theme-mode="dark"] h4,
+[data-theme-mode="dark"] h5,
+[data-theme-mode="dark"] h6 {
+  color: var(--theme-text, #ffffff) !important;
+}
+
+[data-theme-mode="dark"] .text-foreground {
+  color: var(--theme-text, #ffffff) !important;
+}
+
+[data-theme-mode="dark"] .text-muted-foreground {
+  color: var(--theme-muted, rgba(255, 255, 255, 0.7)) !important;
+}
+
+[data-theme-mode="dark"] .prose {
+  color: var(--theme-text, #ffffff) !important;
+}
+
+[data-theme-mode="dark"] p {
+  color: var(--theme-text, #ffffff);
+}
+
+[data-theme-mode="dark"] a {
+  color: var(--theme-accent, #8B5CF6);
+}
+
 /* Theme-aware borders */
 .theme-border {
   border-color: var(--theme-surface, #e5e7eb);
