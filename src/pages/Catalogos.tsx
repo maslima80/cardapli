@@ -4,25 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, ExternalLink, Copy, Files, Trash2, Edit, ArrowLeft, Share2, Eye, Zap, UserPlus, UserMinus, ToggleLeft, ToggleRight, Link as LinkIcon } from "lucide-react";
+import { Plus, Search, ExternalLink, Copy, Files, Trash2, Edit, ArrowLeft, Share2, Eye, Zap, ToggleLeft, ToggleRight } from "lucide-react";
 import { CreateCatalogDialog } from "@/components/catalog/CreateCatalogDialog";
 import { PublishSuccessModal } from "@/components/catalog/PublishSuccessModal";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { publicCatalogUrl, whatsappShareCatalog } from "@/lib/urls";
-import { addCatalogToProfile, removeCatalogFromProfile, isCatalogInProfile } from "@/lib/profileBlockHelpers";
-import { setCatalogStatus, setCatalogLink, batchUpdateCatalog, duplicateCatalog as duplicateCatalogMutation } from "@/lib/catalogMutations";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { setCatalogStatus, setCatalogLink } from "@/lib/catalogMutations";
 
 interface Catalog {
   id: string;
@@ -47,10 +36,7 @@ const Catalogos = () => {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [selectedCatalog, setSelectedCatalog] = useState<Catalog | null>(null);
   const [userSlug, setUserSlug] = useState<string>("");
-  const [catalogsInProfile, setCatalogsInProfile] = useState<Set<string>>(new Set());
   const [userId, setUserId] = useState<string>("");
-  const [guardrailModalOpen, setGuardrailModalOpen] = useState(false);
-  const [guardrailCatalog, setGuardrailCatalog] = useState<Catalog | null>(null);
 
   useEffect(() => {
     loadCatalogs();
@@ -123,24 +109,7 @@ const Catalogos = () => {
       }
     }
 
-    // Load which catalogs are in profile
-    await loadProfileCatalogs(session.user.id);
-    
     setLoading(false);
-  };
-
-  const loadProfileCatalogs = async (uid: string) => {
-    const { data: profileBlock } = await supabase
-      .from("profile_blocks")
-      .select("data")
-      .eq("user_id", uid)
-      .eq("type", "catalogs")
-      .single();
-
-    if (profileBlock) {
-      const catalogIds = (profileBlock.data as any)?.catalog_ids || [];
-      setCatalogsInProfile(new Set(catalogIds));
-    }
   };
 
   const handleDuplicate = async (catalog: Catalog) => {
@@ -203,78 +172,15 @@ const Catalogos = () => {
   const handleToggleLink = async (catalog: Catalog) => {
     const newLinkAtivo = !catalog.link_ativo;
     
-    // Guardrail: If turning OFF link while on profile, also remove from profile
-    const updates: any = { link_ativo: newLinkAtivo };
-    if (!newLinkAtivo && catalog.no_perfil) {
-      updates.no_perfil = false;
-    }
-
     // Optimistic update
     const oldCatalogs = [...catalogs];
     setCatalogs(catalogs.map(c => 
-      c.id === catalog.id ? { ...c, ...updates } : c
+      c.id === catalog.id ? { ...c, link_ativo: newLinkAtivo } : c
     ));
 
     try {
-      if (!newLinkAtivo && catalog.no_perfil) {
-        // Batch update: turn off link AND remove from profile
-        await batchUpdateCatalog(catalog.id, updates);
-        toast.success("Link desativado. Catálogo removido do perfil.");
-        
-        // Also update catalogsInProfile state
-        const newSet = new Set(catalogsInProfile);
-        newSet.delete(catalog.id);
-        setCatalogsInProfile(newSet);
-      } else {
-        await setCatalogLink(catalog.id, newLinkAtivo);
-        toast.success(newLinkAtivo ? "Link ativado" : "Link desativado");
-      }
-    } catch (error) {
-      // Rollback on error
-      setCatalogs(oldCatalogs);
-      toast.error("Não foi possível concluir a ação. Tente novamente.");
-      console.error(error);
-    }
-  };
-
-  const handleAddToProfile = (catalog: Catalog) => {
-    const isPublished = catalog.status === "publicado" || catalog.status === "public" || catalog.status === "unlisted";
-    
-    // Guardrail: Check if requirements are met
-    if (!isPublished || !catalog.link_ativo) {
-      setGuardrailCatalog(catalog);
-      setGuardrailModalOpen(true);
-      return;
-    }
-
-    // Requirements met, proceed with toggle
-    handleToggleProfile(catalog);
-  };
-
-  const handleGuardrailConfirm = async () => {
-    if (!guardrailCatalog) return;
-
-    // Optimistic update
-    const oldCatalogs = [...catalogs];
-    setCatalogs(catalogs.map(c => 
-      c.id === guardrailCatalog.id 
-        ? { ...c, status: "publicado", link_ativo: true, no_perfil: true } 
-        : c
-    ));
-
-    try {
-      await batchUpdateCatalog(guardrailCatalog.id, {
-        status: "publicado",
-        link_ativo: true,
-        no_perfil: true,
-      });
-      
-      // Update catalogsInProfile state
-      setCatalogsInProfile(new Set([...catalogsInProfile, guardrailCatalog.id]));
-      
-      toast.success("Adicionado ao perfil");
-      setGuardrailModalOpen(false);
-      setGuardrailCatalog(null);
+      await setCatalogLink(catalog.id, newLinkAtivo);
+      toast.success(newLinkAtivo ? "Link ativado" : "Link desativado");
     } catch (error) {
       // Rollback on error
       setCatalogs(oldCatalogs);
@@ -303,39 +209,6 @@ const Catalogos = () => {
     toast.success("Link copiado!");
   };
 
-  const handleToggleProfile = async (catalog: Catalog) => {
-    const isInProfile = catalogsInProfile.has(catalog.id);
-    const isEligible = catalog.status === "publicado" && (catalog as any).link_ativo === true;
-
-    if (!isInProfile) {
-      // Adding to profile
-      if (!isEligible) {
-        // Show guard modal - for now just show toast
-        toast.error("⚠️ Para adicionar ao perfil, o catálogo precisa estar publicado e com link ativo.");
-        return;
-      }
-
-      const success = await addCatalogToProfile(userId, catalog.id);
-      if (success) {
-        setCatalogsInProfile(new Set([...catalogsInProfile, catalog.id]));
-        toast.success("Adicionado à sua página pública. Veja em /perfil → Página Pública.");
-      } else {
-        toast.error("Erro ao adicionar ao perfil");
-      }
-    } else {
-      // Removing from profile
-      const success = await removeCatalogFromProfile(userId, catalog.id);
-      if (success) {
-        const newSet = new Set(catalogsInProfile);
-        newSet.delete(catalog.id);
-        setCatalogsInProfile(newSet);
-        toast.success("Removido do seu perfil");
-      } else {
-        toast.error("Erro ao remover do perfil");
-      }
-    }
-  };
-
   const getStatusChip = (status: Catalog["status"]) => {
     const isPublished = status === "publicado" || status === "public" || status === "unlisted";
     return (
@@ -361,17 +234,6 @@ const Catalogos = () => {
     );
   };
 
-  const getPerfilChip = (noPerfil: boolean) => {
-    return (
-      <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
-        noPerfil 
-          ? "bg-violet-100 text-violet-800" 
-          : "bg-gray-100 text-gray-700"
-      }`}>
-        {noPerfil ? "🟣 No perfil" : "⚪️ Fora do perfil"}
-      </span>
-    );
-  };
 
   if (loading) {
     return (
@@ -507,7 +369,6 @@ const Catalogos = () => {
                       <div className="flex flex-wrap gap-2 mb-3 min-w-0">
                         {getStatusChip(catalog.status)}
                         {getLinkChip(catalog.link_ativo)}
-                        {getPerfilChip(catalog.no_perfil)}
                       </div>
 
                       {/* Quick Toggles */}
@@ -548,26 +409,6 @@ const Catalogos = () => {
                         
                         {isPublished && (
                           <>
-                            {/* Profile Toggle Button */}
-                            <Button
-                              size="sm"
-                              variant={catalog.no_perfil ? "default" : "outline"}
-                              onClick={() => catalog.no_perfil ? handleToggleProfile(catalog) : handleAddToProfile(catalog)}
-                              className="gap-1.5"
-                            >
-                              {catalog.no_perfil ? (
-                                <>
-                                  <UserMinus className="w-3.5 h-3.5" />
-                                  <span className="hidden sm:inline">Remover do perfil</span>
-                                </>
-                              ) : (
-                                <>
-                                  <UserPlus className="w-3.5 h-3.5" />
-                                  <span className="hidden sm:inline">Adicionar ao perfil</span>
-                                </>
-                              )}
-                            </Button>
-
                             <Button
                               size="sm"
                               variant="outline"
@@ -637,24 +478,6 @@ const Catalogos = () => {
             catalogTitle={selectedCatalog.title}
           />
         )}
-
-        {/* Guardrail Modal */}
-        <AlertDialog open={guardrailModalOpen} onOpenChange={setGuardrailModalOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Mostrar no seu perfil?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Para aparecer em /u/{userSlug}, é preciso publicar e ativar o link deste catálogo.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction onClick={handleGuardrailConfirm}>
-                Ativar link e publicar
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>
     </div>
   );
