@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, ExternalLink, Copy, Files, Trash2, Edit, ArrowLeft, Share2, Eye, Zap, UserPlus, UserMinus } from "lucide-react";
+import { Plus, Search, ExternalLink, Copy, Files, Trash2, Edit, ArrowLeft, Share2, Eye, Zap, UserPlus, UserMinus, ToggleLeft, ToggleRight, Link as LinkIcon } from "lucide-react";
 import { CreateCatalogDialog } from "@/components/catalog/CreateCatalogDialog";
 import { PublishSuccessModal } from "@/components/catalog/PublishSuccessModal";
 import { toast } from "sonner";
@@ -12,6 +12,17 @@ import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { publicCatalogUrl, whatsappShareCatalog } from "@/lib/urls";
 import { addCatalogToProfile, removeCatalogFromProfile, isCatalogInProfile } from "@/lib/profileBlockHelpers";
+import { setCatalogStatus, setCatalogLink, batchUpdateCatalog, duplicateCatalog as duplicateCatalogMutation } from "@/lib/catalogMutations";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Catalog {
   id: string;
@@ -38,6 +49,8 @@ const Catalogos = () => {
   const [userSlug, setUserSlug] = useState<string>("");
   const [catalogsInProfile, setCatalogsInProfile] = useState<Set<string>>(new Set());
   const [userId, setUserId] = useState<string>("");
+  const [guardrailModalOpen, setGuardrailModalOpen] = useState(false);
+  const [guardrailCatalog, setGuardrailCatalog] = useState<Catalog | null>(null);
 
   useEffect(() => {
     loadCatalogs();
@@ -164,6 +177,109 @@ const Catalogos = () => {
     } else {
       toast.success("Catálogo excluído");
       setCatalogs((prev) => prev.filter((c) => c.id !== id));
+    }
+  };
+
+  const handleToggleStatus = async (catalog: Catalog) => {
+    const newStatus = catalog.status === "publicado" || catalog.status === "public" ? "rascunho" : "publicado";
+    
+    // Optimistic update
+    const oldCatalogs = [...catalogs];
+    setCatalogs(catalogs.map(c => 
+      c.id === catalog.id ? { ...c, status: newStatus } : c
+    ));
+
+    try {
+      await setCatalogStatus(catalog.id, newStatus);
+      toast.success(newStatus === "publicado" ? "Catálogo publicado" : "Catálogo em rascunho");
+    } catch (error) {
+      // Rollback on error
+      setCatalogs(oldCatalogs);
+      toast.error("Não foi possível concluir a ação. Tente novamente.");
+      console.error(error);
+    }
+  };
+
+  const handleToggleLink = async (catalog: Catalog) => {
+    const newLinkAtivo = !catalog.link_ativo;
+    
+    // Guardrail: If turning OFF link while on profile, also remove from profile
+    const updates: any = { link_ativo: newLinkAtivo };
+    if (!newLinkAtivo && catalog.no_perfil) {
+      updates.no_perfil = false;
+    }
+
+    // Optimistic update
+    const oldCatalogs = [...catalogs];
+    setCatalogs(catalogs.map(c => 
+      c.id === catalog.id ? { ...c, ...updates } : c
+    ));
+
+    try {
+      if (!newLinkAtivo && catalog.no_perfil) {
+        // Batch update: turn off link AND remove from profile
+        await batchUpdateCatalog(catalog.id, updates);
+        toast.success("Link desativado. Catálogo removido do perfil.");
+        
+        // Also update catalogsInProfile state
+        const newSet = new Set(catalogsInProfile);
+        newSet.delete(catalog.id);
+        setCatalogsInProfile(newSet);
+      } else {
+        await setCatalogLink(catalog.id, newLinkAtivo);
+        toast.success(newLinkAtivo ? "Link ativado" : "Link desativado");
+      }
+    } catch (error) {
+      // Rollback on error
+      setCatalogs(oldCatalogs);
+      toast.error("Não foi possível concluir a ação. Tente novamente.");
+      console.error(error);
+    }
+  };
+
+  const handleAddToProfile = (catalog: Catalog) => {
+    const isPublished = catalog.status === "publicado" || catalog.status === "public" || catalog.status === "unlisted";
+    
+    // Guardrail: Check if requirements are met
+    if (!isPublished || !catalog.link_ativo) {
+      setGuardrailCatalog(catalog);
+      setGuardrailModalOpen(true);
+      return;
+    }
+
+    // Requirements met, proceed with toggle
+    handleToggleProfile(catalog);
+  };
+
+  const handleGuardrailConfirm = async () => {
+    if (!guardrailCatalog) return;
+
+    // Optimistic update
+    const oldCatalogs = [...catalogs];
+    setCatalogs(catalogs.map(c => 
+      c.id === guardrailCatalog.id 
+        ? { ...c, status: "publicado", link_ativo: true, no_perfil: true } 
+        : c
+    ));
+
+    try {
+      await batchUpdateCatalog(guardrailCatalog.id, {
+        status: "publicado",
+        link_ativo: true,
+        no_perfil: true,
+      });
+      
+      // Update catalogsInProfile state
+      setCatalogsInProfile(new Set([...catalogsInProfile, guardrailCatalog.id]));
+      
+      toast.success("Adicionado ao perfil");
+      setGuardrailModalOpen(false);
+      setGuardrailCatalog(null);
+    } catch (error) {
+      // Rollback on error
+      setCatalogs(oldCatalogs);
+      toast.error("Não foi possível concluir a ação. Tente novamente.");
+      console.error(error);
     }
   };
 
@@ -394,6 +510,30 @@ const Catalogos = () => {
                         {getPerfilChip(catalog.no_perfil)}
                       </div>
 
+                      {/* Quick Toggles */}
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleToggleStatus(catalog)}
+                          className="gap-1.5 h-8 px-2"
+                          title={isPublished ? "Voltar para rascunho" : "Publicar"}
+                        >
+                          {isPublished ? <ToggleRight className="w-4 h-4 text-emerald-600" /> : <ToggleLeft className="w-4 h-4 text-amber-600" />}
+                          <span className="text-xs">Status</span>
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleToggleLink(catalog)}
+                          className="gap-1.5 h-8 px-2"
+                          title={catalog.link_ativo ? "Desativar link" : "Ativar link"}
+                        >
+                          {catalog.link_ativo ? <ToggleRight className="w-4 h-4 text-sky-600" /> : <ToggleLeft className="w-4 h-4 text-gray-600" />}
+                          <span className="text-xs">Link</span>
+                        </Button>
+                      </div>
+
                       {/* Actions */}
                       <div className="flex flex-wrap gap-2">
                         <Button
@@ -411,11 +551,11 @@ const Catalogos = () => {
                             {/* Profile Toggle Button */}
                             <Button
                               size="sm"
-                              variant={catalogsInProfile.has(catalog.id) ? "default" : "outline"}
-                              onClick={() => handleToggleProfile(catalog)}
+                              variant={catalog.no_perfil ? "default" : "outline"}
+                              onClick={() => catalog.no_perfil ? handleToggleProfile(catalog) : handleAddToProfile(catalog)}
                               className="gap-1.5"
                             >
-                              {catalogsInProfile.has(catalog.id) ? (
+                              {catalog.no_perfil ? (
                                 <>
                                   <UserMinus className="w-3.5 h-3.5" />
                                   <span className="hidden sm:inline">Remover do perfil</span>
@@ -497,6 +637,24 @@ const Catalogos = () => {
             catalogTitle={selectedCatalog.title}
           />
         )}
+
+        {/* Guardrail Modal */}
+        <AlertDialog open={guardrailModalOpen} onOpenChange={setGuardrailModalOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Mostrar no seu perfil?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Para aparecer em /u/{userSlug}, é preciso publicar e ativar o link deste catálogo.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={handleGuardrailConfirm}>
+                Ativar link e publicar
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
