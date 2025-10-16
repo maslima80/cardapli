@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { BlockRenderer } from "@/components/catalog/BlockRenderer";
+import { BlockRendererPremium } from "@/components/catalog/BlockRendererPremium";
 import { PublicThemeProvider } from "@/components/theme/PublicThemeProvider";
 import { useMetaTags } from "@/hooks/useMetaTags";
 import { publicProfileUrl } from "@/lib/urls";
@@ -103,12 +103,14 @@ const PublicProfilePage = () => {
           </div>
         ) : (
           <div className="space-y-6">
-            {blocks.map((block) => (
-              <BlockRenderer
+            {blocks.map((block, index) => (
+              <BlockRendererPremium
                 key={block.id}
                 block={block}
                 profile={profile}
                 userId={profile.id}
+                userSlug={userSlug}
+                index={index}
               />
             ))}
           </div>
