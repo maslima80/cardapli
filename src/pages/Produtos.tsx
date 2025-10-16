@@ -7,6 +7,8 @@ import { Plus, Search, ArrowLeft, Filter, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ProductCard } from "@/components/products/ProductCard";
 import { ProductDrawer } from "@/components/products/ProductDrawer";
+import { ProductShareModal } from "@/components/product/ProductShareModal";
+import { generateUniqueSlug } from "@/lib/slugify";
 import { Badge } from "@/components/ui/badge";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -75,6 +77,9 @@ export default function Produtos() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [productToShare, setProductToShare] = useState<Product | null>(null);
+  const [userSlug, setUserSlug] = useState<string>("");
 
   useEffect(() => {
     checkAuth();
@@ -85,6 +90,18 @@ export default function Produtos() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       navigate("/entrar");
+      return;
+    }
+
+    // Load user slug for sharing
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("slug")
+      .eq("id", user.id)
+      .single();
+    
+    if (profile?.slug) {
+      setUserSlug(profile.slug);
     }
   };
 
@@ -125,6 +142,55 @@ export default function Produtos() {
   const handleProductSaved = async () => {
     await fetchProducts();
     setDrawerOpen(false);
+  };
+
+  const handleShareProduct = async (product: Product) => {
+    // Ensure product has a slug
+    let productSlug = (product as any).slug;
+    
+    if (!productSlug) {
+      // Generate and save slug
+      productSlug = generateUniqueSlug(product.title);
+      
+      const { error } = await supabase
+        .from("products")
+        .update({ slug: productSlug })
+        .eq("id", product.id);
+      
+      if (error) {
+        toast({
+          title: "Erro",
+          description: "Não foi possível gerar o link do produto",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Update local state
+      setProducts(products.map(p => 
+        p.id === product.id ? { ...p, slug: productSlug } as any : p
+      ));
+    }
+    
+    setProductToShare({ ...product, slug: productSlug } as any);
+    setShareModalOpen(true);
+  };
+
+  const handleActivateProductLink = async () => {
+    if (!productToShare) return;
+    
+    const { error } = await supabase
+      .from("products")
+      .update({ public_link: true })
+      .eq("id", productToShare.id);
+    
+    if (error) throw error;
+    
+    // Update local state
+    setProducts(products.map(p => 
+      p.id === productToShare.id ? { ...p, public_link: true } as any : p
+    ));
+    setProductToShare({ ...productToShare, public_link: true } as any);
   };
 
   const handleDuplicateProduct = async (product: Product) => {
@@ -575,6 +641,7 @@ export default function Produtos() {
                 onEdit={handleEditProduct}
                 onDuplicate={handleDuplicateProduct}
                 onDelete={openDeleteDialog}
+                onShare={handleShareProduct}
               />
             ))}
           </div>
@@ -606,7 +673,7 @@ export default function Produtos() {
           <AlertDialogHeader>
             <AlertDialogTitle>Excluir produto?</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir "{productToDelete?.title}"? Esta ação não pode ser desfeita.
+              Esta ação não pode ser desfeita. O produto será removido permanentemente.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -617,6 +684,19 @@ export default function Produtos() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Product Share Modal */}
+      {productToShare && (
+        <ProductShareModal
+          open={shareModalOpen}
+          onOpenChange={setShareModalOpen}
+          productTitle={productToShare.title}
+          productSlug={(productToShare as any).slug || ""}
+          userSlug={userSlug}
+          publicLink={(productToShare as any).public_link !== false}
+          onActivateLink={handleActivateProductLink}
+        />
+      )}
     </div>
   );
 }

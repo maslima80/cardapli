@@ -2,7 +2,7 @@ import { Product } from "@/pages/Produtos";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ImageIcon, Edit, Copy, Trash2, Link as LinkIcon } from "lucide-react";
+import { ImageIcon, Edit, Copy, Trash2, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -18,9 +18,10 @@ interface ProductCardProps {
   onEdit: (product: Product) => void;
   onDuplicate: (product: Product) => void;
   onDelete: (product: Product) => void;
+  onShare?: (product: Product) => void;
 }
 
-export function ProductCard({ product, onEdit, onDuplicate, onDelete }: ProductCardProps) {
+export function ProductCard({ product, onEdit, onDuplicate, onDelete, onShare }: ProductCardProps) {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const coverPhoto = Array.isArray(product.photos) && product.photos.length > 0
@@ -165,9 +166,12 @@ export function ProductCard({ product, onEdit, onDuplicate, onDelete }: ProductC
                 size="sm"
                 variant="ghost"
                 className="h-7 px-2 text-xs flex-1"
-                onClick={handleCopyLink}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onShare?.(product);
+                }}
               >
-                <LinkIcon className="h-3.5 w-3.5" />
+                <Share2 className="h-3.5 w-3.5" />
               </Button>
               <Button
                 size="sm"
@@ -280,9 +284,12 @@ export function ProductCard({ product, onEdit, onDuplicate, onDelete }: ProductC
             size="sm"
             variant="ghost"
             className="h-8 px-2 text-xs flex-1"
-            onClick={handleCopyLink}
+            onClick={(e) => {
+              e.stopPropagation();
+              onShare?.(product);
+            }}
           >
-            <LinkIcon className="h-3.5 w-3.5" />
+            <Share2 className="h-3.5 w-3.5" />
           </Button>
           <Button
             size="sm"
