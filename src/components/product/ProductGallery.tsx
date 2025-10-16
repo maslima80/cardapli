@@ -17,6 +17,7 @@ interface ProductGalleryProps {
 export const ProductGallery = ({ photos, productTitle }: ProductGalleryProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [imageEntering, setImageEntering] = useState(false);
   
   // Embla carousel for main gallery
   const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -34,8 +35,14 @@ export const ProductGallery = ({ photos, productTitle }: ProductGalleryProps) =>
   // Update selected index when embla scrolls
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
-    setSelectedIndex(emblaApi.selectedScrollSnap());
-  }, [emblaApi]);
+    const newIndex = emblaApi.selectedScrollSnap();
+    if (newIndex !== selectedIndex) {
+      // Trigger enter animation
+      setImageEntering(true);
+      setTimeout(() => setImageEntering(false), 200);
+    }
+    setSelectedIndex(newIndex);
+  }, [emblaApi, selectedIndex]);
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -106,11 +113,28 @@ export const ProductGallery = ({ photos, productTitle }: ProductGalleryProps) =>
                   className="flex-[0_0_100%] min-w-0 relative"
                   style={{ aspectRatio: '4/3' }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
+                  {/* Blur depth layer */}
+                  <div
+                    className="absolute inset-0 blur-2xl scale-110 opacity-30"
+                    style={{
+                      backgroundImage: `url(${photo.url})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }}
+                    aria-hidden="true"
+                  />
+                  
+                  {/* Foreground container */}
+                  <div className="absolute inset-0 flex items-center justify-center p-4">
                     <img
+                      key={`${photo.url}-${index}`}
                       src={photo.url}
                       alt={photo.alt || `${productTitle} - Imagem ${index + 1}`}
-                      className="max-w-full max-h-full w-auto h-auto object-contain cursor-zoom-in transition-transform hover:scale-[1.02]"
+                      className={`relative z-10 max-w-full max-h-full w-auto h-auto object-contain cursor-zoom-in transition-all duration-200 ease-out ${
+                        index === selectedIndex && imageEntering
+                          ? 'opacity-0 scale-[0.985]'
+                          : 'opacity-100 scale-100 hover:scale-[1.02]'
+                      }`}
                       onClick={() => setLightboxOpen(true)}
                       loading={index === 0 ? "eager" : "lazy"}
                       draggable={false}
@@ -157,35 +181,45 @@ export const ProductGallery = ({ photos, productTitle }: ProductGalleryProps) =>
           )}
         </div>
 
-        {/* Thumbnails */}
+        {/* Thumbnails with scroll fade */}
         {photos.length > 1 && (
-          <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-1 -mx-1 px-1">
-            {photos.map((photo, index) => (
-              <button
-                key={index}
-                onClick={() => scrollTo(index)}
-                className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden snap-start transition-all ${
-                  index === selectedIndex
-                    ? "ring-3 ring-primary shadow-lg scale-105"
-                    : "opacity-60 hover:opacity-100 hover:scale-105"
-                }`}
-              >
-                <img
-                  src={photo.url}
-                  alt={`Miniatura ${index + 1}`}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                  draggable={false}
-                />
-              </button>
-            ))}
+          <div
+            className="relative overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-1 -mx-1 px-1"
+            style={{
+              WebkitMaskImage:
+                'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
+              maskImage:
+                'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
+            }}
+          >
+            <div className="flex gap-2 min-w-max px-2">
+              {photos.map((photo, index) => (
+                <button
+                  key={index}
+                  onClick={() => scrollTo(index)}
+                  className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden snap-start transition-all ${
+                    index === selectedIndex
+                      ? "ring-3 ring-primary shadow-lg scale-105"
+                      : "opacity-60 hover:opacity-100 hover:scale-105"
+                  }`}
+                >
+                  <img
+                    src={photo.url}
+                    alt={`Miniatura ${index + 1}`}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                    draggable={false}
+                  />
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>
 
-      {/* Lightbox with Embla */}
+      {/* Premium Lightbox with Embla */}
       <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
-        <DialogContent className="max-w-[100vw] max-h-[100vh] w-full h-full p-0 bg-black border-0">
+        <DialogContent className="max-w-[100vw] max-h-[100vh] w-full h-full p-0 bg-black/95 border-0">
           <div className="relative w-full h-full">
             {/* Close Button */}
             <Button
@@ -203,12 +237,12 @@ export const ProductGallery = ({ photos, productTitle }: ProductGalleryProps) =>
                 {photos.map((photo, index) => (
                   <div
                     key={index}
-                    className="flex-[0_0_100%] min-w-0 h-full flex items-center justify-center p-4"
+                    className="flex-[0_0_100%] min-w-0 h-full flex items-center justify-center p-4 sm:p-8"
                   >
                     <img
                       src={photo.url}
                       alt={photo.alt || `${productTitle} - Imagem ${index + 1}`}
-                      className="max-w-full max-h-full w-auto h-auto object-contain"
+                      className="max-w-full max-h-full w-auto h-auto object-contain select-none"
                       draggable={false}
                     />
                   </div>
