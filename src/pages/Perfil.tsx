@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { PremiumThemeSettings } from "@/components/profile/PremiumThemeSettings";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { ArrowLeft, Eye, Copy, Instagram, Facebook, Youtube, Globe } from "lucide-react";
@@ -23,6 +24,7 @@ type Profile = {
   email_public: string | null;
   socials: any;
   accent_color: string | null;
+  background_color: string | null;
   theme_mode: string | null;
   font_theme: string | null;
   cta_shape: string | null;
@@ -41,8 +43,9 @@ export default function Perfil() {
     email_public: null,
     socials: {},
     accent_color: "#8B5CF6",
+    background_color: null,
     theme_mode: "light",
-    font_theme: "clean",
+    font_theme: "moderna",
     cta_shape: "rounded",
     slug: null,
   });
@@ -82,8 +85,9 @@ export default function Perfil() {
           email_public: data.email_public,
           socials: data.socials || {},
           accent_color: data.accent_color || "#8B5CF6",
+          background_color: data.background_color || null,
           theme_mode: data.theme_mode || "light",
-          font_theme: data.font_theme || "clean",
+          font_theme: data.font_theme || "moderna",
           cta_shape: data.cta_shape || "rounded",
           slug: data.slug,
         });
@@ -324,133 +328,13 @@ export default function Perfil() {
               </div>
             </div>
 
-            {/* Theme Settings */}
-            <div className="space-y-4 pt-4 border-t">
-              <Label className="text-base font-semibold">Tema</Label>
-              
-              {/* Theme Mode */}
-              <div className="space-y-2">
-                <Label className="text-sm">Modo</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    type="button"
-                    variant={profile.theme_mode === "light" ? "default" : "outline"}
-                    onClick={() => handleFieldChange("theme_mode", "light")}
-                    className="w-full"
-                  >
-                    Claro
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={profile.theme_mode === "dark" ? "default" : "outline"}
-                    onClick={() => handleFieldChange("theme_mode", "dark")}
-                    className="w-full"
-                  >
-                    Escuro
-                  </Button>
-                </div>
-              </div>
-
-              {/* Accent Color */}
-              <div className="space-y-2">
-                <Label htmlFor="accent_color" className="text-sm">Cor principal</Label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    id="accent_color"
-                    value={profile.accent_color || "#8B5CF6"}
-                    onChange={(e) => handleFieldChange("accent_color", e.target.value)}
-                    className="w-12 h-12 rounded-lg border border-border cursor-pointer"
-                  />
-                  <Input
-                    value={profile.accent_color || "#8B5CF6"}
-                    onChange={(e) => handleFieldChange("accent_color", e.target.value)}
-                    placeholder="#8B5CF6"
-                    className="flex-1"
-                  />
-                </div>
-              </div>
-
-              {/* Font Theme */}
-              <div className="space-y-2">
-                <Label htmlFor="font_theme" className="text-sm">Fonte</Label>
-                <select
-                  id="font_theme"
-                  value={profile.font_theme || "clean"}
-                  onChange={(e) => handleFieldChange("font_theme", e.target.value)}
-                  className="w-full h-10 px-3 rounded-lg border border-border bg-background"
-                >
-                  <option value="clean">Moderna (Poppins + Nunito)</option>
-                  <option value="elegant">Elegante (Playfair + Inter)</option>
-                  <option value="modern">Clean (Inter)</option>
-                </select>
-              </div>
-
-              {/* Button Shape */}
-              <div className="space-y-2">
-                <Label className="text-sm">Forma dos botões</Label>
-                <div className="grid grid-cols-3 gap-2">
-                  <Button
-                    type="button"
-                    variant={profile.cta_shape === "rounded" ? "default" : "outline"}
-                    onClick={() => handleFieldChange("cta_shape", "rounded")}
-                    className="rounded-2xl"
-                  >
-                    Rounded
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={profile.cta_shape === "square" ? "default" : "outline"}
-                    onClick={() => handleFieldChange("cta_shape", "square")}
-                    className="rounded-none"
-                  >
-                    Square
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={profile.cta_shape === "capsule" ? "default" : "outline"}
-                    onClick={() => handleFieldChange("cta_shape", "capsule")}
-                    className="rounded-full"
-                  >
-                    Capsule
-                  </Button>
-                </div>
-              </div>
-
-              {/* Preview */}
-              <div
-                className={`p-6 rounded-lg border border-border ${
-                  profile.theme_mode === "dark" ? "bg-gray-900 text-white" : "bg-white"
-                }`}
-              >
-                <div className="text-center space-y-4">
-                  {profile.logo_url && (
-                    <img
-                      src={profile.logo_url}
-                      alt="Logo preview"
-                      className="w-12 h-12 mx-auto rounded-lg object-cover"
-                    />
-                  )}
-                  <h3 className="text-xl font-bold">
-                    {profile.business_name || "Nome da sua marca"}
-                  </h3>
-                  {profile.slogan && (
-                    <p className="text-sm italic opacity-70">{profile.slogan}</p>
-                  )}
-                  <button
-                    className={`px-6 py-3 text-white font-medium transition-all ${
-                      profile.cta_shape === "capsule"
-                        ? "rounded-full"
-                        : profile.cta_shape === "square"
-                        ? "rounded-none"
-                        : "rounded-2xl"
-                    }`}
-                    style={{ backgroundColor: profile.accent_color || "#8B5CF6" }}
-                  >
-                    Ver Catálogo
-                  </button>
-                </div>
-              </div>
+            {/* Theme Settings - Premium */}
+            <div className="pt-4 border-t">
+              <Label className="text-base font-semibold mb-4 block">Tema</Label>
+              <PremiumThemeSettings
+                profile={profile}
+                onChange={handleFieldChange}
+              />
             </div>
 
             {/* Username */}
