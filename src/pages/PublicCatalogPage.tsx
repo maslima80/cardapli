@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { BlockRendererPremium } from "@/components/catalog/BlockRendererPremium";
 import { SectionNavigation } from "@/components/catalog/SectionNavigation";
-import { getEffectiveTheme, generateThemeVariables } from "@/lib/theme-utils";
+import { PublicThemeProvider } from "@/components/theme/PublicThemeProvider";
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
 import { useMetaTags } from "@/hooks/useMetaTags";
@@ -158,10 +158,6 @@ const PublicCatalogPage = () => {
     );
   }
 
-  // Calculate effective theme
-  const effectiveTheme = getEffectiveTheme(catalog?.theme_overrides, profile);
-  const themeVars = generateThemeVariables(effectiveTheme);
-
   // Build sections for navigation
   const sections = blocks
     .filter((block) => block.anchor_slug && block.data?.title)
@@ -173,19 +169,11 @@ const PublicCatalogPage = () => {
 
   const showSectionNav = catalog?.settings?.show_section_nav && sections.length > 0;
 
-  // Apply font family based on theme
-  const fontClass =
-    effectiveTheme.font === "elegant"
-      ? "font-playfair"
-      : effectiveTheme.font === "modern"
-      ? "font-poppins"
-      : "font-inter";
+  // Extract catalog theme overrides
+  const catalogOverrides = catalog?.theme_overrides || null;
 
   return (
-    <div
-      className={`min-h-screen bg-gradient-subtle ${fontClass}`}
-      style={themeVars as any}
-    >
+    <PublicThemeProvider userSlug={userSlug!} catalogOverrides={catalogOverrides}>
       {showSectionNav && <SectionNavigation sections={sections} />}
       
       {blocks.map((block, index) => (
@@ -210,9 +198,9 @@ const PublicCatalogPage = () => {
       )}
 
       {/* Footer */}
-      <div className="block-wrapper" data-bg="surface">
-        <div className="container max-w-[1120px] mx-auto text-center border-t border-border">
-          <p className="text-sm text-muted-foreground py-8">
+      <div className="py-8 border-t" style={{ borderColor: 'var(--theme-surface)' }}>
+        <div className="container max-w-[1120px] mx-auto text-center">
+          <p className="text-sm" style={{ color: 'var(--theme-muted)' }}>
             {profile?.business_name && (
               <>
                 © {new Date().getFullYear()} {profile.business_name}
@@ -223,7 +211,8 @@ const PublicCatalogPage = () => {
               Feito com{" "}
               <a
                 href="https://cardapli.com.br"
-                className="text-primary hover:underline"
+                style={{ color: 'var(--theme-accent)' }}
+                className="hover:underline"
               >
                 Cardapli
               </a>
@@ -231,7 +220,7 @@ const PublicCatalogPage = () => {
           </p>
         </div>
       </div>
-    </div>
+    </PublicThemeProvider>
   );
 };
 
