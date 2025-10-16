@@ -3,11 +3,12 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, ArrowLeft, Package, Share2, Copy } from "lucide-react";
+import { MessageCircle, ArrowLeft, Package, Share2 } from "lucide-react";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { ExternalMedia } from "@/components/product/ExternalMedia";
 import { VariantSelector } from "@/components/product/VariantSelector";
 import { ProductInfoAccordion } from "@/components/product/ProductInfoAccordion";
+import { ProductShareModal } from "@/components/product/ProductShareModal";
 import { buildVariants, ProductVariant, getPriceRange } from "@/lib/variants";
 import { publicProfileUrl, absolute, publicProductUrl, publicProductFullUrl } from "@/lib/urls";
 import { toast } from "sonner";
@@ -61,6 +62,9 @@ export default function PublicProductPageNew() {
   const [variantsData, setVariantsData] = useState<{ options: any[]; variants: any[] }>({ options: [], variants: [] });
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [selectedCombination, setSelectedCombination] = useState<Record<string, string>>({});
+  
+  // Share modal state
+  const [shareModalOpen, setShareModalOpen] = useState(false);
 
   useEffect(() => {
     loadProductAndProfile();
@@ -133,11 +137,6 @@ export default function PublicProductPageNew() {
     setSelectedCombination(combination);
   };
 
-  const handleCopyLink = () => {
-    const url = publicProductFullUrl(userSlug!, productSlug!);
-    navigator.clipboard.writeText(url);
-    toast.success("Link copiado!");
-  };
 
   const getWhatsAppUrl = () => {
     if (!product || !profile) return "#";
@@ -292,7 +291,7 @@ export default function PublicProductPageNew() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={handleCopyLink}
+            onClick={() => setShareModalOpen(true)}
             className="gap-2"
           >
             <Share2 className="w-4 h-4" />
@@ -455,6 +454,16 @@ export default function PublicProductPageNew() {
           </a>
         </div>
       </div>
+
+      {/* Share Modal */}
+      <ProductShareModal
+        open={shareModalOpen}
+        onOpenChange={setShareModalOpen}
+        productTitle={product.title}
+        productSlug={productSlug!}
+        userSlug={userSlug!}
+        publicLink={true}
+      />
     </div>
   );
 }
