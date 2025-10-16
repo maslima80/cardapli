@@ -19,7 +19,7 @@ import QuickCatalogSuccess from "./pages/QuickCatalogSuccess";
 import PublicCatalog from "./pages/PublicCatalog";
 import PublicCatalogPage from "./pages/PublicCatalogPage";
 import PublicProfilePage from "./pages/PublicProfilePage";
-import PublicProductPage from "./pages/PublicProductPage";
+import PublicProductPage from "./pages/PublicProductPageNew";
 import EscolherSlug from "./pages/EscolherSlug";
 import NotFound from "./pages/NotFound";
 import LegacyRedirect from "./pages/LegacyRedirect";
