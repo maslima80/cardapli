@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Play, ExternalLink } from "lucide-react";
+import { useState, useCallback, useEffect } from "react";
+import useEmblaCarousel from "embla-carousel-react";
+import { Play, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface ExternalMediaItem {
   type?: "video" | "link";
@@ -45,6 +46,14 @@ const getVideoEmbedUrl = (url: string): string | null => {
 
 export const ExternalMedia = ({ videoUrl, externalMedia = [] }: ExternalMediaProps) => {
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  // Embla carousel for videos
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: false,
+    align: 'start',
+    skipSnaps: false,
+  });
 
   // Combine video_url and external_media into a single array
   const allMedia: ExternalMediaItem[] = [];
@@ -70,16 +79,47 @@ export const ExternalMedia = ({ videoUrl, externalMedia = [] }: ExternalMediaPro
   );
   const hasMultipleVideos = videoItems.length > 1;
 
+  // Update selected index when embla scrolls
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect();
+    emblaApi.on('select', onSelect);
+    return () => {
+      emblaApi.off('select', onSelect);
+    };
+  }, [emblaApi, onSelect]);
+
+  const scrollPrev = useCallback(() => {
+    if (emblaApi) emblaApi.scrollPrev();
+  }, [emblaApi]);
+
+  const scrollNext = useCallback(() => {
+    if (emblaApi) emblaApi.scrollNext();
+  }, [emblaApi]);
+
+  const canScrollPrev = selectedIndex > 0;
+  const canScrollNext = selectedIndex < videoItems.length - 1;
+
   return (
     <div className="space-y-3">
       <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
         Vídeo
       </h3>
 
-      {/* Video thumbnails / players */}
-      <div className={`relative ${hasMultipleVideos ? '-mx-4 px-4 md:mx-0 md:px-0' : ''}`}>
-        <div className={`flex ${hasMultipleVideos ? 'md:grid md:grid-cols-2' : 'justify-center'} gap-2 ${hasMultipleVideos ? 'overflow-x-auto snap-x snap-mandatory scrollbar-hide md:overflow-visible' : ''} pb-1`}>
-          {allMedia.map((item, index) => {
+      {/* Video carousel / grid */}
+      <div className="relative group">
+        {/* Embla viewport for mobile, grid for desktop */}
+        <div 
+          className={`${hasMultipleVideos ? 'overflow-hidden md:overflow-visible' : ''}`}
+          ref={hasMultipleVideos ? emblaRef : null}
+        >
+          <div className={`flex ${hasMultipleVideos ? 'md:grid md:grid-cols-2 touch-pan-y' : 'justify-center'} gap-2`}>
+            {allMedia.map((item, index) => {
             // Handle both old format (type: "video") and new format (provider: "youtube")
             const isVideo = item.type === "video" || item.provider === "youtube" || item.provider === "vimeo";
             const embedUrl = item.embedUrl || (isVideo ? getVideoEmbedUrl(item.url) : null);
@@ -161,7 +201,30 @@ export const ExternalMedia = ({ videoUrl, externalMedia = [] }: ExternalMediaPro
 
           return null;
         })}
+          </div>
         </div>
+
+        {/* Navigation Arrows (desktop only, for multiple videos) */}
+        {hasMultipleVideos && (
+          <>
+            <button
+              onClick={scrollPrev}
+              disabled={!canScrollPrev}
+              className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 items-center justify-center rounded-full bg-white/90 shadow-lg hover:bg-white disabled:opacity-0 transition-all z-10"
+              aria-label="Vídeo anterior"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            <button
+              onClick={scrollNext}
+              disabled={!canScrollNext}
+              className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 items-center justify-center rounded-full bg-white/90 shadow-lg hover:bg-white disabled:opacity-0 transition-all z-10"
+              aria-label="Próximo vídeo"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
