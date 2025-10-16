@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { BlockRenderer } from "@/components/catalog/BlockRenderer";
+import { BlockRendererPremium } from "@/components/catalog/BlockRendererPremium";
 import { SectionNavigation } from "@/components/catalog/SectionNavigation";
 import { getEffectiveTheme, generateThemeVariables } from "@/lib/theme-utils";
 import { Button } from "@/components/ui/button";
@@ -188,12 +188,16 @@ const PublicCatalogPage = () => {
     >
       {showSectionNav && <SectionNavigation sections={sections} />}
       
-      {blocks.map((block) => (
-        <BlockRenderer
+      {blocks.map((block, index) => (
+        <BlockRendererPremium
           key={block.id}
           block={block}
           profile={profile}
           userId={profile?.id}
+          userSlug={userSlug}
+          catalogSlug={catalogSlug}
+          catalogTitle={catalog?.title}
+          index={index}
         />
       ))}
 
