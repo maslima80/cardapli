@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { BlockRenderer } from "@/components/catalog/BlockRenderer";
+import { PublicThemeProvider } from "@/components/theme/PublicThemeProvider";
 import { useMetaTags } from "@/hooks/useMetaTags";
 import { publicProfileUrl } from "@/lib/urls";
 
@@ -91,12 +92,12 @@ const PublicProfilePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-subtle">
+    <PublicThemeProvider userSlug={userSlug!}>
       {/* Blocks */}
       <div className="container max-w-3xl mx-auto px-4 py-6">
         {blocks.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">
+            <p style={{ color: 'var(--theme-muted)' }}>
               Esta página ainda não tem conteúdo.
             </p>
           </div>
@@ -115,9 +116,9 @@ const PublicProfilePage = () => {
       </div>
 
       {/* Footer */}
-      <div className="border-t border-border mt-12">
+      <div className="border-t mt-12" style={{ borderColor: 'var(--theme-surface)' }}>
         <div className="container max-w-3xl mx-auto px-4 py-8 text-center">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm" style={{ color: 'var(--theme-muted)' }}>
             {profile.business_name && (
               <>
                 © {new Date().getFullYear()} {profile.business_name}
@@ -128,7 +129,8 @@ const PublicProfilePage = () => {
               Feito com{" "}
               <a
                 href="https://cardapli.com.br"
-                className="text-primary hover:underline"
+                style={{ color: 'var(--theme-accent)' }}
+                className="hover:underline"
               >
                 Cardapli
               </a>
@@ -136,7 +138,7 @@ const PublicProfilePage = () => {
           </p>
         </div>
       </div>
-    </div>
+    </PublicThemeProvider>
   );
 };
 
