@@ -1,0 +1,42 @@
+/**
+ * Theme-aware block styles
+ * Uses CSS variables set by PublicThemeProvider
+ */
+
+/* Block container with theme surface */
+.block-surface {
+  background: var(--theme-surface, #ffffff);
+  color: var(--theme-text, #111111);
+}
+
+/* Block with border ring */
+.block-surface-ring {
+  background: var(--theme-surface, #ffffff);
+  color: var(--theme-text, #111111);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+/* Dark mode adjustments */
+[data-theme-mode="dark"] .block-surface-ring {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Theme-aware muted background */
+.block-muted-bg {
+  background: var(--theme-surface, #fafafa);
+  color: var(--theme-text, #111111);
+}
+
+/* Theme-aware text colors */
+.theme-text {
+  color: var(--theme-text, #111111);
+}
+
+.theme-muted {
+  color: var(--theme-muted, rgba(17, 17, 17, 0.6));
+}
+
+/* Theme-aware borders */
+.theme-border {
+  border-color: var(--theme-surface, #e5e7eb);
+}

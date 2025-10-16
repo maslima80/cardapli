@@ -93,7 +93,7 @@ export function CategoryGridBlockPremium({ data, userId, userSlug, catalogSlug }
         <SectionHeader title={data?.title} subtitle={data?.subtitle} />
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="rounded-2xl bg-white ring-1 ring-black/5 p-3">
+            <div key={i} className="rounded-2xl block-surface-ring p-3">
               <Skeleton className="aspect-square rounded-xl mb-2" />
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-3 w-12 mt-1" />
@@ -124,7 +124,7 @@ export function CategoryGridBlockPremium({ data, userId, userSlug, catalogSlug }
           <Link
             key={category.name}
             to={getCategoryUrl(category.name)}
-            className="group block rounded-2xl bg-white ring-1 ring-black/5 hover:ring-black/10 transition-all p-3"
+            className="group block rounded-2xl block-surface-ring hover:shadow-md transition-all p-3"
           >
             {/* Category Image */}
             <div className="aspect-square overflow-hidden rounded-xl bg-muted mb-2">

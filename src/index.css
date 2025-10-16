@@ -1,5 +1,6 @@
 /* Import block rhythm system first */
 @import "./styles/block-rhythm.css";
+@import "./styles/theme-blocks.css";
 
 /* These are Tailwind CSS directives that get processed during build time */
 @tailwind base;
