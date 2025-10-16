@@ -117,7 +117,23 @@ export default function Produtos() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setProducts(data || []);
+      
+      // Fetch variant prices for each product
+      const productsWithVariants = await Promise.all(
+        (data || []).map(async (product) => {
+          const { data: variants } = await supabase
+            .from("product_variants")
+            .select("price")
+            .eq("product_id", product.id);
+          
+          return {
+            ...product,
+            variantPrices: variants?.map(v => v.price).filter(Boolean) || [],
+          };
+        })
+      );
+      
+      setProducts(productsWithVariants || []);
     } catch (error: any) {
       toast({
         title: "Erro ao carregar produtos",

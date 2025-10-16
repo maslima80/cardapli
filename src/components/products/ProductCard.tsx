@@ -47,14 +47,34 @@ export function ProductCard({ product, onEdit, onDuplicate, onDelete, onShare }:
       return null;
     }
 
+    // Check if product has variants with prices
+    const variantPrices = (product as any).variantPrices || [];
+    const allPrices = [
+      ...(product.price ? [Number(product.price)] : []),
+      ...variantPrices.map((p: any) => Number(p))
+    ].filter(p => !isNaN(p) && p > 0);
+
+    if (allPrices.length === 0) {
+      return null;
+    }
+
+    const minPrice = Math.min(...allPrices);
+    const maxPrice = Math.max(...allPrices);
+    const hasRange = minPrice !== maxPrice;
+
     const priceStr = new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
-    }).format(Number(product.price));
+    }).format(minPrice);
 
     const unit = product.price_unit === "Outro" && product.price_unit_custom
       ? product.price_unit_custom
       : product.price_unit;
+
+    // Show "A partir de" if there's a price range from variants
+    if (hasRange && variantPrices.length > 0) {
+      return `A partir de ${priceStr}`;
+    }
 
     return `${priceStr} / ${unit}`;
   };
