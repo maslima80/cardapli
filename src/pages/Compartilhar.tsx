@@ -182,7 +182,10 @@ export default function Compartilhar() {
     }
     
     // Navigate to modal or next step with selected products
-    const selectedProducts = products.filter(p => selectedIds.has(p.id));
+    const selectedProducts = filteredProducts.filter(p => selectedIds.has(p.id));
+    console.log('Selected IDs:', Array.from(selectedIds));
+    console.log('Filtered Products:', filteredProducts.length);
+    console.log('Selected Products:', selectedProducts.length, selectedProducts.map(p => p.title));
     // Store in sessionStorage for the modal
     sessionStorage.setItem('quickCatalogProducts', JSON.stringify(selectedProducts));
     navigate("/compartilhar/criar");
@@ -200,7 +203,7 @@ export default function Compartilhar() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-subtle pb-24">
+    <div className="min-h-screen bg-gradient-subtle pb-32">
       <div className="container max-w-4xl mx-auto px-4 py-6 space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
@@ -367,7 +370,7 @@ export default function Compartilhar() {
 
       {/* Fixed Bottom Bar */}
       {selectedIds.size > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border shadow-lg animate-in slide-in-from-bottom duration-300">
+        <div className="fixed bottom-16 left-0 right-0 bg-background border-t border-border shadow-lg animate-in slide-in-from-bottom duration-300 z-50">
           <div className="container max-w-4xl mx-auto px-4 py-4">
             <div className="flex items-center justify-between gap-4">
               <div>

@@ -28,6 +28,7 @@ export default function QuickCatalogCreate() {
     }
 
     const selectedProducts = JSON.parse(stored);
+    console.log('QuickCatalogCreate - Received products:', selectedProducts.length, selectedProducts.map(p => p.title));
     setProducts(selectedProducts);
 
     // Auto-fill title with date
@@ -129,6 +130,7 @@ export default function QuickCatalogCreate() {
 
       // Create Product Grid block
       const productIds = products.map(p => p.id);
+      console.log('Creating catalog with product IDs:', productIds);
       const { error: gridError } = await supabase
         .from("catalog_blocks")
         .insert({
@@ -137,12 +139,13 @@ export default function QuickCatalogCreate() {
           sort: 1,
           visible: true,
           data: {
-            mode: 'manual',
-            product_ids: productIds,
+            source_type: 'manual',
+            selected_product_ids: productIds,
             layout: layout,
-            columns: layout === 'grid' ? 2 : 1,
             show_price: true,
-            show_description: true,
+            show_tags: false,
+            show_button: true,
+            limit: productIds.length,
           },
         });
 
