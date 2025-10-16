@@ -107,7 +107,7 @@ export function ProductCard({
     return (
       <Link
         to={productUrl}
-        className="group block rounded-2xl block-surface-ring shadow-sm hover:shadow-md transition-all"
+        className="group block rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all"
       >
         <div className="grid grid-cols-[96px,1fr] gap-3 items-start p-3">
           {/* Thumbnail - Square */}
@@ -167,7 +167,7 @@ export function ProductCard({
   return (
     <Link
       to={productUrl}
-      className="group block rounded-2xl block-surface-ring shadow-sm hover:shadow-md transition-all"
+      className="group block rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all"
     >
       <div className="p-3 md:p-4">
         {/* Image */}
@@ -240,7 +240,7 @@ export function ProductCard({
 export function ProductCardSkeleton({ layout = "grid" }: { layout?: "grid" | "list" }) {
   if (layout === "list") {
     return (
-      <div className="rounded-2xl block-surface-ring shadow-sm p-3">
+      <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-3">
         <div className="grid grid-cols-[96px,1fr] gap-3">
           <Skeleton className="w-24 h-24 rounded-lg" />
           <div className="space-y-2">
@@ -254,7 +254,7 @@ export function ProductCardSkeleton({ layout = "grid" }: { layout?: "grid" | "li
   }
 
   return (
-    <div className="rounded-2xl block-surface-ring shadow-sm p-3 md:p-4">
+    <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-3 md:p-4">
       <Skeleton className="aspect-square rounded-xl mb-3" />
       <Skeleton className="h-4 w-full mb-2" />
       <Skeleton className="h-4 w-2/3 mb-2" />

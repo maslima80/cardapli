@@ -27,7 +27,6 @@ export function Section({
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.4, ease: "easeOut" }}
       className={cn(
-        altBackground && "block-surface",
         !noPadding && "py-8 sm:py-12",
         className
       )}

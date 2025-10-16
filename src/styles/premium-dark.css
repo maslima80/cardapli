@@ -1,0 +1,136 @@
+/**
+ * Premium Dark Mode Styles
+ * Inspired by modern SaaS designs with subtle surfaces and perfect contrast
+ */
+
+/* Premium dark mode color overrides */
+.dark {
+  /* Background layers */
+  --background: 222 47% 11%; /* slate-950 */
+  --foreground: 210 40% 98%; /* slate-50 */
+  
+  /* Card/Surface colors - subtle elevation */
+  --card: 217 33% 17%; /* slate-900 */
+  --card-foreground: 210 40% 98%;
+  
+  /* Muted backgrounds and text */
+  --muted: 215 28% 17%; /* slate-800 */
+  --muted-foreground: 218 11% 65%; /* slate-400 */
+  
+  /* Border colors - subtle */
+  --border: 215 28% 17%; /* slate-800 */
+  
+  /* Input backgrounds */
+  --input: 215 28% 17%;
+  
+  /* Primary/Accent - will be overridden by user's accent color */
+  --primary: 263 70% 50%; /* violet-600 */
+  --primary-foreground: 210 40% 98%;
+  
+  /* Secondary */
+  --secondary: 215 28% 17%;
+  --secondary-foreground: 210 40% 98%;
+  
+  /* Accent */
+  --accent: 215 28% 17%;
+  --accent-foreground: 210 40% 98%;
+  
+  /* Destructive */
+  --destructive: 0 63% 31%;
+  --destructive-foreground: 210 40% 98%;
+  
+  /* Popover */
+  --popover: 222 47% 11%;
+  --popover-foreground: 210 40% 98%;
+  
+  /* Ring */
+  --ring: 263 70% 50%;
+}
+
+/* Premium surfaces with subtle shadows */
+.dark .premium-surface {
+  background-color: rgb(30 41 59 / 0.5); /* slate-800 with opacity */
+  border: 1px solid rgb(51 65 85 / 0.3); /* slate-700 with opacity */
+  backdrop-filter: blur(12px);
+}
+
+/* Elevated cards */
+.dark .premium-card {
+  background: linear-gradient(
+    to bottom,
+    rgb(30 41 59 / 0.6),
+    rgb(15 23 42 / 0.8)
+  );
+  border: 1px solid rgb(51 65 85 / 0.2);
+  box-shadow: 
+    0 1px 3px 0 rgb(0 0 0 / 0.3),
+    0 1px 2px -1px rgb(0 0 0 / 0.3);
+}
+
+/* Hover states */
+.dark .premium-card:hover {
+  border-color: rgb(100 116 139 / 0.3);
+  box-shadow: 
+    0 4px 6px -1px rgb(0 0 0 / 0.3),
+    0 2px 4px -2px rgb(0 0 0 / 0.3);
+}
+
+/* Text hierarchy */
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6 {
+  color: rgb(248 250 252); /* slate-50 */
+}
+
+.dark p {
+  color: rgb(226 232 240); /* slate-200 */
+}
+
+.dark .text-muted {
+  color: rgb(148 163 184); /* slate-400 */
+}
+
+/* Premium gradients for dark mode */
+.dark .premium-gradient {
+  background: linear-gradient(
+    135deg,
+    rgb(15 23 42) 0%,
+    rgb(30 41 59) 100%
+  );
+}
+
+/* Accent color support */
+.dark [data-accent] {
+  color: var(--accent-color, rgb(139 92 246)); /* violet-500 default */
+}
+
+.dark .bg-accent {
+  background-color: var(--accent-color, rgb(139 92 246));
+}
+
+.dark .border-accent {
+  border-color: var(--accent-color, rgb(139 92 246));
+}
+
+/* Button styles */
+.dark .btn-accent {
+  background-color: var(--accent-color, rgb(139 92 246));
+  color: white;
+  border: none;
+}
+
+.dark .btn-accent:hover {
+  filter: brightness(1.1);
+}
+
+/* Links */
+.dark a {
+  color: var(--accent-color, rgb(167 139 250)); /* violet-400 */
+}
+
+.dark a:hover {
+  color: var(--accent-color, rgb(196 181 253)); /* violet-300 */
+}

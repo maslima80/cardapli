@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { BlockRendererPremium } from "@/components/catalog/BlockRendererPremium";
-import { PublicThemeProvider } from "@/components/theme/PublicThemeProvider";
+import { SimpleThemeProvider } from "@/components/theme/SimpleThemeProvider";
 import { useMetaTags } from "@/hooks/useMetaTags";
 import { publicProfileUrl } from "@/lib/urls";
 
@@ -92,7 +92,7 @@ const PublicProfilePage = () => {
   }
 
   return (
-    <PublicThemeProvider userSlug={userSlug!}>
+    <SimpleThemeProvider userSlug={userSlug!}>
       {/* Blocks */}
       <div className="container max-w-3xl mx-auto px-4 py-6">
         {blocks.length === 0 ? (
@@ -140,7 +140,7 @@ const PublicProfilePage = () => {
           </p>
         </div>
       </div>
-    </PublicThemeProvider>
+    </SimpleThemeProvider>
   );
 };
 
