@@ -653,7 +653,7 @@ export default function Produtos() {
         <Button
           onClick={handleNewProduct}
           size="lg"
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-10 p-0"
+          className="fixed bottom-20 right-6 h-14 w-14 rounded-full shadow-lg z-10 p-0"
         >
           <Plus className="h-6 w-6" />
         </Button>
