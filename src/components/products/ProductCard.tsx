@@ -69,11 +69,11 @@ export function ProductCard({ product, onEdit, onDuplicate, onDelete, onShare }:
 
     const unit = product.price_unit === "Outro" && product.price_unit_custom
       ? product.price_unit_custom
-      : product.price_unit;
+      : product.price_unit || "Unidade";
 
     // Show "A partir de" if there's a price range from variants
     if (hasRange && variantPrices.length > 0) {
-      return `A partir de ${priceStr}`;
+      return `A partir de ${priceStr} / ${unit}`;
     }
 
     return `${priceStr} / ${unit}`;
