@@ -104,7 +104,7 @@ export const ProductShareModal = ({
         <DialogHeader>
           <DialogTitle>Pronto para enviar?</DialogTitle>
           <DialogDescription>
-            Compartilhe este produto com seus clientes
+            Compartilhe este produto
           </DialogDescription>
         </DialogHeader>
 
