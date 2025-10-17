@@ -239,14 +239,23 @@ export function ProductGridBlockV2Premium({
     const layout = data?.layout || "grid";
     const skeletonCount = layout === "list" ? 3 : 8;
     
+    if (layout === "list") {
+      return (
+        <div className="space-y-4">
+          {[...Array(skeletonCount)].map((_, i) => (
+            <ProductCardSkeleton key={i} layout={layout} />
+          ))}
+        </div>
+      );
+    }
+    
+    // Grade mode - horizontal swipe skeleton
     return (
-      <div className={cn(
-        layout === "list" 
-          ? "space-y-4"
-          : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6"
-      )}>
+      <div className="flex overflow-x-auto pb-8 -mx-4 px-4 gap-4">
         {[...Array(skeletonCount)].map((_, i) => (
-          <ProductCardSkeleton key={i} layout={layout} />
+          <div key={i} className="flex-shrink-0 w-[280px] sm:w-[320px]">
+            <ProductCardSkeleton layout="grid" />
+          </div>
         ))}
       </div>
     );
@@ -282,12 +291,9 @@ export function ProductGridBlockV2Premium({
         renderSkeleton()
       ) : products.length === 0 ? (
         renderEmpty()
-      ) : (
-        <div className={cn(
-          layout === "list" 
-            ? "space-y-4"
-            : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6"
-        )}>
+      ) : layout === "list" ? (
+        // Lista mode - vertical stack
+        <div className="space-y-4">
           {products.map((product) => (
             <ProductCard
               key={product.id}
@@ -299,6 +305,59 @@ export function ProductGridBlockV2Premium({
               userSlug={userSlug}
             />
           ))}
+        </div>
+      ) : (
+        // Grade mode - horizontal swipe
+        <div className="relative">
+          <div 
+            className="flex overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory scroll-pt-4 -mx-4 px-4 cursor-grab active:cursor-grabbing"
+            style={{ 
+              scrollbarWidth: 'none', 
+              msOverflowStyle: 'none',
+              WebkitOverflowScrolling: 'touch',
+            }}
+            onMouseDown={(e) => {
+              const ele = e.currentTarget;
+              const startX = e.pageX - ele.offsetLeft;
+              const scrollLeft = ele.scrollLeft;
+              
+              const handleMouseMove = (e: MouseEvent) => {
+                const x = e.pageX - ele.offsetLeft;
+                const walk = (x - startX) * 2;
+                ele.scrollLeft = scrollLeft - walk;
+              };
+              
+              const handleMouseUp = () => {
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+              };
+              
+              document.addEventListener('mousemove', handleMouseMove);
+              document.addEventListener('mouseup', handleMouseUp);
+            }}
+          >
+            <div className="flex gap-4">
+              {products.map((product) => (
+                <div key={product.id} className="flex-shrink-0 w-[280px] sm:w-[320px] snap-start">
+                  <ProductCard
+                    product={product}
+                    layout="grid"
+                    showPrice={data.show_price !== false}
+                    showTags={data.show_tags !== false}
+                    showButton={data.show_button !== false}
+                    userSlug={userSlug}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Scroll hint */}
+          {products.length > 1 && (
+            <p className="text-center text-xs text-slate-500 dark:text-slate-500 mt-2">
+              ← Deslize para ver mais →
+            </p>
+          )}
         </div>
       )}
     </div>
