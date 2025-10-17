@@ -171,7 +171,10 @@ const PublicCatalogPage = () => {
   const showSectionNav = catalog?.settings?.show_section_nav && sections.length > 0;
 
   return (
-    <SimpleThemeProvider userSlug={userSlug!}>
+    <SimpleThemeProvider 
+      userSlug={userSlug!}
+      catalogThemeOverrides={catalog?.theme_overrides}
+    >
       {showSectionNav && <SectionNavigation sections={sections} />}
       
       {blocks.map((block, index) => (

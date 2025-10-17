@@ -18,6 +18,7 @@ interface CatalogSettingsDialogProps {
     use_brand?: boolean;
     mode?: "light" | "dark";
     accent_color?: string;
+    font?: string;
     font_theme?: string;
     cta_shape?: "rounded" | "square" | "capsule";
   };
@@ -47,7 +48,18 @@ export const CatalogSettingsDialog = ({
   });
 
   const handleThemeChange = (updates: any) => {
-    const newTheme = { ...localTheme, ...updates };
+    // Map font_theme to font for catalog theme overrides
+    const mappedUpdates = { ...updates };
+    if (mappedUpdates.font_theme) {
+      mappedUpdates.font = mappedUpdates.font_theme;
+      delete mappedUpdates.font_theme;
+    }
+    if (mappedUpdates.theme_mode) {
+      mappedUpdates.mode = mappedUpdates.theme_mode;
+      delete mappedUpdates.theme_mode;
+    }
+    
+    const newTheme = { ...localTheme, ...mappedUpdates };
     setLocalTheme(newTheme);
     onThemeChange(newTheme);
   };
@@ -128,7 +140,12 @@ export const CatalogSettingsDialog = ({
             {!useBrand && profile && (
               <div className="border-t pt-4">
                 <PremiumThemeSettings
-                  profile={{ ...profile, ...localTheme }}
+                  profile={{ 
+                    ...profile, 
+                    ...localTheme,
+                    font_theme: localTheme.font || profile.font_theme,
+                    theme_mode: localTheme.mode || profile.theme_mode
+                  }}
                   onChange={(field, value) => handleThemeChange({ [field]: value })}
                 />
               </div>

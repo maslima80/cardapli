@@ -3,10 +3,16 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface SimpleThemeProviderProps {
   userSlug: string;
+  catalogThemeOverrides?: {
+    use_brand?: boolean;
+    mode?: string;
+    accent_color?: string;
+    font?: string;
+  };
   children: ReactNode;
 }
 
-export function SimpleThemeProvider({ userSlug, children }: SimpleThemeProviderProps) {
+export function SimpleThemeProvider({ userSlug, catalogThemeOverrides, children }: SimpleThemeProviderProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,8 +26,22 @@ export function SimpleThemeProvider({ userSlug, children }: SimpleThemeProviderP
           .single();
 
         if (profile) {
+          // Check if catalog has theme overrides
+          const useBrand = catalogThemeOverrides?.use_brand !== false;
+          
+          // Determine which theme to use
+          const themeMode = !useBrand && catalogThemeOverrides?.mode 
+            ? catalogThemeOverrides.mode 
+            : profile.theme_mode;
+          const accentColor = !useBrand && catalogThemeOverrides?.accent_color
+            ? catalogThemeOverrides.accent_color
+            : profile.accent_color;
+          const fontTheme = !useBrand && catalogThemeOverrides?.font
+            ? catalogThemeOverrides.font
+            : profile.font_theme;
+          
           // Apply dark mode class to html element
-          const isDark = profile.theme_mode === 'dark';
+          const isDark = themeMode === 'dark';
           if (isDark) {
             document.documentElement.classList.add('dark');
           } else {
@@ -29,8 +49,8 @@ export function SimpleThemeProvider({ userSlug, children }: SimpleThemeProviderP
           }
 
           // Apply accent color as CSS variable
-          if (profile.accent_color) {
-            document.documentElement.style.setProperty('--accent-color', profile.accent_color);
+          if (accentColor) {
+            document.documentElement.style.setProperty('--accent-color', accentColor);
           }
 
           // Apply font theme - Premium SaaS-grade fonts
@@ -42,8 +62,8 @@ export function SimpleThemeProvider({ userSlug, children }: SimpleThemeProviderP
             classica: { heading: 'Lora', body: 'Source Sans 3' },
           };
 
-          const fontTheme = profile.font_theme || 'neutra';
-          const fonts = fontThemes[fontTheme] || fontThemes.neutra;
+          const selectedFontTheme = fontTheme || 'neutra';
+          const fonts = fontThemes[selectedFontTheme] || fontThemes.neutra;
 
           document.documentElement.style.setProperty('--font-heading', fonts.heading);
           document.documentElement.style.setProperty('--font-body', fonts.body);
@@ -82,7 +102,7 @@ export function SimpleThemeProvider({ userSlug, children }: SimpleThemeProviderP
       document.documentElement.style.removeProperty('--font-heading');
       document.documentElement.style.removeProperty('--font-body');
     };
-  }, [userSlug]);
+  }, [userSlug, catalogThemeOverrides]);
 
   if (loading) {
     return (
