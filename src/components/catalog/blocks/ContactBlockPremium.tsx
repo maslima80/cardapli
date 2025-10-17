@@ -72,13 +72,16 @@ export function ContactBlockPremium({ data, profile, catalogTitle }: ContactBloc
       <div className="space-y-3">
         {/* Primary WhatsApp CTA */}
         {showWhatsapp && (
-          <Button
+          <button
             onClick={handleWhatsAppClick}
-            className="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium flex items-center justify-center gap-2 transition-all"
+            className="w-full h-12 rounded-xl font-medium flex items-center justify-center gap-2 transition-all text-white hover:opacity-90 shadow-sm hover:shadow-md"
+            style={{
+              backgroundColor: 'var(--accent-color, #8B5CF6)',
+            }}
           >
             <MessageCircle className="w-5 h-5" />
-            {data.whatsapp?.label || "Enviar mensagem no WhatsApp"}
-          </Button>
+            {data.whatsapp?.label || "WhatsApp"}
+          </button>
         )}
 
         {/* Secondary actions */}
