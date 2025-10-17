@@ -97,7 +97,7 @@ export const ExternalLinksBlockPremium = ({ data }: ExternalLinksBlockProps) => 
   };
 
   return (
-    <div className="py-12">
+    <div className="py-6">
       <div className="container max-w-3xl mx-auto px-4">
         <div className="space-y-4">
           {links.map((link, index) => (
