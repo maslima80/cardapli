@@ -115,16 +115,17 @@ export const ProductShareModal = ({
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-900 dark:text-slate-50">Link do produto</label>
             <div className="flex gap-2">
-              <Input value={productUrl} readOnly className="flex-1" />
+              <Input value={productUrl} readOnly className="flex-1 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-50 border-slate-300 dark:border-slate-700" />
               <Button
                 variant="outline"
                 size="icon"
                 onClick={handleCopy}
+                className="bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700"
               >
                 {copied ? (
                   <Check className="w-4 h-4 text-green-600" />
                 ) : (
-                  <Copy className="w-4 h-4" />
+                  <Copy className="w-4 h-4 text-slate-900 dark:text-slate-50" />
                 )}
               </Button>
             </div>
@@ -138,7 +139,7 @@ export const ProductShareModal = ({
               rel="noopener noreferrer"
               className="block"
             >
-              <Button className="w-full gap-2 bg-green-600 hover:bg-green-700">
+              <Button className="w-full gap-2 bg-green-600 hover:bg-green-700 text-white">
                 <MessageCircle className="w-4 h-4" />
                 Enviar no WhatsApp
               </Button>
@@ -146,7 +147,7 @@ export const ProductShareModal = ({
 
             <Button
               variant="outline"
-              className="w-full gap-2"
+              className="w-full gap-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-50 border-slate-300 dark:border-slate-700"
               onClick={handleEmailShare}
             >
               <Mail className="w-4 h-4" />
@@ -155,7 +156,7 @@ export const ProductShareModal = ({
 
             <Button
               variant="outline"
-              className="w-full gap-2"
+              className="w-full gap-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-50 border-slate-300 dark:border-slate-700"
               onClick={() => {
                 window.open(productUrl, '_blank');
               }}
