@@ -56,6 +56,7 @@ export default function PublicProductPageNew() {
   
   const [product, setProduct] = useState<Product | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [catalog, setCatalog] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -67,25 +68,42 @@ export default function PublicProductPageNew() {
   // Share modal state
   const [shareModalOpen, setShareModalOpen] = useState(false);
   
-  // Get referrer to determine back navigation
+  // Get referrer to determine back navigation and catalog
   const [backUrl, setBackUrl] = useState<string>("");
+  const [catalogSlugFromUrl, setCatalogSlugFromUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    loadProductAndProfile();
+    // Check URL params or sessionStorage for catalog context
+    const urlParams = new URLSearchParams(window.location.search);
+    const catalogParam = urlParams.get('catalog');
+    const storedCatalog = sessionStorage.getItem('lastCatalog');
     
-    // Detect if user came from a catalog
-    const referrer = document.referrer;
-    if (referrer && referrer.includes(`/u/${userSlug}/`)) {
-      // Extract catalog slug from referrer if present
-      const catalogMatch = referrer.match(/\/u\/[^/]+\/([^/?#]+)/);
-      if (catalogMatch && catalogMatch[1] !== 'p') {
-        // User came from a catalog, set back URL to that catalog
-        setBackUrl(`/u/${userSlug}/${catalogMatch[1]}`);
-        return;
+    let detectedCatalog: string | null = null;
+    
+    if (catalogParam) {
+      detectedCatalog = catalogParam;
+      setBackUrl(`/u/${userSlug}/${catalogParam}`);
+    } else if (storedCatalog) {
+      detectedCatalog = storedCatalog;
+      setBackUrl(`/u/${userSlug}/${storedCatalog}`);
+    } else {
+      // Try to detect from referrer as fallback
+      const referrer = document.referrer;
+      if (referrer && referrer.includes(`/u/${userSlug}/`)) {
+        const catalogMatch = referrer.match(/\/u\/[^/]+\/([^/?#]+)/);
+        if (catalogMatch && catalogMatch[1] !== 'p') {
+          detectedCatalog = catalogMatch[1];
+          setBackUrl(`/u/${userSlug}/${catalogMatch[1]}`);
+        } else {
+          setBackUrl(publicProfileUrl(userSlug || ""));
+        }
+      } else {
+        setBackUrl(publicProfileUrl(userSlug || ""));
       }
     }
-    // Default: go back to profile
-    setBackUrl(publicProfileUrl(userSlug || ""));
+    
+    setCatalogSlugFromUrl(detectedCatalog);
+    loadProductAndProfile(detectedCatalog);
   }, [userSlug, productSlug]);
 
   // Set document title for SEO
@@ -96,7 +114,7 @@ export default function PublicProductPageNew() {
     }
   }, [product, profile, userSlug]);
 
-  const loadProductAndProfile = async () => {
+  const loadProductAndProfile = async (catalogSlug: string | null = null) => {
     try {
       // Load profile
       const { data: profileData, error: profileError } = await supabase
@@ -113,6 +131,22 @@ export default function PublicProductPageNew() {
       }
 
       setProfile(profileData as any);
+      
+      // Load catalog if we have a catalog slug
+      if (catalogSlug) {
+        console.log('Loading catalog:', catalogSlug);
+        const { data: catalogData } = await supabase
+          .from("catalogs")
+          .select("*")
+          .eq("user_id", profileData.id)
+          .eq("slug", catalogSlug)
+          .single();
+        
+        console.log('Catalog data:', catalogData);
+        if (catalogData) {
+          setCatalog(catalogData);
+        }
+      }
 
       // Load product
       const { data: productData, error: productError } = await supabase
@@ -294,7 +328,10 @@ export default function PublicProductPageNew() {
   const hasVariants = variantsData.options.length > 0;
 
   return (
-    <SimpleThemeProvider userSlug={userSlug!}>
+    <SimpleThemeProvider 
+      userSlug={userSlug!}
+      catalogThemeOverrides={catalog?.theme_overrides}
+    >
       <div className="pb-28 md:pb-8 w-full overflow-x-hidden bg-white dark:bg-slate-950">
       {/* Header */}
       <header className="backdrop-blur border-b sticky top-0 z-40 w-full" style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', borderColor: 'var(--theme-surface)', color: 'var(--theme-foreground)' }}>

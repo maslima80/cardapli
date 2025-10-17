@@ -27,6 +27,7 @@ interface ProductCardProps {
   showTags?: boolean;
   showButton?: boolean;
   userSlug?: string;
+  catalogSlug?: string;
 }
 
 export function ProductCard({
@@ -36,10 +37,18 @@ export function ProductCard({
   showTags = false,
   showButton = true,
   userSlug,
+  catalogSlug,
 }: ProductCardProps) {
   const productUrl = userSlug 
     ? `/u/${userSlug}/p/${product.slug || product.id}`
     : `/p/${product.slug || product.id}`;
+  
+  // Store catalog context when clicking product
+  const handleClick = () => {
+    if (catalogSlug) {
+      sessionStorage.setItem('lastCatalog', catalogSlug);
+    }
+  };
   
   const thumbnail = product.photos?.[0];
   const imageUrl = thumbnail?.url;
@@ -107,6 +116,7 @@ export function ProductCard({
     return (
       <Link
         to={productUrl}
+        onClick={handleClick}
         className="group block rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all"
       >
         <div className="grid grid-cols-[96px,1fr] gap-3 items-start p-3">
@@ -167,6 +177,7 @@ export function ProductCard({
   return (
     <Link
       to={productUrl}
+      onClick={handleClick}
       className="group block rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all"
     >
       <div className="p-3 md:p-4">
