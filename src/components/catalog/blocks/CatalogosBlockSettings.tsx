@@ -100,6 +100,13 @@ export const CatalogosBlockSettings = ({
     })
   );
 
+  // Sync selectedIds when data.catalog_ids changes (when drawer opens with existing data)
+  useEffect(() => {
+    if (data.catalog_ids && data.catalog_ids.length > 0) {
+      setSelectedIds(data.catalog_ids);
+    }
+  }, [data.catalog_ids]);
+
   useEffect(() => {
     loadCatalogs();
   }, [userId]);

@@ -187,8 +187,8 @@ export const CatalogosBlockPremium = ({ data, profile }: CatalogosBlockProps) =>
             href={publicCatalogUrl(profile.slug, catalog.slug)}
             className="group block bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden hover:shadow-lg transition-all h-full"
           >
-            {/* Cover Image */}
-            <div className="aspect-video bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-900 relative overflow-hidden">
+            {/* Cover Image - Square for better visibility */}
+            <div className="aspect-square bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-900 relative overflow-hidden">
               {coverUrl ? (
                 <img
                   src={coverUrl}
