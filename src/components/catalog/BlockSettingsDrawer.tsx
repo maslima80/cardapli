@@ -936,18 +936,6 @@ export const BlockSettingsDrawer = ({
                 />
               </div>
             )}
-            
-            <div className="space-y-2">
-              <Label>Fundo</Label>
-              <select
-                className="w-full border rounded-xl p-2"
-                value={formData.background || "default"}
-                onChange={(e) => setFormData({ ...formData, background: e.target.value })}
-              >
-                <option value="default">Padrão</option>
-                <option value="accent">Faixa suave</option>
-              </select>
-            </div>
 
             <div className="space-y-3">
               <Label>Perguntas</Label>

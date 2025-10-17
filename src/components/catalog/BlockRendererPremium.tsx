@@ -11,7 +11,7 @@ import { AboutBusinessBlock } from "./blocks/AboutBusinessBlock";
 import { DividerBlock } from "./blocks/DividerBlock";
 import { VideoBlock } from "./blocks/VideoBlock";
 import { TestimonialsBlockPremium } from "./blocks/TestimonialsBlockPremium";
-import { FaqBlock } from "./blocks/FaqBlock";
+import { FaqBlockPremium } from "./blocks/FaqBlockPremium";
 import { InformacoesBlockPremium } from "./blocks/InformacoesBlockPremium";
 import { LocationBlockPremium } from "./blocks/LocationBlockPremium";
 import { CatalogosBlock } from "./blocks/CatalogosBlock";
@@ -121,7 +121,7 @@ export const BlockRendererPremium = ({
         return <TestimonialsBlockPremium data={block.data} />;
     
       case "faq":
-        return <FaqBlock data={block.data} />;
+        return <FaqBlockPremium data={block.data} />;
     
       case "benefits":
       case "informacoes":
