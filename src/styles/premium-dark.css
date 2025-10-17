@@ -115,14 +115,16 @@
   border-color: var(--accent-color, rgb(139 92 246));
 }
 
-/* Button styles */
-.dark .btn-accent {
-  background-color: var(--accent-color, rgb(139 92 246));
-  color: white;
-  border: none;
+/* Accent-colored buttons (works in light and dark mode) */
+.btn-accent {
+  background-color: var(--accent-color, rgb(139 92 246)) !important;
+  color: white !important;
+  border-color: var(--accent-color, rgb(139 92 246)) !important;
 }
 
-.dark .btn-accent:hover {
+.btn-accent:hover {
+  background-color: var(--accent-color, rgb(139 92 246)) !important;
+  opacity: 0.9;
   filter: brightness(1.1);
 }
 

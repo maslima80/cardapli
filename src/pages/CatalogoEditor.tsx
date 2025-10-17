@@ -53,6 +53,21 @@ const CatalogoEditor = () => {
     loadCatalog();
   }, [id]);
 
+  // Apply dark mode class when in preview mode
+  useEffect(() => {
+    if (previewMode && profile?.theme_mode === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else if (!previewMode) {
+      document.documentElement.classList.remove('dark');
+    }
+    
+    return () => {
+      if (previewMode) {
+        document.documentElement.classList.remove('dark');
+      }
+    };
+  }, [previewMode, profile?.theme_mode]);
+
   const loadCatalog = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -407,8 +422,10 @@ const CatalogoEditor = () => {
           </div>
         ) : previewMode ? (
           <div 
-            className={`space-y-6 bg-background rounded-2xl shadow-lg overflow-hidden ${fontClass}`}
-            style={themeVars as any}
+            className={`space-y-6 rounded-2xl shadow-lg overflow-hidden bg-white dark:bg-slate-950 ${fontClass}`}
+            style={{ 
+              '--accent-color': profile?.accent_color || '#8B5CF6'
+            } as any}
           >
             {blocks.filter(b => b.visible).map((block) => (
               <div key={block.id} className="catalog-preview-block">

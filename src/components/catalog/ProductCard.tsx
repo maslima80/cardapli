@@ -224,7 +224,7 @@ export function ProductCard({
           <Button
             variant="ghost"
             size="sm"
-            className="w-full mt-3 h-9 rounded-lg text-sm font-medium"
+            className="btn-accent w-full mt-3 h-9 rounded-lg text-sm font-medium"
             aria-label={`Ver produto ${product.title}`}
             asChild
           >
