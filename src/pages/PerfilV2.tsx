@@ -346,9 +346,19 @@ export default function PerfilV2() {
           {/* Profile Card */}
           <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setActiveSection('profile')}>
             <CardHeader>
-              <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-950 flex items-center justify-center mb-3">
-                <User className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-              </div>
+              {profile.logo_url ? (
+                <div className="w-16 h-16 rounded-xl overflow-hidden mb-3 border-2 border-slate-200 dark:border-slate-800">
+                  <img
+                    src={profile.logo_url}
+                    alt="Logo"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-950 flex items-center justify-center mb-3">
+                  <User className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                </div>
+              )}
               <CardTitle>Perfil</CardTitle>
               <CardDescription>
                 Nome, logo, slogan, contato e redes sociais

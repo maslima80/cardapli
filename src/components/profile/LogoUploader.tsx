@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Upload } from "lucide-react";
+import { Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { validateFileSize, validateFileType } from "@/lib/imagekit";
 
@@ -61,6 +61,45 @@ export function LogoUploader({ currentLogo, onLogoChange }: LogoUploaderProps) {
         variant: 'destructive',
       });
       return null;
+    }
+  };
+
+  const handleRemoveLogo = async () => {
+    if (!currentLogo) return;
+
+    setUploading(true);
+    try {
+      // Try to delete from ImageKit
+      try {
+        const urlObj = new URL(currentLogo);
+        const pathParts = urlObj.pathname.split('/');
+        const filenamePart = pathParts[pathParts.length - 1];
+        const fileId = filenamePart.split('.')[0];
+        
+        if (fileId) {
+          await supabase.functions.invoke('imagekit-delete', {
+            body: { fileId }
+          });
+        }
+      } catch (error) {
+        console.error('Failed to delete logo from ImageKit:', error);
+      }
+
+      // Update profile with null logo
+      onLogoChange('');
+      toast({
+        title: 'Logo removido',
+        description: 'Seu logo foi removido com sucesso',
+      });
+    } catch (error: any) {
+      console.error('Error removing logo:', error);
+      toast({
+        title: 'Erro ao remover logo',
+        description: error.message || 'Ocorreu um erro ao remover o logo',
+        variant: 'destructive',
+      });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -140,7 +179,7 @@ export function LogoUploader({ currentLogo, onLogoChange }: LogoUploaderProps) {
   };
 
   return (
-    <div>
+    <div className="space-y-3">
       <input
         ref={fileInputRef}
         type="file"
@@ -148,16 +187,50 @@ export function LogoUploader({ currentLogo, onLogoChange }: LogoUploaderProps) {
         onChange={handleFileSelect}
         className="hidden"
       />
-      <Button
-        type="button"
-        variant="outline"
-        onClick={() => fileInputRef.current?.click()}
-        disabled={uploading}
-        className="w-full"
-      >
-        <Upload className="h-4 w-4 mr-2" />
-        {uploading ? 'Enviando...' : 'Enviar logo'}
-      </Button>
+      
+      {currentLogo ? (
+        <div className="space-y-3">
+          {/* Logo Preview */}
+          <div className="relative w-32 h-32 mx-auto">
+            <img
+              src={currentLogo}
+              alt="Logo atual"
+              className="w-full h-full object-cover rounded-xl border-2 border-slate-200 dark:border-slate-800"
+            />
+            <button
+              type="button"
+              onClick={handleRemoveLogo}
+              disabled={uploading}
+              className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg transition-colors disabled:opacity-50"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          
+          {/* Change Logo Button */}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="w-full"
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            {uploading ? 'Enviando...' : 'Alterar logo'}
+          </Button>
+        </div>
+      ) : (
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+          className="w-full"
+        >
+          <Upload className="h-4 w-4 mr-2" />
+          {uploading ? 'Enviando...' : 'Enviar logo'}
+        </Button>
+      )}
     </div>
   );
 }
