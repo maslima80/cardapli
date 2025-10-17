@@ -15,15 +15,16 @@ const PublicFilteredProductsPage = () => {
   const category = searchParams.get("category");
   const tag = searchParams.get("tag");
   
-  // If no filters, show normal page
-  if (!category && !tag) {
-    return catalogSlug ? <PublicCatalogPage /> : <PublicProfilePage />;
-  }
-  
+  // Declare all hooks first (Rules of Hooks)
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<any[]>([]);
   const [profile, setProfile] = useState<any>(null);
   const [catalog, setCatalog] = useState<any>(null);
+  
+  // If no filters, show normal page (after all hooks are declared)
+  if (!category && !tag) {
+    return catalogSlug ? <PublicCatalogPage /> : <PublicProfilePage />;
+  }
 
   useEffect(() => {
     loadFilteredProducts();
