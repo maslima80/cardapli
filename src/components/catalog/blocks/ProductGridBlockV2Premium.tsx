@@ -251,7 +251,7 @@ export function ProductGridBlockV2Premium({
     
     // Grade mode - horizontal swipe skeleton
     return (
-      <div className="flex overflow-x-auto pb-8 -mx-4 px-4 gap-4">
+      <div className="flex overflow-x-auto pb-8 pl-4 pr-4 gap-4">
         {[...Array(skeletonCount)].map((_, i) => (
           <div key={i} className="flex-shrink-0 w-[280px] sm:w-[320px]">
             <ProductCardSkeleton layout="grid" />
@@ -310,7 +310,7 @@ export function ProductGridBlockV2Premium({
         // Grade mode - horizontal swipe
         <div className="relative">
           <div 
-            className="flex overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory scroll-pt-4 -mx-4 px-4 cursor-grab active:cursor-grabbing"
+            className="flex overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory scroll-pt-4 pl-4 pr-4 cursor-grab active:cursor-grabbing"
             style={{ 
               scrollbarWidth: 'none', 
               msOverflowStyle: 'none',
