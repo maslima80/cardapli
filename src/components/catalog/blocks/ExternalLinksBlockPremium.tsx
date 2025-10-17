@@ -20,6 +20,7 @@ interface ExternalLinksBlockProps {
       url: string;
       title: string;
       description?: string;
+      ctaText?: string;
       icon?: string;
       iconType?: "emoji" | "icon" | "image";
       thumbnail?: string;
@@ -116,12 +117,14 @@ export const ExternalLinksBlockPremium = ({ data }: ExternalLinksBlockProps) => 
                       {link.description}
                     </p>
                   )}
-                  <div className="flex items-center gap-2 text-sm font-medium group-hover:gap-3 transition-all"
-                    style={{ color: 'var(--accent-color, #8B5CF6)' }}
-                  >
-                    <span>Visitar</span>
-                    <ExternalLink className="w-4 h-4" />
-                  </div>
+                  {link.ctaText && (
+                    <div className="flex items-center gap-2 text-sm font-medium group-hover:gap-3 transition-all"
+                      style={{ color: 'var(--accent-color, #8B5CF6)' }}
+                    >
+                      <span>{link.ctaText}</span>
+                      <ExternalLink className="w-4 h-4" />
+                    </div>
+                  )}
                 </div>
               </div>
             </a>

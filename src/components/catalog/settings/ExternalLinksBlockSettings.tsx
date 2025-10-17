@@ -53,6 +53,7 @@ interface Link {
   url: string;
   title: string;
   description?: string;
+  ctaText?: string;
   icon?: string;
   iconType?: "emoji" | "icon" | "image";
   thumbnail?: string;
@@ -139,6 +140,15 @@ const SortableLinkItem = ({
       </div>
 
       <div className="space-y-2">
+        <Label>Texto do Botão (opcional)</Label>
+        <Input
+          value={link.ctaText || ''}
+          onChange={(e) => onUpdate(index, 'ctaText', e.target.value)}
+          placeholder="Visitar"
+        />
+      </div>
+
+      <div className="space-y-2">
         <Label>Ícone/Imagem (opcional)</Label>
         <Tabs value={iconTab} onValueChange={(value) => {
           setIconTab(value as any);
@@ -196,9 +206,8 @@ const SortableLinkItem = ({
           <TabsContent value="image" className="space-y-2">
             <p className="text-xs text-muted-foreground">Envie uma imagem:</p>
             <SimpleImageUploader
-              value={link.thumbnail || ''}
-              onChange={(url) => onUpdate(index, 'thumbnail', url)}
-              aspectRatio="square"
+              currentImageUrl={link.thumbnail || ''}
+              onImageChange={(url) => onUpdate(index, 'thumbnail', url)}
             />
           </TabsContent>
         </Tabs>
@@ -234,8 +243,9 @@ export function ExternalLinksBlockSettings({ data, onUpdate }: ExternalLinksBloc
       url: '', 
       title: '', 
       description: '', 
+      ctaText: 'Visitar',
       icon: '🔗', 
-      iconType: 'emoji',
+      iconType: 'emoji' as 'emoji',
       thumbnail: '' 
     }];
     setLinks(newLinks);
