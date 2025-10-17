@@ -90,7 +90,7 @@ export function ContactBlockPremium({ data, profile, catalogTitle }: ContactBloc
             <Button
               onClick={handleEmailClick}
               variant="outline"
-              className="h-11 rounded-xl font-medium flex items-center justify-center gap-2"
+              className="h-11 rounded-xl font-medium flex items-center justify-center gap-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700"
             >
               <Mail className="w-4 h-4" />
               {data.email?.label || "E-mail"}
@@ -101,7 +101,7 @@ export function ContactBlockPremium({ data, profile, catalogTitle }: ContactBloc
             <Button
               onClick={handlePhoneClick}
               variant="secondary"
-              className="h-11 rounded-xl font-medium flex items-center justify-center gap-2"
+              className="h-11 rounded-xl font-medium flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700"
             >
               <Phone className="w-4 h-4" />
               {data.phone?.label || "Telefone"}
