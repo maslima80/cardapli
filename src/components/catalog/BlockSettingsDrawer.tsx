@@ -1050,26 +1050,13 @@ export const BlockSettingsDrawer = ({
                 value={formData.layout || "grid"}
                 onChange={(e) => setFormData({ ...formData, layout: e.target.value })}
               >
-                <option value="grid">Cartões em grade</option>
-                <option value="list">Lista com ícones à esquerda</option>
+                <option value="grid">Cartões lado a lado</option>
+                <option value="list">Lista (um abaixo do outro)</option>
               </select>
               <p className="text-xs text-muted-foreground">
-                Grade: ícones acima do título, ideal para 3-12 itens<br />
-                Lista: ícones à esquerda, melhor para textos longos
+                Cartões: deslize horizontalmente, visual moderno<br />
+                Lista: empilhados verticalmente, fácil leitura
               </p>
-            </div>
-            
-            <div className="space-y-2">
-              <Label>Fundo</Label>
-              <select
-                className="w-full border rounded-xl p-2"
-                value={formData.background || "default"}
-                onChange={(e) => setFormData({ ...formData, background: e.target.value })}
-              >
-                <option value="default">Padrão</option>
-                <option value="accent">Faixa suave</option>
-                <option value="cards_elevated">Cartões elevados</option>
-              </select>
             </div>
 
             <div className="space-y-3">
