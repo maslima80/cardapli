@@ -393,9 +393,9 @@ export default function PublicProductPageNew() {
               <div className="space-y-2 min-w-0">
                 {product.categories && product.categories.length > 0 && (
                   <div className="flex flex-wrap items-center gap-2 min-w-0">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase">Categorias:</span>
+                    <span className="text-xs font-semibold uppercase" style={{ color: 'var(--theme-muted)' }}>Categorias:</span>
                     {product.categories.map((cat, i) => (
-                      <Badge key={i} className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                      <Badge key={i} className="border-2" style={{ borderColor: 'var(--accent-color)', color: 'var(--accent-color)', backgroundColor: 'transparent' }}>
                         {cat}
                       </Badge>
                     ))}
@@ -404,9 +404,9 @@ export default function PublicProductPageNew() {
 
                 {product.quality_tags && product.quality_tags.length > 0 && (
                   <div className="flex flex-wrap items-center gap-2 min-w-0">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase">Tags:</span>
+                    <span className="text-xs font-semibold uppercase" style={{ color: 'var(--theme-muted)' }}>Tags:</span>
                     {product.quality_tags.map((tag, i) => (
-                      <Badge key={i} className="border-2 border-primary/50 text-primary bg-transparent">
+                      <Badge key={i} style={{ backgroundColor: 'var(--accent-color)', color: 'white' }}>
                         {tag}
                       </Badge>
                     ))}
@@ -441,29 +441,29 @@ export default function PublicProductPageNew() {
 
             {/* Product Details Grid */}
             {(product.sku || selectedVariant?.sku || product.min_qty || product.production_days) && (
-              <div className="grid grid-cols-2 gap-3 p-4 bg-muted/50 rounded-lg text-sm">
+              <div className="grid grid-cols-2 gap-3 p-4 rounded-xl border text-sm" style={{ borderColor: 'var(--theme-surface)', backgroundColor: 'rgba(0,0,0,0.05)' }}>
                 {(product.sku || selectedVariant?.sku) && (
                   <div>
-                    <span className="text-muted-foreground block mb-1">SKU</span>
-                    <span className="font-medium">{selectedVariant?.sku || product.sku}</span>
+                    <span className="block mb-1 text-xs uppercase font-semibold" style={{ color: 'var(--theme-muted)' }}>SKU</span>
+                    <span className="font-mono font-medium" style={{ color: 'var(--theme-foreground)' }}>{selectedVariant?.sku || product.sku}</span>
                   </div>
                 )}
                 {product.min_qty && (
                   <div>
-                    <span className="text-muted-foreground block mb-1">Qtd. mínima</span>
-                    <span className="font-medium">{product.min_qty}</span>
+                    <span className="block mb-1 text-xs uppercase font-semibold" style={{ color: 'var(--theme-muted)' }}>Qtd. mínima</span>
+                    <span className="font-medium" style={{ color: 'var(--theme-foreground)' }}>{product.min_qty}</span>
                   </div>
                 )}
                 {product.production_days && (
                   <div className="col-span-2">
-                    <span className="text-muted-foreground block mb-1">Prazo de produção</span>
-                    <span className="font-medium">{product.production_days} dias</span>
+                    <span className="block mb-1 text-xs uppercase font-semibold" style={{ color: 'var(--theme-muted)' }}>Prazo de produção</span>
+                    <span className="font-medium" style={{ color: 'var(--theme-foreground)' }}>{product.production_days} dias úteis</span>
                   </div>
                 )}
               </div>
             )}
 
-            {/* Customization Notice */}
+// ... (rest of the code remains the same)
             {product.accepts_customization && (
               <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                 <p className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-1">
