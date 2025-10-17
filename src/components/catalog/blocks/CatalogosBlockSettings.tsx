@@ -30,6 +30,7 @@ import { CSS } from "@dnd-kit/utilities";
 
 interface CatalogosBlockSettingsProps {
   data: {
+    title?: string;
     catalog_ids?: string[];
     layout?: "grid" | "swipe";
   };
@@ -177,8 +178,9 @@ export const CatalogosBlockSettings = ({
     updateParent(newIds);
   };
 
-  const updateParent = (newIds: string[], newLayout?: "grid" | "swipe") => {
+  const updateParent = (newIds: string[], newLayout?: "grid" | "swipe", newTitle?: string) => {
     onUpdate({
+      title: newTitle !== undefined ? newTitle : data.title,
       catalog_ids: newIds,
       layout: newLayout || data.layout || "grid",
     });
@@ -192,6 +194,21 @@ export const CatalogosBlockSettings = ({
           <Label className="text-base">Catálogos no perfil</Label>
           <p className="text-sm text-muted-foreground mt-1">
             Escolha quais catálogos exibir na sua página pública e defina a ordem
+          </p>
+        </div>
+
+        {/* Title Field */}
+        <div className="space-y-2">
+          <Label>Título do Bloco</Label>
+          <input
+            type="text"
+            className="w-full border rounded-xl p-2"
+            value={data.title || "Catálogos"}
+            onChange={(e) => updateParent(selectedIds, data.layout, e.target.value)}
+            placeholder="Catálogos"
+          />
+          <p className="text-xs text-muted-foreground">
+            Deixe vazio para ocultar o título
           </p>
         </div>
 

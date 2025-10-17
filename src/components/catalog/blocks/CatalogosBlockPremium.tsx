@@ -5,6 +5,7 @@ import { ExternalLink, Folder } from "lucide-react";
 
 interface CatalogosBlockProps {
   data: {
+    title?: string;
     catalog_ids?: string[];
     layout?: "grid" | "swipe";
   };
@@ -230,18 +231,24 @@ export const CatalogosBlockPremium = ({ data, profile }: CatalogosBlockProps) =>
     }
   };
 
+  const title = data.title || "Catálogos";
+
   if (layout === "grid") {
     // Grid/List layout
     return (
       <div className="py-12">
         <div className="container max-w-4xl mx-auto px-4">
-          <h2 
-            className="text-3xl font-bold mb-8 text-slate-900 dark:text-slate-50"
-            style={{ fontFamily: 'var(--font-heading, inherit)' }}
-          >
-            Catálogos
-          </h2>
-          <div className="space-y-4">
+          {title && (
+            <h2 
+              className="text-3xl font-bold mb-8 text-slate-900 dark:text-slate-50"
+              style={{ fontFamily: 'var(--font-heading, inherit)' }}
+            >
+              {title}
+            </h2>
+          )}
+          <div className={`space-y-4 ${
+            catalogs.length === 1 ? 'max-w-md mx-auto' : ''
+          }`}>
             {catalogs.map((catalog, index) => renderCatalogCard(catalog, index))}
           </div>
         </div>
@@ -253,12 +260,14 @@ export const CatalogosBlockPremium = ({ data, profile }: CatalogosBlockProps) =>
   return (
     <div className="py-12">
       <div className="container max-w-6xl mx-auto px-4">
-        <h2 
-          className="text-3xl font-bold mb-8 text-slate-900 dark:text-slate-50"
-          style={{ fontFamily: 'var(--font-heading, inherit)' }}
-        >
-          Catálogos
-        </h2>
+        {title && (
+          <h2 
+            className="text-3xl font-bold mb-8 text-slate-900 dark:text-slate-50"
+            style={{ fontFamily: 'var(--font-heading, inherit)' }}
+          >
+            {title}
+          </h2>
+        )}
         
         <div className="relative">
           {/* Horizontal scroll container with drag support */}
