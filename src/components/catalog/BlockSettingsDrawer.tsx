@@ -220,7 +220,7 @@ export const BlockSettingsDrawer = ({
               <Label>Alinhamento</Label>
               <Select
                 value={formData.align || "center"}
-                onValueChange={(value) => setFormData({ ...formData, align: value })}
+                onValueChange={(value) => setFormData({ ...formData, align: value, layout: "full" })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Escolha o alinhamento" />
@@ -228,21 +228,6 @@ export const BlockSettingsDrawer = ({
                 <SelectContent>
                   <SelectItem value="left">Esquerda</SelectItem>
                   <SelectItem value="center">Centro</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Layout</Label>
-              <Select
-                value={formData.layout || "card"}
-                onValueChange={(value) => setFormData({ ...formData, layout: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Escolha o layout" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="card">Cartão (com bordas arredondadas)</SelectItem>
-                  <SelectItem value="full">Faixa completa (full-bleed)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

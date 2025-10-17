@@ -109,6 +109,9 @@ const CatalogoEditor = () => {
   const handleAddBlock = async (type: string) => {
     const newSort = blocks.length > 0 ? Math.max(...blocks.map(b => b.sort)) + 1 : 0;
 
+    // Set default data based on block type
+    const defaultData = type === "cover" ? { layout: "full" } : {};
+
     const { data, error } = await supabase
       .from("catalog_blocks")
       .insert({
@@ -116,7 +119,7 @@ const CatalogoEditor = () => {
         type,
         sort: newSort,
         visible: true,
-        data: {},
+        data: defaultData,
       })
       .select()
       .single();
