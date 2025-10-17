@@ -10,7 +10,7 @@ import { AboutBlock } from "./blocks/AboutBlock";
 import { AboutBusinessBlock } from "./blocks/AboutBusinessBlock";
 import { DividerBlock } from "./blocks/DividerBlock";
 import { VideoBlock } from "./blocks/VideoBlock";
-import { TestimonialsBlock } from "./blocks/TestimonialsBlock";
+import { TestimonialsBlockPremium } from "./blocks/TestimonialsBlockPremium";
 import { FaqBlock } from "./blocks/FaqBlock";
 import { BenefitsBlock } from "./blocks/BenefitsBlock";
 import { StepByStepBlock } from "./blocks/StepByStepBlock";
@@ -120,7 +120,7 @@ export const BlockRendererPremium = ({
         return <DividerBlock />;
     
       case "testimonials":
-        return <TestimonialsBlock data={block.data} />;
+        return <TestimonialsBlockPremium data={block.data} />;
     
       case "faq":
         return <FaqBlock data={block.data} />;
