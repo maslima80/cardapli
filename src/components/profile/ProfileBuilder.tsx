@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Plus, Eye, Copy, ExternalLink } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Plus, Eye, Copy, ExternalLink, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { BlockCard } from "@/components/catalog/BlockCard";
 import { AddBlockDrawer } from "@/components/catalog/AddBlockDrawer";
@@ -35,6 +37,8 @@ export const ProfileBuilder = ({ userSlug, userId }: ProfileBuilderProps) => {
   const [loading, setLoading] = useState(true);
   const [addDrawerOpen, setAddDrawerOpen] = useState(false);
   const [editingBlock, setEditingBlock] = useState<any>(null);
+  const [showWhatsAppBubble, setShowWhatsAppBubble] = useState(false);
+  const [hasWhatsApp, setHasWhatsApp] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -45,7 +49,48 @@ export const ProfileBuilder = ({ userSlug, userId }: ProfileBuilderProps) => {
 
   useEffect(() => {
     loadBlocks();
+    loadWhatsAppSettings();
   }, [userId]);
+
+  const loadWhatsAppSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("show_whatsapp_bubble, whatsapp")
+        .eq("id", userId)
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        setShowWhatsAppBubble(data.show_whatsapp_bubble || false);
+        setHasWhatsApp(!!data.whatsapp);
+      }
+    } catch (error) {
+      console.error("Error loading WhatsApp settings:", error);
+    }
+  };
+
+  const handleWhatsAppToggle = async (checked: boolean) => {
+    if (checked && !hasWhatsApp) {
+      toast.error("Adicione um número de WhatsApp no seu perfil primeiro!");
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ show_whatsapp_bubble: checked })
+        .eq("id", userId);
+
+      if (error) throw error;
+
+      setShowWhatsAppBubble(checked);
+      toast.success(checked ? "WhatsApp bubble ativado!" : "WhatsApp bubble desativado!");
+    } catch (error) {
+      console.error("Error updating WhatsApp bubble:", error);
+      toast.error("Erro ao atualizar configuração");
+    }
+  };
 
   const loadBlocks = async () => {
     const { data, error } = await supabase
@@ -193,6 +238,33 @@ export const ProfileBuilder = ({ userSlug, userId }: ProfileBuilderProps) => {
 
   return (
     <div className="space-y-4">
+      {/* WhatsApp Bubble Toggle */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-[#25D366] flex items-center justify-center">
+              <MessageCircle className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <Label htmlFor="whatsapp-toggle" className="text-base font-medium cursor-pointer">
+                WhatsApp Bubble
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                {hasWhatsApp 
+                  ? "Mostrar botão flutuante de WhatsApp na página"
+                  : "Adicione um WhatsApp no seu perfil primeiro"}
+              </p>
+            </div>
+          </div>
+          <Switch
+            id="whatsapp-toggle"
+            checked={showWhatsAppBubble}
+            onCheckedChange={handleWhatsAppToggle}
+            disabled={!hasWhatsApp}
+          />
+        </div>
+      </div>
+
       {/* Helpful Tips */}
       <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 space-y-2">
         <p className="text-sm text-blue-900 dark:text-blue-100">
