@@ -71,6 +71,7 @@ export const BlockRendererPremium = ({
             data={block.data} 
             userId={userId}
             userSlug={userSlug}
+            catalogSlug={catalogSlug}
           />
         );
     

@@ -334,7 +334,7 @@ export default function PublicProductPageNew() {
     >
       <div className="pb-28 md:pb-8 w-full overflow-x-hidden bg-white dark:bg-slate-950">
       {/* Header */}
-      <header className="backdrop-blur border-b sticky top-0 z-40 w-full" style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', borderColor: 'var(--theme-surface)', color: 'var(--theme-foreground)' }}>
+      <header className="backdrop-blur border-b sticky top-0 z-40 w-full bg-white/95 dark:bg-slate-950/95" style={{ borderColor: 'var(--theme-surface)' }}>
         <div className="w-full max-w-6xl mx-auto px-4 py-3 flex items-center justify-between min-w-0">
           <Link 
             to={backUrl || publicProfileUrl(profile.slug)} 
@@ -350,6 +350,7 @@ export default function PublicProductPageNew() {
             size="sm"
             onClick={() => setShareModalOpen(true)}
             className="gap-2"
+            style={{ color: 'var(--theme-foreground)' }}
           >
             <Share2 className="w-4 h-4" />
             <span className="hidden sm:inline">Compartilhar</span>
@@ -441,7 +442,11 @@ export default function PublicProductPageNew() {
 
             {/* Product Details Grid */}
             {(product.sku || selectedVariant?.sku || product.min_qty || product.production_days) && (
-              <div className="grid grid-cols-2 gap-3 p-4 rounded-xl border text-sm" style={{ borderColor: 'var(--theme-surface)', backgroundColor: 'rgba(0,0,0,0.05)' }}>
+              <div className="grid grid-cols-2 gap-3 p-4 rounded-xl border text-sm" style={{ 
+                borderColor: 'var(--accent-color, #8B5CF6)', 
+                backgroundColor: 'transparent',
+                borderWidth: '2px'
+              }}>
                 {(product.sku || selectedVariant?.sku) && (
                   <div>
                     <span className="block mb-1 text-xs uppercase font-semibold" style={{ color: 'var(--theme-muted)' }}>SKU</span>
@@ -463,7 +468,7 @@ export default function PublicProductPageNew() {
               </div>
             )}
 
-// ... (rest of the code remains the same)
+            {/* Customization Box */}
             {product.accepts_customization && (
               <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                 <p className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-1">

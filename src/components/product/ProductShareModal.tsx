@@ -64,8 +64,8 @@ export const ProductShareModal = ({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Ativar link público?</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-foreground">Ativar link público?</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
               Este produto está oculto. Para compartilhá-lo, ative o link público.
             </DialogDescription>
           </DialogHeader>
@@ -100,23 +100,20 @@ export const ProductShareModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-50">
         <DialogHeader>
-          <DialogTitle>Pronto para enviar?</DialogTitle>
-          <DialogDescription>
-            Compartilhe este produto
-          </DialogDescription>
+          <DialogTitle className="text-slate-900 dark:text-slate-50">Compartilhe este produto</DialogTitle>
         </DialogHeader>
+        
+        {/* Product Title */}
+        <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-3 -mt-2">
+          <p className="font-medium text-slate-900 dark:text-slate-50">{productTitle}</p>
+        </div>
 
         <div className="space-y-4">
-          {/* Product Info */}
-          <div className="bg-muted/50 rounded-lg p-3">
-            <p className="font-medium truncate">{productTitle}</p>
-          </div>
-
           {/* URL Display */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Link do produto</label>
+            <label className="text-sm font-medium text-slate-900 dark:text-slate-50">Link do produto</label>
             <div className="flex gap-2">
               <Input value={productUrl} readOnly className="flex-1" />
               <Button
@@ -170,7 +167,7 @@ export const ProductShareModal = ({
 
           {/* Info */}
           <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-            <p className="text-xs text-blue-900 dark:text-blue-100">
+            <p className="text-xs text-blue-900 dark:text-blue-200">
               💡 <strong>Dica:</strong> O link leva direto para a página do produto com todas as informações.
             </p>
           </div>
