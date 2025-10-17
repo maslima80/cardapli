@@ -320,15 +320,15 @@ export default function PerfilV2() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex-1 px-4 py-3 bg-slate-100 dark:bg-slate-900 rounded-lg font-mono text-sm">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-4">
+              <div className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-slate-100 dark:bg-slate-900 rounded-lg font-mono text-xs sm:text-sm break-all">
                 cardapli.com.br/u/{profile.slug || 'seu-usuario'}
               </div>
-              <Button variant="outline" onClick={() => setActiveSection('username')}>
+              <Button variant="outline" onClick={() => setActiveSection('username')} className="sm:flex-shrink-0">
                 Editar
               </Button>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <Button variant="outline" onClick={viewProfile} className="flex-1" disabled={!profile.slug}>
                 <Eye className="w-4 h-4 mr-2" />
                 Ver página
