@@ -158,127 +158,43 @@ export function TagGridBlockPremiumV2({ data, userId, userSlug, catalogSlug }: T
     );
   }
 
-  const renderTagCard = (tag: any) => (
+  const renderTagPill = (tag: any) => (
     <Link
       key={tag.name}
       to={getTagUrl(tag.name)}
-      className="group block bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 hover:shadow-lg transition-all"
+      className="group inline-flex items-center gap-2 px-5 py-3 rounded-full border-2 transition-all hover:shadow-md"
+      style={{
+        borderColor: 'var(--accent-color, #8B5CF6)',
+        backgroundColor: 'white',
+      }}
     >
-      <div className="flex items-start justify-between mb-3">
-        <div 
-          className="w-12 h-12 rounded-xl flex items-center justify-center"
-          style={{ backgroundColor: 'var(--accent-color, #8B5CF6)' }}
-        >
-          <Tag className="w-6 h-6 text-white" />
-        </div>
-        {data.show_count !== false && (
-          <span 
-            className="text-2xl font-bold"
-            style={{ 
-              color: 'var(--accent-color, #8B5CF6)',
-              fontFamily: 'var(--font-heading, inherit)'
-            }}
-          >
-            {tag.count}
-          </span>
-        )}
-      </div>
-      
-      <h3 
-        className="text-lg font-semibold mb-2 text-slate-900 dark:text-slate-50"
+      <span 
+        className="font-semibold text-slate-900 dark:text-slate-50"
         style={{ fontFamily: 'var(--font-heading, inherit)' }}
       >
         {tag.name}
-      </h3>
-      
-      {showButton && (
-        <div className="flex items-center gap-2 text-sm font-medium group-hover:gap-3 transition-all"
-          style={{ color: 'var(--accent-color, #8B5CF6)' }}
+      </span>
+      {data.show_count !== false && (
+        <span 
+          className="px-2 py-0.5 rounded-full text-sm font-bold text-white"
+          style={{ backgroundColor: 'var(--accent-color, #8B5CF6)' }}
         >
-          <span>{buttonText}</span>
-          <ChevronRight className="w-4 h-4" />
-        </div>
+          {tag.count}
+        </span>
       )}
+      <ChevronRight 
+        className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity"
+        style={{ color: 'var(--accent-color, #8B5CF6)' }}
+      />
     </Link>
   );
 
-  if (layout === "swipe") {
-    return (
-      <div className="py-12">
-        <div className="container max-w-6xl mx-auto px-4">
-          {title && (
-            <div className="mb-8">
-              <h2 
-                className="text-3xl font-bold text-slate-900 dark:text-slate-50"
-                style={{ fontFamily: 'var(--font-heading, inherit)' }}
-              >
-                {title}
-              </h2>
-              {subtitle && (
-                <p 
-                  className="text-slate-600 dark:text-slate-400 mt-2"
-                  style={{ fontFamily: 'var(--font-body, inherit)' }}
-                >
-                  {subtitle}
-                </p>
-              )}
-            </div>
-          )}
-          
-          <div className="relative">
-            <div 
-              className="flex overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory scroll-pt-4 -mx-4 px-4 cursor-grab active:cursor-grabbing"
-              style={{ 
-                scrollbarWidth: 'none', 
-                msOverflowStyle: 'none',
-                WebkitOverflowScrolling: 'touch',
-              }}
-              onMouseDown={(e) => {
-                const ele = e.currentTarget;
-                const startX = e.pageX - ele.offsetLeft;
-                const scrollLeft = ele.scrollLeft;
-                
-                const handleMouseMove = (e: MouseEvent) => {
-                  const x = e.pageX - ele.offsetLeft;
-                  const walk = (x - startX) * 2;
-                  ele.scrollLeft = scrollLeft - walk;
-                };
-                
-                const handleMouseUp = () => {
-                  document.removeEventListener('mousemove', handleMouseMove);
-                  document.removeEventListener('mouseup', handleMouseUp);
-                };
-                
-                document.addEventListener('mousemove', handleMouseMove);
-                document.addEventListener('mouseup', handleMouseUp);
-              }}
-            >
-              <div className="flex gap-4">
-                {tags.map((tag) => (
-                  <div key={tag.name} className="flex-shrink-0 w-[240px] snap-start">
-                    {renderTagCard(tag)}
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            {tags.length > 1 && (
-              <p className="text-center text-xs text-slate-500 dark:text-slate-500 mt-2">
-                ← Deslize para ver mais →
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Cards layout - responsive grid
+  // Always use horizontal swipe for tags (compact pills)
   return (
     <div className="py-12">
       <div className="container max-w-6xl mx-auto px-4">
         {title && (
-          <div className="mb-8">
+          <div className="mb-6">
             <h2 
               className="text-3xl font-bold text-slate-900 dark:text-slate-50"
               style={{ fontFamily: 'var(--font-heading, inherit)' }}
@@ -296,8 +212,44 @@ export function TagGridBlockPremiumV2({ data, userId, userSlug, catalogSlug }: T
           </div>
         )}
         
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {tags.map(renderTagCard)}
+        <div className="relative">
+          <div 
+            className="flex overflow-x-auto pb-6 scrollbar-hide -mx-4 px-4 cursor-grab active:cursor-grabbing"
+            style={{ 
+              scrollbarWidth: 'none', 
+              msOverflowStyle: 'none',
+              WebkitOverflowScrolling: 'touch',
+            }}
+            onMouseDown={(e) => {
+              const ele = e.currentTarget;
+              const startX = e.pageX - ele.offsetLeft;
+              const scrollLeft = ele.scrollLeft;
+              
+              const handleMouseMove = (e: MouseEvent) => {
+                const x = e.pageX - ele.offsetLeft;
+                const walk = (x - startX) * 2;
+                ele.scrollLeft = scrollLeft - walk;
+              };
+              
+              const handleMouseUp = () => {
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+              };
+              
+              document.addEventListener('mousemove', handleMouseMove);
+              document.addEventListener('mouseup', handleMouseUp);
+            }}
+          >
+            <div className="flex gap-3">
+              {tags.map(renderTagPill)}
+            </div>
+          </div>
+          
+          {tags.length > 3 && (
+            <p className="text-center text-xs text-slate-500 dark:text-slate-500 mt-2">
+              ← Deslize para ver mais →
+            </p>
+          )}
         </div>
       </div>
     </div>

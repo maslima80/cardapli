@@ -228,78 +228,7 @@ export function CategoryGridBlockPremiumV2({ data, userId, userSlug, catalogSlug
     </Link>
   );
 
-  if (layout === "swipe") {
-    return (
-      <div className="py-12">
-        <div className="container max-w-6xl mx-auto px-4">
-          {title && (
-            <div className="mb-8">
-              <h2 
-                className="text-3xl font-bold text-slate-900 dark:text-slate-50"
-                style={{ fontFamily: 'var(--font-heading, inherit)' }}
-              >
-                {title}
-              </h2>
-              {subtitle && (
-                <p 
-                  className="text-slate-600 dark:text-slate-400 mt-2"
-                  style={{ fontFamily: 'var(--font-body, inherit)' }}
-                >
-                  {subtitle}
-                </p>
-              )}
-            </div>
-          )}
-          
-          <div className="relative">
-            <div 
-              className="flex overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory scroll-pt-4 -mx-4 px-4 cursor-grab active:cursor-grabbing"
-              style={{ 
-                scrollbarWidth: 'none', 
-                msOverflowStyle: 'none',
-                WebkitOverflowScrolling: 'touch',
-              }}
-              onMouseDown={(e) => {
-                const ele = e.currentTarget;
-                const startX = e.pageX - ele.offsetLeft;
-                const scrollLeft = ele.scrollLeft;
-                
-                const handleMouseMove = (e: MouseEvent) => {
-                  const x = e.pageX - ele.offsetLeft;
-                  const walk = (x - startX) * 2;
-                  ele.scrollLeft = scrollLeft - walk;
-                };
-                
-                const handleMouseUp = () => {
-                  document.removeEventListener('mousemove', handleMouseMove);
-                  document.removeEventListener('mouseup', handleMouseUp);
-                };
-                
-                document.addEventListener('mousemove', handleMouseMove);
-                document.addEventListener('mouseup', handleMouseUp);
-              }}
-            >
-              <div className="flex gap-4">
-                {categories.map((category) => (
-                  <div key={category.name} className="flex-shrink-0 w-[200px] snap-start">
-                    {renderCategoryCard(category)}
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            {categories.length > 1 && (
-              <p className="text-center text-xs text-slate-500 dark:text-slate-500 mt-2">
-                ← Deslize para ver mais →
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Cards layout - responsive grid
+  // Always use horizontal swipe for categories (better mobile UX)
   return (
     <div className="py-12">
       <div className="container max-w-6xl mx-auto px-4">
@@ -322,8 +251,48 @@ export function CategoryGridBlockPremiumV2({ data, userId, userSlug, catalogSlug
           </div>
         )}
         
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {categories.map(renderCategoryCard)}
+        <div className="relative">
+          <div 
+            className="flex overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory scroll-pt-4 -mx-4 px-4 cursor-grab active:cursor-grabbing"
+            style={{ 
+              scrollbarWidth: 'none', 
+              msOverflowStyle: 'none',
+              WebkitOverflowScrolling: 'touch',
+            }}
+            onMouseDown={(e) => {
+              const ele = e.currentTarget;
+              const startX = e.pageX - ele.offsetLeft;
+              const scrollLeft = ele.scrollLeft;
+              
+              const handleMouseMove = (e: MouseEvent) => {
+                const x = e.pageX - ele.offsetLeft;
+                const walk = (x - startX) * 2;
+                ele.scrollLeft = scrollLeft - walk;
+              };
+              
+              const handleMouseUp = () => {
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+              };
+              
+              document.addEventListener('mousemove', handleMouseMove);
+              document.addEventListener('mouseup', handleMouseUp);
+            }}
+          >
+            <div className="flex gap-4">
+              {categories.map((category) => (
+                <div key={category.name} className="flex-shrink-0 w-[180px] sm:w-[200px] snap-start">
+                  {renderCategoryCard(category)}
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {categories.length > 1 && (
+            <p className="text-center text-xs text-slate-500 dark:text-slate-500 mt-2">
+              ← Deslize para ver mais →
+            </p>
+          )}
         </div>
       </div>
     </div>
