@@ -1903,9 +1903,9 @@ export const BlockSettingsDrawer = ({
              block.type === "contact" ? "Editar Contato" :
              block.type === "socials" ? "Editar Redes Sociais" :
              block.type === "testimonials" ? "Editar Depoimentos" :
-             block.type === "benefits" ? "Editar Benefícios" :
+             block.type === "benefits" ? "Editar Informações" :
+             block.type === "informacoes" ? "Editar Informações" :
              block.type === "faq" ? "Editar Perguntas Frequentes" :
-             block.type === "important_info" ? "Editar Info Importante" :
              block.type === "divider" ? "Editar Divisor" :
              "Editar Bloco"}
           </SheetTitle>

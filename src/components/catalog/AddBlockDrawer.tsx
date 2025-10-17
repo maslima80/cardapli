@@ -49,10 +49,8 @@ const blockTypes = [
   { type: "contact", icon: Phone, label: "Contato", description: "WhatsApp, email, telefone" },
   { type: "socials", icon: Share2, label: "Redes Sociais", description: "Links para suas redes" },
   { type: "testimonials", icon: Star, label: "Depoimentos", description: "Avaliações de clientes" },
-  { type: "benefits", icon: List, label: "Benefícios", description: "Lista de vantagens" },
-  { type: "step_by_step", icon: ListOrdered, label: "Passo a passo", description: "Guia de instruções sequenciais" },
+  { type: "informacoes", icon: List, label: "Informações", description: "Destaque informações importantes" },
   { type: "faq", icon: HelpCircle, label: "Perguntas Frequentes", description: "Dúvidas comuns" },
-  { type: "important_info", icon: AlertCircle, label: "Info Importante", description: "Destaque informações" },
   { type: "catalogs", icon: Folder, label: "Catálogos", description: "Mostre seus catálogos" },
   { type: "divider", icon: Minus, label: "Divisor", description: "Linha de separação" },
 ];
