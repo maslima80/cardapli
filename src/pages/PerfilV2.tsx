@@ -238,9 +238,9 @@ export default function PerfilV2() {
             <CardContent>
               <PremiumThemeSettings
                 profile={profile}
-                onUpdate={(updates) => {
-                  setProfile((prev) => ({ ...prev, ...updates }));
-                  updateProfile(updates);
+                onChange={(field, value) => {
+                  setProfile((prev) => ({ ...prev, [field]: value }));
+                  updateProfile({ [field]: value });
                 }}
               />
             </CardContent>
