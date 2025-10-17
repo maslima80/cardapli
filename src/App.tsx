@@ -20,6 +20,7 @@ import PublicCatalog from "./pages/PublicCatalog";
 import PublicCatalogPage from "./pages/PublicCatalogPage";
 import PublicProfilePage from "./pages/PublicProfilePage";
 import PublicProductPage from "./pages/PublicProductPageNew";
+import PublicFilteredProductsPage from "./pages/PublicFilteredProductsPage";
 import EscolherSlug from "./pages/EscolherSlug";
 import NotFound from "./pages/NotFound";
 import LegacyRedirect from "./pages/LegacyRedirect";
@@ -55,12 +56,12 @@ const App = () => (
             
             {/* Public routes - /u/:userSlug for profiles and catalogs */}
             <Route path="/u/:userSlug" element={<PublicUserLayout />}>
-              {/* /u/user → profile */}
-              <Route index element={<PublicProfilePage />} />
+              {/* /u/user → profile or filtered products */}
+              <Route index element={<PublicFilteredProductsPage />} />
               {/* /u/user/p/:productSlug → product */}
               <Route path="p/:productSlug" element={<PublicProductPage />} />
-              {/* /u/user/:catalogSlug → catalog */}
-              <Route path=":catalogSlug" element={<PublicCatalogPage />} />
+              {/* /u/user/:catalogSlug → catalog or filtered products */}
+              <Route path=":catalogSlug" element={<PublicFilteredProductsPage />} />
             </Route>
             
             {/* Legacy redirects - old /@user URLs redirect to /u/user */}
