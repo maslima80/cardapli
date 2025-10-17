@@ -14,7 +14,7 @@ import { TestimonialsBlockPremium } from "./blocks/TestimonialsBlockPremium";
 import { FaqBlockPremium } from "./blocks/FaqBlockPremium";
 import { InformacoesBlockPremium } from "./blocks/InformacoesBlockPremium";
 import { LocationBlockPremium } from "./blocks/LocationBlockPremium";
-import { CatalogosBlock } from "./blocks/CatalogosBlock";
+import { CatalogosBlockPremium } from "./blocks/CatalogosBlockPremium";
 import { ProfileHeaderBlock } from "./blocks/ProfileHeaderBlock";
 import { Section } from "./Section";
 
@@ -130,7 +130,7 @@ export const BlockRendererPremium = ({
     
     
       case "catalogs":
-        return <CatalogosBlock data={block.data} profile={profile} />;
+        return <CatalogosBlockPremium data={block.data} profile={profile} />;
     
       case "profile_header":
         return <ProfileHeaderBlock data={block.data} profile={profile} />;

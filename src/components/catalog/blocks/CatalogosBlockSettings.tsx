@@ -31,8 +31,7 @@ import { CSS } from "@dnd-kit/utilities";
 interface CatalogosBlockSettingsProps {
   data: {
     catalog_ids?: string[];
-    layout?: string;
-    columns?: number;
+    layout?: "grid" | "swipe";
   };
   onUpdate: (data: any) => void;
   userId: string;
@@ -171,11 +170,10 @@ export const CatalogosBlockSettings = ({
     updateParent(newIds);
   };
 
-  const updateParent = (newIds: string[]) => {
+  const updateParent = (newIds: string[], newLayout?: "grid" | "swipe") => {
     onUpdate({
       catalog_ids: newIds,
-      layout: data.layout || "grid",
-      columns: data.columns || 2,
+      layout: newLayout || data.layout || "grid",
     });
   };
 
@@ -187,6 +185,23 @@ export const CatalogosBlockSettings = ({
           <Label className="text-base">Catálogos no perfil</Label>
           <p className="text-sm text-muted-foreground mt-1">
             Escolha quais catálogos exibir na sua página pública e defina a ordem
+          </p>
+        </div>
+
+        {/* Layout Option */}
+        <div className="space-y-2">
+          <Label>Layout</Label>
+          <select
+            className="w-full border rounded-xl p-2"
+            value={data.layout || "grid"}
+            onChange={(e) => updateParent(selectedIds, e.target.value as "grid" | "swipe")}
+          >
+            <option value="grid">Lista (um abaixo do outro)</option>
+            <option value="swipe">Cartões lado a lado</option>
+          </select>
+          <p className="text-xs text-muted-foreground">
+            Lista: empilhados verticalmente, fácil leitura<br />
+            Cartões: deslize horizontalmente, visual moderno
           </p>
         </div>
 
