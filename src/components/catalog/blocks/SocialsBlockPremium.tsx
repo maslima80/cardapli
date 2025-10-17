@@ -10,6 +10,7 @@ interface SocialsBlockProps {
     show_youtube?: boolean;
     show_facebook?: boolean;
     show_website?: boolean;
+    use_accent_color?: boolean; // New: use theme accent color instead of brand colors
   };
   profile?: {
     socials?: {
@@ -18,6 +19,7 @@ interface SocialsBlockProps {
       facebook?: string;
       website?: string;
     };
+    accent_color?: string;
   };
 }
 
@@ -47,7 +49,15 @@ const socialLabels = {
   website: "Website",
 };
 
-const SocialIcon = ({ platform, url }: { platform: keyof typeof socialColors; url: string }) => {
+const SocialIcon = ({ 
+  platform, 
+  url, 
+  useAccentColor = false 
+}: { 
+  platform: keyof typeof socialColors; 
+  url: string;
+  useAccentColor?: boolean;
+}) => {
   const icons = {
     instagram: Instagram,
     youtube: Youtube,
@@ -64,19 +74,32 @@ const SocialIcon = ({ platform, url }: { platform: keyof typeof socialColors; ur
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex flex-col items-center gap-2"
+      className="group flex flex-col items-center gap-3"
       aria-label={`Visitar ${label}`}
     >
-      <div
-        className={cn(
-          "w-14 h-14 rounded-full flex items-center justify-center transition-transform duration-200",
-          colors.bg,
-          colors.hover
-        )}
-      >
-        <Icon className="w-6 h-6 text-white" />
-      </div>
-      <span className="text-xs font-medium text-slate-600 group-hover:text-slate-900 transition-colors">
+      {useAccentColor ? (
+        // Premium accent color style
+        <div
+          className="w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg"
+          style={{
+            backgroundColor: 'var(--accent-color, #8B5CF6)',
+          }}
+        >
+          <Icon className="w-7 h-7 text-white" />
+        </div>
+      ) : (
+        // Original brand colors
+        <div
+          className={cn(
+            "w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 hover:shadow-lg",
+            colors.bg,
+            colors.hover
+          )}
+        >
+          <Icon className="w-7 h-7 text-white" />
+        </div>
+      )}
+      <span className="text-sm font-medium text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">
         {label}
       </span>
     </a>
@@ -89,6 +112,7 @@ export function SocialsBlockPremium({ data, profile }: SocialsBlockProps) {
   const showYoutube = data.show_youtube !== false;
   const showFacebook = data.show_facebook !== false;
   const showWebsite = data.show_website !== false;
+  const useAccentColor = data.use_accent_color || false;
 
   const displayedSocials: Array<{ platform: keyof typeof socialColors; url: string }> = [];
   if (showInstagram && socials.instagram) displayedSocials.push({ platform: "instagram", url: socials.instagram });
@@ -101,15 +125,20 @@ export function SocialsBlockPremium({ data, profile }: SocialsBlockProps) {
   }
 
   return (
-    <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-6">
+    <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-6 sm:p-8">
       <SectionHeader 
         title={data.title || "Redes Sociais"}
         subtitle={data.subtitle}
       />
       
-      <div className="flex items-center justify-center gap-8 mt-6">
+      <div className="flex items-center justify-center gap-10 sm:gap-12 mt-8">
         {displayedSocials.map(({ platform, url }) => (
-          <SocialIcon key={platform} platform={platform} url={url} />
+          <SocialIcon 
+            key={platform} 
+            platform={platform} 
+            url={url} 
+            useAccentColor={useAccentColor}
+          />
         ))}
       </div>
     </div>

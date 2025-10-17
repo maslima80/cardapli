@@ -721,37 +721,56 @@ export const BlockSettingsDrawer = ({
       case "socials":
         return (
           <>
-            <div className="flex items-center justify-between mb-4">
-              <Label>Sincronizar com Perfil</Label>
-              <Switch
-                checked={formData.sync_profile !== false}
-                onCheckedChange={(checked) => setFormData({ ...formData, sync_profile: checked })}
+            {/* Title */}
+            <div className="space-y-2 mb-4">
+              <Label>Título do Bloco</Label>
+              <Input
+                value={formData.title || "Redes Sociais"}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder="Redes Sociais"
               />
             </div>
+
+            {/* Accent Color Toggle */}
+            <div className="flex items-center justify-between mb-6 p-4 bg-violet-50 dark:bg-violet-950/20 rounded-lg border border-violet-200 dark:border-violet-800">
+              <div>
+                <Label className="font-medium">Usar Cor de Destaque</Label>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Ícones na cor do seu tema ao invés das cores originais
+                </p>
+              </div>
+              <Switch
+                checked={formData.use_accent_color || false}
+                onCheckedChange={(checked) => setFormData({ ...formData, use_accent_color: checked })}
+              />
+            </div>
+
+            {/* Social Media Toggles */}
             <div className="space-y-3">
+              <Label className="text-sm font-medium">Redes Sociais para Exibir</Label>
               <div className="flex items-center justify-between">
-                <Label>Mostrar Instagram</Label>
+                <Label className="font-normal">Mostrar Instagram</Label>
                 <Checkbox
                   checked={formData.show_instagram !== false}
                   onCheckedChange={(checked) => setFormData({ ...formData, show_instagram: checked })}
                 />
               </div>
               <div className="flex items-center justify-between">
-                <Label>Mostrar YouTube</Label>
+                <Label className="font-normal">Mostrar YouTube</Label>
                 <Checkbox
                   checked={formData.show_youtube !== false}
                   onCheckedChange={(checked) => setFormData({ ...formData, show_youtube: checked })}
                 />
               </div>
               <div className="flex items-center justify-between">
-                <Label>Mostrar Facebook</Label>
+                <Label className="font-normal">Mostrar Facebook</Label>
                 <Checkbox
                   checked={formData.show_facebook !== false}
                   onCheckedChange={(checked) => setFormData({ ...formData, show_facebook: checked })}
                 />
               </div>
               <div className="flex items-center justify-between">
-                <Label>Mostrar Website</Label>
+                <Label className="font-normal">Mostrar Website</Label>
                 <Checkbox
                   checked={formData.show_website !== false}
                   onCheckedChange={(checked) => setFormData({ ...formData, show_website: checked })}
