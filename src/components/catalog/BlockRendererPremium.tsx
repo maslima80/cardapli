@@ -15,7 +15,7 @@ import { FaqBlock } from "./blocks/FaqBlock";
 import { BenefitsBlock } from "./blocks/BenefitsBlock";
 import { StepByStepBlock } from "./blocks/StepByStepBlock";
 import { ImportantInfoBlock } from "./blocks/ImportantInfoBlock";
-import { LocationBlock } from "./blocks/LocationBlock";
+import { LocationBlockPremium } from "./blocks/LocationBlockPremium";
 import { CatalogosBlock } from "./blocks/CatalogosBlock";
 import { ProfileHeaderBlock } from "./blocks/ProfileHeaderBlock";
 import { Section } from "./Section";
@@ -96,7 +96,7 @@ export const BlockRendererPremium = ({
         );
     
       case "location":
-        return <LocationBlock data={block.data} profile={profile} />;
+        return <LocationBlockPremium data={block.data} profile={profile} />;
     
       case "about":
         return <AboutBlock data={block.data} profileAbout={profile?.about} />;
