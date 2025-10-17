@@ -162,30 +162,22 @@ export function TagGridBlockPremiumV2({ data, userId, userSlug, catalogSlug }: T
     <Link
       key={tag.name}
       to={getTagUrl(tag.name)}
-      className="group inline-flex items-center gap-2 px-5 py-3 rounded-full border-2 transition-all hover:shadow-md"
-      style={{
-        borderColor: 'var(--accent-color, #8B5CF6)',
-        backgroundColor: 'white',
-      }}
+      className="group inline-flex items-center gap-1.5 px-4 py-2 rounded-full transition-all hover:shadow-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
     >
       <span 
-        className="font-semibold text-slate-900 dark:text-slate-50"
-        style={{ fontFamily: 'var(--font-heading, inherit)' }}
+        className="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-slate-50 transition-colors"
+        style={{ fontFamily: 'var(--font-body, inherit)' }}
       >
         {tag.name}
       </span>
       {data.show_count !== false && (
         <span 
-          className="px-2 py-0.5 rounded-full text-sm font-bold text-white"
+          className="text-xs font-bold px-1.5 py-0.5 rounded-full text-white"
           style={{ backgroundColor: 'var(--accent-color, #8B5CF6)' }}
         >
           {tag.count}
         </span>
       )}
-      <ChevronRight 
-        className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity"
-        style={{ color: 'var(--accent-color, #8B5CF6)' }}
-      />
     </Link>
   );
 
