@@ -112,44 +112,32 @@ export const ProductGallery = ({ photos, productTitle }: ProductGalleryProps) =>
   return (
     <>
       <div className="w-full space-y-3">
-        {/* Main Gallery with Embla */}
+        {/* Main Gallery with Embla - Premium Square Format */}
         <div className="relative group w-full">
-          <div className="overflow-hidden rounded-2xl min-w-0" ref={emblaRef}>
+          <div className="overflow-hidden rounded-2xl md:rounded-3xl min-w-0" ref={emblaRef}>
             <div className="flex touch-pan-y min-w-0">
               {photos.map((photo, index) => (
                 <div
                   key={index}
-                  className="flex-[0_0_100%] min-w-0 relative"
-                  style={{ aspectRatio: '4/3' }}
+                  className="flex-[0_0_100%] min-w-0 relative aspect-square"
                 >
-                  {/* Blur depth layer - uses contain to match foreground */}
-                  <div
-                    className="absolute inset-0 blur-3xl scale-125 opacity-20"
-                    style={{
-                      backgroundImage: `url(${photo.url})`,
-                      backgroundSize: 'contain',
-                      backgroundRepeat: 'no-repeat',
-                      backgroundPosition: 'center',
-                    }}
-                    aria-hidden="true"
+                  {/* Premium: Full cover image, no white space */}
+                  <img
+                    key={`${photo.url}-${index}`}
+                    src={photo.url}
+                    alt={photo.alt || `${productTitle} - Imagem ${index + 1}`}
+                    className={`w-full h-full object-cover cursor-zoom-in transition-all duration-300 ease-out ${
+                      index === selectedIndex && imageEntering
+                        ? 'opacity-0 scale-[0.98]'
+                        : 'opacity-100 scale-100 hover:scale-105'
+                    }`}
+                    onClick={() => setLightboxOpen(true)}
+                    loading={index === 0 ? "eager" : "lazy"}
+                    draggable={false}
                   />
                   
-                  {/* Foreground container */}
-                  <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-6">
-                    <img
-                      key={`${photo.url}-${index}`}
-                      src={photo.url}
-                      alt={photo.alt || `${productTitle} - Imagem ${index + 1}`}
-                      className={`relative z-10 max-w-full max-h-full w-auto h-auto object-contain cursor-zoom-in transition-all duration-200 ease-out ${
-                        index === selectedIndex && imageEntering
-                          ? 'opacity-0 scale-[0.985]'
-                          : 'opacity-100 scale-100 hover:scale-[1.02]'
-                      }`}
-                      onClick={() => setLightboxOpen(true)}
-                      loading={index === 0 ? "eager" : "lazy"}
-                      draggable={false}
-                    />
-                  </div>
+                  {/* Subtle gradient overlay for depth */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent pointer-events-none" />
                 </div>
               ))}
             </div>
