@@ -5,6 +5,7 @@ interface AboutBusinessBlockProps {
     use_profile?: boolean;
     title?: string;
     content?: string;
+    show_frame?: boolean; // Optional frame/card styling
   };
   profileAbout?: string;
 }
@@ -19,13 +20,16 @@ export const AboutBusinessBlock = ({ data, profileAbout }: AboutBusinessBlockPro
   // Always allow custom title, fallback to "Sobre o Negócio"
   const title = data.title || "Sobre o Negócio";
   
+  // Frame toggle (default to true for backwards compatibility)
+  const showFrame = data.show_frame !== false;
+  
   // Don't render the block if there's no content to display
   if (!content) {
     return null;
   }
 
-  return (
-    <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-6 sm:p-8">
+  const blockContent = (
+    <>
       <h2 
         className="text-2xl sm:text-3xl font-bold mb-4 text-slate-900 dark:text-slate-50"
         style={{ fontFamily: 'var(--font-heading, inherit)' }}
@@ -38,6 +42,20 @@ export const AboutBusinessBlock = ({ data, profileAbout }: AboutBusinessBlockPro
       >
         {content}
       </div>
+    </>
+  );
+
+  if (showFrame) {
+    return (
+      <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-6 sm:p-8">
+        {blockContent}
+      </div>
+    );
+  }
+
+  return (
+    <div className="py-8 px-6 sm:px-8">
+      {blockContent}
     </div>
   );
 };

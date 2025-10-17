@@ -309,6 +309,20 @@ export const BlockSettingsDrawer = ({
                 <option value="center">Centro</option>
               </select>
             </div>
+
+            {/* Frame toggle */}
+            <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-800">
+              <div>
+                <Label className="font-medium">Mostrar Moldura</Label>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Adiciona borda e fundo ao bloco (fica ótimo em dark mode)
+                </p>
+              </div>
+              <Switch
+                checked={formData.show_frame || false}
+                onCheckedChange={(checked) => setFormData({ ...formData, show_frame: checked })}
+              />
+            </div>
           </>
         );
 
@@ -596,6 +610,20 @@ export const BlockSettingsDrawer = ({
                 />
               </div>
             )}
+
+            {/* Frame toggle */}
+            <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-800 mt-4">
+              <div>
+                <Label className="font-medium">Mostrar Moldura</Label>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Adiciona borda e fundo ao bloco (fica ótimo em dark mode)
+                </p>
+              </div>
+              <Switch
+                checked={formData.show_frame !== false}
+                onCheckedChange={(checked) => setFormData({ ...formData, show_frame: checked })}
+              />
+            </div>
           </>
         );
 
