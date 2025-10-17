@@ -2,8 +2,8 @@ import { CoverBlock } from "./blocks/CoverBlock";
 import { TextBlock } from "./blocks/TextBlock";
 import { ImageBlock } from "./blocks/ImageBlock";
 import { ProductGridBlockV2Premium } from "./blocks/ProductGridBlockV2Premium";
-import { CategoryGridBlockPremium } from "./blocks/CategoryGridBlockPremium";
-import { TagGridBlockPremium } from "./blocks/TagGridBlockPremium";
+import { CategoryGridBlockPremiumV2 } from "./blocks/CategoryGridBlockPremiumV2";
+import { TagGridBlockPremiumV2 } from "./blocks/TagGridBlockPremiumV2";
 import { ContactBlockPremium } from "./blocks/ContactBlockPremium";
 import { SocialsBlockPremium } from "./blocks/SocialsBlockPremium";
 import { AboutBlock } from "./blocks/AboutBlock";
@@ -75,7 +75,7 @@ export const BlockRendererPremium = ({
     
       case "category_grid":
         return (
-          <CategoryGridBlockPremium 
+          <CategoryGridBlockPremiumV2 
             data={block.data} 
             userId={userId}
             userSlug={userSlug}
@@ -85,7 +85,7 @@ export const BlockRendererPremium = ({
       
       case "tag_grid":
         return (
-          <TagGridBlockPremium 
+          <TagGridBlockPremiumV2 
             data={block.data} 
             userId={userId}
             userSlug={userSlug}
