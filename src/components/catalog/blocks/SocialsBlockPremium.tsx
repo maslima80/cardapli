@@ -74,34 +74,31 @@ const SocialIcon = ({
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex flex-col items-center gap-3"
+      className="group"
       aria-label={`Visitar ${label}`}
     >
       {useAccentColor ? (
-        // Premium accent color style
+        // Subtle accent color style (linktree/stan.store inspired)
         <div
-          className="w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg"
+          className="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 hover:opacity-80"
           style={{
             backgroundColor: 'var(--accent-color, #8B5CF6)',
           }}
         >
-          <Icon className="w-7 h-7 text-white" />
+          <Icon className="w-5 h-5 text-white" />
         </div>
       ) : (
         // Original brand colors
         <div
           className={cn(
-            "w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 hover:shadow-lg",
+            "w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 hover:opacity-80",
             colors.bg,
             colors.hover
           )}
         >
-          <Icon className="w-7 h-7 text-white" />
+          <Icon className="w-5 h-5 text-white" />
         </div>
       )}
-      <span className="text-sm font-medium text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">
-        {label}
-      </span>
     </a>
   );
 };
@@ -125,13 +122,19 @@ export function SocialsBlockPremium({ data, profile }: SocialsBlockProps) {
   }
 
   return (
-    <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-6 sm:p-8">
-      <SectionHeader 
-        title={data.title || "Redes Sociais"}
-        subtitle={data.subtitle}
-      />
+    <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+      {/* Only show header if title exists */}
+      {data.title && (
+        <SectionHeader 
+          title={data.title}
+          subtitle={data.subtitle}
+        />
+      )}
       
-      <div className="flex items-center justify-center gap-10 sm:gap-12 mt-8">
+      <div className={cn(
+        "flex items-center justify-center gap-4",
+        data.title ? "mt-6" : ""
+      )}>
         {displayedSocials.map(({ platform, url }) => (
           <SocialIcon 
             key={platform} 

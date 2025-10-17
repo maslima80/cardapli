@@ -723,12 +723,15 @@ export const BlockSettingsDrawer = ({
           <>
             {/* Title */}
             <div className="space-y-2 mb-4">
-              <Label>Título do Bloco</Label>
+              <Label>Título do Bloco (Opcional)</Label>
               <Input
-                value={formData.title || "Redes Sociais"}
+                value={formData.title || ""}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder="Redes Sociais"
+                placeholder="Deixe vazio para ocultar o título"
               />
+              <p className="text-xs text-muted-foreground">
+                💡 Dica: Deixe em branco para um visual mais limpo, como linktree
+              </p>
             </div>
 
             {/* Accent Color Toggle */}
