@@ -508,6 +508,8 @@ const CatalogoEditor = () => {
         onOpenChange={setSettingsDialogOpen}
         settings={catalog?.settings || {}}
         themeOverrides={catalog?.theme_overrides}
+        profile={profile}
+        hasWhatsApp={!!profile?.whatsapp}
         onSave={handleSaveSettings}
         onThemeChange={handleThemeChange}
       />

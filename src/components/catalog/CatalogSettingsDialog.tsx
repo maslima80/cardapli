@@ -4,21 +4,25 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
+import { PremiumThemeSettings } from "@/components/profile/PremiumThemeSettings";
+import { MessageCircle } from "lucide-react";
 
 interface CatalogSettingsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   settings: {
     show_section_nav?: boolean;
+    show_whatsapp_bubble?: boolean;
   };
   themeOverrides?: {
     use_brand?: boolean;
     mode?: "light" | "dark";
     accent_color?: string;
-    font?: "clean" | "elegant" | "modern";
+    font_theme?: string;
     cta_shape?: "rounded" | "square" | "capsule";
   };
+  profile?: any;
+  hasWhatsApp?: boolean;
   onSave: (settings: any) => void;
   onThemeChange: (theme: any) => void;
 }
@@ -26,8 +30,10 @@ interface CatalogSettingsDialogProps {
 export const CatalogSettingsDialog = ({
   open,
   onOpenChange,
-  settings = { show_section_nav: false },
+  settings = { show_section_nav: false, show_whatsapp_bubble: false },
   themeOverrides = {},
+  profile,
+  hasWhatsApp = false,
   onSave,
   onThemeChange,
 }: CatalogSettingsDialogProps) => {
@@ -51,7 +57,7 @@ export const CatalogSettingsDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Configurações do Catálogo</DialogTitle>
         </DialogHeader>
@@ -77,6 +83,30 @@ export const CatalogSettingsDialog = ({
                 }
               />
             </div>
+
+            {/* WhatsApp Bubble Toggle */}
+            <div className="flex items-center justify-between pt-4 border-t">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#25D366] flex items-center justify-center">
+                  <MessageCircle className="w-5 h-5 text-white" />
+                </div>
+                <div className="space-y-0.5">
+                  <Label>WhatsApp Bubble</Label>
+                  <p className="text-xs text-muted-foreground">
+                    {hasWhatsApp
+                      ? "Mostrar botão flutuante de WhatsApp neste catálogo"
+                      : "Adicione um WhatsApp no seu perfil primeiro"}
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={settings?.show_whatsapp_bubble || false}
+                onCheckedChange={(checked) =>
+                  onSave({ ...settings, show_whatsapp_bubble: checked })
+                }
+                disabled={!hasWhatsApp}
+              />
+            </div>
           </TabsContent>
 
           <TabsContent value="theme" className="space-y-4 mt-4">
@@ -95,84 +125,13 @@ export const CatalogSettingsDialog = ({
               />
             </div>
 
-            {!useBrand && (
-              <>
-                <div className="space-y-2">
-                  <Label>Modo</Label>
-                  <select
-                    className="w-full border rounded-xl p-2 bg-background"
-                    value={localTheme?.mode || "light"}
-                    onChange={(e) =>
-                      handleThemeChange({
-                        mode: e.target.value as "light" | "dark",
-                      })
-                    }
-                  >
-                    <option value="light">Claro</option>
-                    <option value="dark">Escuro</option>
-                  </select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Cor de destaque</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      type="color"
-                      value={localTheme?.accent_color || "#8B5CF6"}
-                      onChange={(e) =>
-                        handleThemeChange({ accent_color: e.target.value })
-                      }
-                      className="w-20 h-10 p-1 cursor-pointer"
-                    />
-                    <Input
-                      type="text"
-                      value={localTheme?.accent_color || "#8B5CF6"}
-                      onChange={(e) =>
-                        handleThemeChange({ accent_color: e.target.value })
-                      }
-                      placeholder="#8B5CF6"
-                      className="flex-1"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Fonte</Label>
-                  <select
-                    className="w-full border rounded-xl p-2 bg-background"
-                    value={localTheme?.font || "clean"}
-                    onChange={(e) =>
-                      handleThemeChange({
-                        font: e.target.value as "clean" | "elegant" | "modern",
-                      })
-                    }
-                  >
-                    <option value="clean">Clean (Inter)</option>
-                    <option value="elegant">Elegante (Playfair + Inter)</option>
-                    <option value="modern">Moderna (Poppins)</option>
-                  </select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Forma dos botões</Label>
-                  <select
-                    className="w-full border rounded-xl p-2 bg-background"
-                    value={localTheme?.cta_shape || "rounded"}
-                    onChange={(e) =>
-                      handleThemeChange({
-                        cta_shape: e.target.value as
-                          | "rounded"
-                          | "square"
-                          | "capsule",
-                      })
-                    }
-                  >
-                    <option value="rounded">Rounded</option>
-                    <option value="square">Square</option>
-                    <option value="capsule">Capsule</option>
-                  </select>
-                </div>
-              </>
+            {!useBrand && profile && (
+              <div className="border-t pt-4">
+                <PremiumThemeSettings
+                  profile={{ ...profile, ...localTheme }}
+                  onChange={(field, value) => handleThemeChange({ [field]: value })}
+                />
+              </div>
             )}
           </TabsContent>
         </Tabs>

@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BlockRendererPremium } from "@/components/catalog/BlockRendererPremium";
 import { SectionNavigation } from "@/components/catalog/SectionNavigation";
 import { SimpleThemeProvider } from "@/components/theme/SimpleThemeProvider";
+import { WhatsAppBubble } from "@/components/WhatsAppBubble";
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
 import { useMetaTags } from "@/hooks/useMetaTags";
@@ -217,6 +218,11 @@ const PublicCatalogPage = () => {
           </p>
         </div>
       </div>
+
+      {/* WhatsApp Bubble */}
+      {catalog?.settings?.show_whatsapp_bubble && profile?.whatsapp && (
+        <WhatsAppBubble phoneNumber={profile.whatsapp} />
+      )}
     </SimpleThemeProvider>
   );
 };
