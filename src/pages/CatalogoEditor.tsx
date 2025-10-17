@@ -350,8 +350,53 @@ const CatalogoEditor = () => {
     <div className="min-h-screen bg-gradient-subtle">
       {/* Top Bar */}
       <div className="border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+          {/* Mobile: Stacked Layout */}
+          <div className="sm:hidden space-y-3">
+            {/* First Row: Back + Title */}
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate("/catalogos")}
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </Button>
+              <h1 className="text-lg font-semibold truncate flex-1">{catalog?.title}</h1>
+            </div>
+            {/* Second Row: Actions */}
+            <div className="flex items-center gap-2 pl-11">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSettingsDialogOpen(true)}
+                title="Configurações"
+              >
+                <Settings className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPreviewMode(!previewMode)}
+                className="gap-2 flex-1"
+              >
+                <Eye className="w-4 h-4" />
+                {previewMode ? "Editar" : "Preview"}
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => setPublishModalOpen(true)}
+                disabled={!canPublish}
+                title={publishTooltip}
+                className="flex-1"
+              >
+                Publicar
+              </Button>
+            </div>
+          </div>
+
+          {/* Desktop: Horizontal Layout */}
+          <div className="hidden sm:flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">
               <Button
                 variant="ghost"
