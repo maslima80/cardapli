@@ -3,7 +3,7 @@ import { MessageCircle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface WhatsAppBubbleProps {
-  phoneNumber: string;
+  phoneNumber: string | number;
   message?: string;
   position?: "bottom-right" | "bottom-left";
 }
@@ -24,8 +24,8 @@ export const WhatsAppBubble = ({
 
   if (!phoneNumber) return null;
 
-  // Format phone number (remove non-digits)
-  const cleanPhone = phoneNumber.replace(/\D/g, '');
+  // Format phone number (remove non-digits) - handle both string and number
+  const cleanPhone = String(phoneNumber).replace(/\D/g, '');
   
   // Create WhatsApp URL
   const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;

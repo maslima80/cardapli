@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { BlockRendererPremium } from "@/components/catalog/BlockRendererPremium";
 import { SimpleThemeProvider } from "@/components/theme/SimpleThemeProvider";
+import { WhatsAppBubble } from "@/components/WhatsAppBubble";
 import { useMetaTags } from "@/hooks/useMetaTags";
 import { publicProfileUrl } from "@/lib/urls";
 
@@ -140,6 +141,11 @@ const PublicProfilePage = () => {
           </p>
         </div>
       </div>
+
+      {/* WhatsApp Bubble */}
+      {profile.show_whatsapp_bubble && profile.whatsapp && (
+        <WhatsAppBubble phoneNumber={profile.whatsapp} />
+      )}
     </SimpleThemeProvider>
   );
 };
