@@ -35,6 +35,17 @@ export const ExternalLinksBlockPremium = ({ data }: ExternalLinksBlockProps) => 
     return null; // Don't show empty block
   }
 
+  // Ensure URL has protocol
+  const formatUrl = (url: string) => {
+    if (!url) return '#';
+    // If URL already has protocol, return as is
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    // Add https:// by default
+    return `https://${url}`;
+  };
+
   const renderIcon = (link: any) => {
     // Image/thumbnail
     if (link.thumbnail) {
@@ -92,7 +103,7 @@ export const ExternalLinksBlockPremium = ({ data }: ExternalLinksBlockProps) => 
           {links.map((link, index) => (
             <a
               key={index}
-              href={link.url}
+              href={formatUrl(link.url)}
               target="_blank"
               rel="noopener noreferrer"
               className="group block bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden hover:shadow-lg transition-all"
