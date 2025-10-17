@@ -243,7 +243,7 @@ export function ProductGridBlockV2Premium({
       <div className={cn(
         layout === "list" 
           ? "space-y-4"
-          : "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6"
+          : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6"
       )}>
         {[...Array(skeletonCount)].map((_, i) => (
           <ProductCardSkeleton key={i} layout={layout} />
@@ -286,7 +286,7 @@ export function ProductGridBlockV2Premium({
         <div className={cn(
           layout === "list" 
             ? "space-y-4"
-            : "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6"
+            : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6"
         )}>
           {products.map((product) => (
             <ProductCard
@@ -294,7 +294,7 @@ export function ProductGridBlockV2Premium({
               product={product}
               layout={layout}
               showPrice={data.show_price !== false}
-              showTags={data.show_tags || false}
+              showTags={data.show_tags !== false}
               showButton={data.show_button !== false}
               userSlug={userSlug}
             />
