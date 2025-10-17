@@ -531,36 +531,47 @@ export const BlockSettingsDrawer = ({
       case "about_business":
         return (
           <>
+            {/* Title field - always visible */}
+            <div className="space-y-2 mb-4">
+              <Label>Título (opcional)</Label>
+              <Input
+                value={formData.title || ""}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder="Sobre o Negócio"
+              />
+            </div>
+
+            {/* Profile sync toggle */}
             <div className="space-y-1 mb-4">
               <div className="flex items-center justify-between">
                 <Label htmlFor="use-profile">Usar texto do Perfil</Label>
                 <Switch
                   id="use-profile"
-                  checked={formData.use_profile !== false}
+                  checked={formData.use_profile === true}
                   onCheckedChange={(checked) => {
                     setFormData({ ...formData, use_profile: checked });
                   }}
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                Se ligado, o bloco exibirá automaticamente o texto do seu Perfil. Se desligado, você pode escrever uma versão personalizada para este catálogo.
+                Se ligado, o bloco exibirá automaticamente o texto do seu Perfil. Se desligado, você pode escrever uma versão personalizada.
               </p>
             </div>
             
-            {formData.use_profile !== false ? (
+            {formData.use_profile === true ? (
               // Show profile content preview when using profile
               <div className="space-y-2">
                 {profile?.about ? (
                   <div className="border rounded-lg p-4 bg-muted/20">
-                    <div className="whitespace-pre-wrap">{profile.about}</div>
+                    <div className="whitespace-pre-wrap text-sm">{profile.about}</div>
                     <p className="text-xs text-muted-foreground mt-3">
-                      Este conteúdo vem do seu Perfil. Para alterar, edite em Perfil.
+                      💡 Este conteúdo vem do seu Perfil. Para alterar, edite em Perfil.
                     </p>
                   </div>
                 ) : (
                   <div className="border border-yellow-200 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4">
                     <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                      Seu Perfil não tem um texto "Sobre". Você pode escrever um texto personalizado para este catálogo.
+                      ⚠️ Seu Perfil não tem um texto "Sobre". Adicione um texto no Perfil ou desative esta opção para escrever um texto personalizado.
                     </p>
                     <Button
                       variant="outline"
@@ -574,32 +585,16 @@ export const BlockSettingsDrawer = ({
                 )}
               </div>
             ) : (
-              // Show custom content fields when not using profile
-              <>
-                <div className="space-y-2">
-                  <Label>Título (opcional)</Label>
-                  <Input
-                    value={formData.title || ""}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="Sobre nós"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Conteúdo</Label>
-                  <Textarea
-                    value={formData.content || ""}
-                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                    placeholder="Escreva uma breve apresentação sobre o seu negócio, missão e diferenciais."
-                    rows={8}
-                    required
-                  />
-                  {!formData.content && formData.content !== undefined && (
-                    <p className="text-xs text-destructive">
-                      Conteúdo não pode ficar em branco.
-                    </p>
-                  )}
-                </div>
-              </>
+              // Show custom content field when not using profile
+              <div className="space-y-2">
+                <Label>Conteúdo</Label>
+                <Textarea
+                  value={formData.content || ""}
+                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  placeholder="Escreva uma breve apresentação sobre o seu negócio, missão e diferenciais."
+                  rows={8}
+                />
+              </div>
             )}
           </>
         );

@@ -20,6 +20,7 @@ const blockTypeLabels: Record<string, string> = {
   video: "Vídeo",
   product_grid: "Grade de Produtos",
   about: "Sobre",
+  about_business: "Sobre o Negócio",
   contact: "Contato",
   socials: "Redes Sociais",
   divider: "Divisor",
