@@ -26,6 +26,7 @@ import {
   Layers,
   HelpCircle,
   User,
+  Link2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -53,6 +54,7 @@ const blockTypes = [
   { type: "informacoes", icon: List, label: "Informações", description: "Destaque informações importantes", contexts: ["catalog", "profile"] },
   { type: "faq", icon: HelpCircle, label: "Perguntas Frequentes", description: "Dúvidas comuns", contexts: ["catalog", "profile"] },
   { type: "catalogs", icon: Folder, label: "Catálogos", description: "Mostre seus catálogos", contexts: ["profile"] },
+  { type: "external_links", icon: Link2, label: "Links Externos", description: "Links para qualquer site", contexts: ["catalog", "profile"] },
   { type: "divider", icon: Minus, label: "Divisor", description: "Linha de separação", contexts: ["catalog", "profile"] },
 ];
 

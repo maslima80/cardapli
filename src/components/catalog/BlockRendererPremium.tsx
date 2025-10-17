@@ -15,6 +15,7 @@ import { FaqBlockPremium } from "./blocks/FaqBlockPremium";
 import { InformacoesBlockPremium } from "./blocks/InformacoesBlockPremium";
 import { LocationBlockPremium } from "./blocks/LocationBlockPremium";
 import { CatalogosBlockPremium } from "./blocks/CatalogosBlockPremium";
+import { ExternalLinksBlockPremium } from "./blocks/ExternalLinksBlockPremium";
 import { ProfileHeaderBlock } from "./blocks/ProfileHeaderBlock";
 import { Section } from "./Section";
 
@@ -131,6 +132,9 @@ export const BlockRendererPremium = ({
     
       case "catalogs":
         return <CatalogosBlockPremium data={block.data} profile={profile} />;
+    
+      case "external_links":
+        return <ExternalLinksBlockPremium data={block.data} />;
     
       case "profile_header":
         return <ProfileHeaderBlock data={block.data} profile={profile} />;
