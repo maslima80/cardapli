@@ -159,7 +159,7 @@ const PublicFilteredProductsPage = () => {
             </p>
           </div>
 
-          {/* Products Grid */}
+          {/* Products - List on mobile, Grid on desktop */}
           {products.length === 0 ? (
             <div className="text-center py-16 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
               <p className="text-slate-600 dark:text-slate-400">
@@ -167,19 +167,37 @@ const PublicFilteredProductsPage = () => {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  layout="grid"
-                  showPrice={true}
-                  showTags={true}
-                  showButton={true}
-                  userSlug={userSlug}
-                />
-              ))}
-            </div>
+            <>
+              {/* Mobile: List View */}
+              <div className="md:hidden space-y-4">
+                {products.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    layout="list"
+                    showPrice={true}
+                    showTags={true}
+                    showButton={true}
+                    userSlug={userSlug}
+                  />
+                ))}
+              </div>
+
+              {/* Desktop: Grid View */}
+              <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {products.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    layout="grid"
+                    showPrice={true}
+                    showTags={true}
+                    showButton={true}
+                    userSlug={userSlug}
+                  />
+                ))}
+              </div>
+            </>
           )}
         </div>
       </div>
