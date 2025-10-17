@@ -4,7 +4,7 @@ import {
   Diamond, Clock, Hammer, Globe, ThumbsUp, Check,
 } from "lucide-react";
 
-interface BenefitsBlockProps {
+interface InformacoesBlockProps {
   data: {
     title?: string;
     subtitle?: string;
@@ -32,9 +32,9 @@ const iconMap = {
   check: Check,
 };
 
-export const BenefitsBlockPremium = ({ data }: BenefitsBlockProps) => {
+export const InformacoesBlockPremium = ({ data }: InformacoesBlockProps) => {
   const items = data.items || [];
-  const title = data.title || "Por que escolher a gente";
+  const title = data.title || "Informações importantes";
   const subtitle = data.subtitle || "";
   const layout = data.layout || "grid";
   const [activeIndex, setActiveIndex] = useState(0);
@@ -74,7 +74,7 @@ export const BenefitsBlockPremium = ({ data }: BenefitsBlockProps) => {
   if (items.length === 0) {
     return (
       <div className="py-8 text-center text-slate-600 dark:text-slate-400">
-        Nenhum diferencial adicionado ainda
+        Nenhuma informação adicionada ainda
       </div>
     );
   }

@@ -12,9 +12,7 @@ import { DividerBlock } from "./blocks/DividerBlock";
 import { VideoBlock } from "./blocks/VideoBlock";
 import { TestimonialsBlockPremium } from "./blocks/TestimonialsBlockPremium";
 import { FaqBlock } from "./blocks/FaqBlock";
-import { BenefitsBlockPremium } from "./blocks/BenefitsBlockPremium";
-import { StepByStepBlock } from "./blocks/StepByStepBlock";
-import { ImportantInfoBlock } from "./blocks/ImportantInfoBlock";
+import { InformacoesBlockPremium } from "./blocks/InformacoesBlockPremium";
 import { LocationBlockPremium } from "./blocks/LocationBlockPremium";
 import { CatalogosBlock } from "./blocks/CatalogosBlock";
 import { ProfileHeaderBlock } from "./blocks/ProfileHeaderBlock";
@@ -126,13 +124,10 @@ export const BlockRendererPremium = ({
         return <FaqBlock data={block.data} />;
     
       case "benefits":
-        return <BenefitsBlockPremium data={block.data} />;
+      case "informacoes":
+        return <InformacoesBlockPremium data={block.data} />;
       
-      case "step_by_step":
-        return <StepByStepBlock data={block.data} />;
     
-      case "important_info":
-        return <ImportantInfoBlock data={block.data} />;
     
       case "catalogs":
         return <CatalogosBlock data={block.data} profile={profile} />;

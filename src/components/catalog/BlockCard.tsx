@@ -25,10 +25,9 @@ const blockTypeLabels: Record<string, string> = {
   socials: "Redes Sociais",
   divider: "Divisor",
   testimonials: "Depoimentos",
-  benefits: "Benefícios",
+  benefits: "Informações",
+  informacoes: "Informações",
   faq: "Perguntas Frequentes",
-  step_by_step: "Passo a Passo",
-  important_info: "Informação Importante",
 };
 
 export const BlockCard = ({
