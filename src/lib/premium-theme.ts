@@ -48,37 +48,43 @@ export const BACKGROUND_PRESETS_DARK = [
   { name: 'Azul Escuro', value: '#0F172A' },
 ];
 
-// Font pairings
+// Font pairings - Premium SaaS-grade typography
+// Inspired by Stripe, Linear, Vercel, Notion, and other top-tier products
 export const FONT_THEMES = {
-  moderna: {
-    name: 'Moderna',
-    heading: 'Poppins',
-    body: 'Nunito',
-    description: 'Limpa e contemporânea',
-  },
-  elegante: {
-    name: 'Elegante',
-    heading: 'Playfair Display',
-    body: 'Inter',
-    description: 'Sofisticada e refinada',
-  },
   neutra: {
     name: 'Neutra',
     heading: 'Inter',
     body: 'Inter',
-    description: 'Versátil e profissional',
+    description: 'Profissional e versátil',
+    inspiration: 'Stripe, Linear, Vercel',
   },
-  criativa: {
-    name: 'Criativa',
+  moderna: {
+    name: 'Moderna',
     heading: 'DM Sans',
-    body: 'Lato',
-    description: 'Moderna e expressiva',
+    body: 'Inter',
+    description: 'Limpa e contemporânea',
+    inspiration: 'Notion, Figma',
   },
-  romantica: {
-    name: 'Romântica',
-    heading: 'Cormorant',
-    body: 'Nunito',
-    description: 'Delicada e elegante',
+  elegante: {
+    name: 'Elegante',
+    heading: 'Fraunces',
+    body: 'Inter',
+    description: 'Sofisticada e refinada',
+    inspiration: 'Premium editorial',
+  },
+  expressiva: {
+    name: 'Expressiva',
+    heading: 'Space Grotesk',
+    body: 'Inter',
+    description: 'Ousada e moderna',
+    inspiration: 'Startups tech',
+  },
+  classica: {
+    name: 'Clássica',
+    heading: 'Lora',
+    body: 'Source Sans 3',
+    description: 'Atemporal e legível',
+    inspiration: 'Medium, Substack',
   },
 };
 

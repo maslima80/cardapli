@@ -33,17 +33,17 @@ export function SimpleThemeProvider({ userSlug, children }: SimpleThemeProviderP
             document.documentElement.style.setProperty('--accent-color', profile.accent_color);
           }
 
-          // Apply font theme
+          // Apply font theme - Premium SaaS-grade fonts
           const fontThemes: Record<string, { heading: string; body: string }> = {
-            moderna: { heading: 'Poppins', body: 'Nunito' },
-            elegante: { heading: 'Playfair Display', body: 'Inter' },
             neutra: { heading: 'Inter', body: 'Inter' },
-            criativa: { heading: 'DM Sans', body: 'Lato' },
-            romantica: { heading: 'Cormorant', body: 'Nunito' },
+            moderna: { heading: 'DM Sans', body: 'Inter' },
+            elegante: { heading: 'Fraunces', body: 'Inter' },
+            expressiva: { heading: 'Space Grotesk', body: 'Inter' },
+            classica: { heading: 'Lora', body: 'Source Sans 3' },
           };
 
-          const fontTheme = profile.font_theme || 'moderna';
-          const fonts = fontThemes[fontTheme] || fontThemes.moderna;
+          const fontTheme = profile.font_theme || 'neutra';
+          const fonts = fontThemes[fontTheme] || fontThemes.neutra;
 
           document.documentElement.style.setProperty('--font-heading', fonts.heading);
           document.documentElement.style.setProperty('--font-body', fonts.body);
