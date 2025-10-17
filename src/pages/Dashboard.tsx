@@ -83,7 +83,7 @@ const Dashboard = () => {
     );
   }
 
-  const displayName = userSlug ? `@${userSlug}` : user?.email?.split("@")[0] || "Usuário";
+  const displayName = userSlug || user?.email?.split("@")[0] || "Usuário";
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
@@ -172,21 +172,6 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Empty State */}
-          <div className="bg-card rounded-3xl shadow-soft p-8 sm:p-12 border border-border text-center">
-            <div className="max-w-md mx-auto">
-              <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4">
-                <Layout className="w-10 h-10 text-muted-foreground" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">
-                Você ainda não tem catálogos
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                Comece criando seu primeiro catálogo digital agora mesmo
-              </p>
-              <Button size="lg" onClick={() => navigate("/catalogos")}>Criar primeiro catálogo</Button>
-            </div>
-          </div>
         </div>
       </main>
     </div>

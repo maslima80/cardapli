@@ -305,7 +305,7 @@ export default function PerfilV2() {
               Gerencie seu perfil e link in bio
             </p>
           </div>
-          <Button variant="ghost" onClick={() => navigate("/")}>
+          <Button variant="ghost" onClick={() => navigate("/dashboard")}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Voltar
           </Button>
