@@ -7,7 +7,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
 import { Layers } from "lucide-react";
-import { Slider } from "@/components/ui/slider";
 
 interface CategoryGridBlockSettingsProps {
   data: any;
@@ -17,10 +16,7 @@ interface CategoryGridBlockSettingsProps {
 export function CategoryGridBlockSettings({ data, onUpdate }: CategoryGridBlockSettingsProps) {
   const [title, setTitle] = useState(data?.title || "Categorias");
   const [description, setDescription] = useState(data?.description || "");
-  const [columns, setColumns] = useState(data?.columns || 3);
   const [showCount, setShowCount] = useState(data?.show_count !== false);
-  const [showButton, setShowButton] = useState(data?.show_button !== false);
-  const [buttonText, setButtonText] = useState(data?.button_text || "Ver produtos");
   const [selectedCategories, setSelectedCategories] = useState<string[]>(data?.selected_categories || []);
   const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,10 +25,7 @@ export function CategoryGridBlockSettings({ data, onUpdate }: CategoryGridBlockS
   useEffect(() => {
     setTitle(data?.title || "Categorias");
     setDescription(data?.description || "");
-    setColumns(data?.columns || 3);
     setShowCount(data?.show_count !== false);
-    setShowButton(data?.show_button !== false);
-    setButtonText(data?.button_text || "Ver produtos");
     setSelectedCategories(data?.selected_categories || []);
   }, [data]);
 
@@ -83,10 +76,7 @@ export function CategoryGridBlockSettings({ data, onUpdate }: CategoryGridBlockS
     const updatedData = {
       title,
       description,
-      columns,
       show_count: showCount,
-      show_button: showButton,
-      button_text: buttonText,
       selected_categories: selectedCategories,
       ...overrides,
     };
@@ -148,31 +138,6 @@ export function CategoryGridBlockSettings({ data, onUpdate }: CategoryGridBlockS
         />
       </div>
 
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="columns">Colunas: {columns}</Label>
-        </div>
-        <Slider
-          id="columns"
-          min={1}
-          max={4}
-          step={1}
-          value={[columns]}
-          onValueChange={(value) => {
-            const newColumns = value[0];
-            setColumns(newColumns);
-            updateParent({ columns: newColumns });
-          }}
-          className="w-full"
-        />
-        <div className="flex justify-between text-xs text-muted-foreground">
-          <span>1</span>
-          <span>2</span>
-          <span>3</span>
-          <span>4</span>
-        </div>
-      </div>
-
       <div className="flex items-center space-x-2">
         <Checkbox
           id="show-count"
@@ -185,35 +150,6 @@ export function CategoryGridBlockSettings({ data, onUpdate }: CategoryGridBlockS
         />
         <Label htmlFor="show-count">Mostrar contagem de produtos</Label>
       </div>
-
-      <div className="flex items-center space-x-2">
-        <Checkbox
-          id="show-button"
-          checked={showButton}
-          onCheckedChange={(checked) => {
-            const newShowButton = checked === true;
-            setShowButton(newShowButton);
-            updateParent({ show_button: newShowButton });
-          }}
-        />
-        <Label htmlFor="show-button">Mostrar botão</Label>
-      </div>
-
-      {showButton && (
-        <div className="space-y-2">
-          <Label htmlFor="button-text">Texto do botão</Label>
-          <Input
-            id="button-text"
-            value={buttonText}
-            onChange={(e) => {
-              const newButtonText = e.target.value;
-              setButtonText(newButtonText);
-              updateParent({ button_text: newButtonText });
-            }}
-            placeholder="Ver produtos"
-          />
-        </div>
-      )}
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">

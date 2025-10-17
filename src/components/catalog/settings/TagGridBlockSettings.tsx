@@ -6,9 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tag } from "lucide-react";
-import { Slider } from "@/components/ui/slider";
 
 interface TagGridBlockSettingsProps {
   data: any;
@@ -18,11 +16,7 @@ interface TagGridBlockSettingsProps {
 export function TagGridBlockSettings({ data, onUpdate }: TagGridBlockSettingsProps) {
   const [title, setTitle] = useState(data?.title || "Tags");
   const [description, setDescription] = useState(data?.description || "");
-  const [columns, setColumns] = useState(data?.columns || 3);
   const [showCount, setShowCount] = useState(data?.show_count !== false);
-  const [showButton, setShowButton] = useState(data?.show_button !== false);
-  const [buttonText, setButtonText] = useState(data?.button_text || "Ver produtos");
-  const [style, setStyle] = useState(data?.style || "card");
   const [selectedTags, setSelectedTags] = useState<string[]>(data?.selected_tags || []);
   const [tags, setTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,11 +25,7 @@ export function TagGridBlockSettings({ data, onUpdate }: TagGridBlockSettingsPro
   useEffect(() => {
     setTitle(data?.title || "Tags");
     setDescription(data?.description || "");
-    setColumns(data?.columns || 3);
     setShowCount(data?.show_count !== false);
-    setShowButton(data?.show_button !== false);
-    setButtonText(data?.button_text || "Ver produtos");
-    setStyle(data?.style || "card");
     setSelectedTags(data?.selected_tags || []);
   }, [data]);
 
@@ -86,11 +76,7 @@ export function TagGridBlockSettings({ data, onUpdate }: TagGridBlockSettingsPro
     const updatedData = {
       title,
       description,
-      columns,
       show_count: showCount,
-      show_button: showButton,
-      button_text: buttonText,
-      style,
       selected_tags: selectedTags,
       ...overrides,
     };
@@ -152,54 +138,6 @@ export function TagGridBlockSettings({ data, onUpdate }: TagGridBlockSettingsPro
         />
       </div>
 
-      <div className="space-y-2">
-        <Label>Estilo</Label>
-        <RadioGroup
-          value={style}
-          onValueChange={(value) => {
-            setStyle(value);
-            updateParent({ style: value });
-          }}
-          className="flex flex-col space-y-1"
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="card" id="style-card" />
-            <Label htmlFor="style-card">Cards</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="badge" id="style-badge" />
-            <Label htmlFor="style-badge">Badges</Label>
-          </div>
-        </RadioGroup>
-      </div>
-
-      {style === "card" && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="columns">Colunas: {columns}</Label>
-          </div>
-          <Slider
-            id="columns"
-            min={1}
-            max={4}
-            step={1}
-            value={[columns]}
-            onValueChange={(value) => {
-              const newColumns = value[0];
-              setColumns(newColumns);
-              updateParent({ columns: newColumns });
-            }}
-            className="w-full"
-          />
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>1</span>
-            <span>2</span>
-            <span>3</span>
-            <span>4</span>
-          </div>
-        </div>
-      )}
-
       <div className="flex items-center space-x-2">
         <Checkbox
           id="show-count"
@@ -212,37 +150,6 @@ export function TagGridBlockSettings({ data, onUpdate }: TagGridBlockSettingsPro
         />
         <Label htmlFor="show-count">Mostrar contagem de produtos</Label>
       </div>
-
-      {style === "card" && (
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="show-button"
-            checked={showButton}
-            onCheckedChange={(checked) => {
-              const newShowButton = checked === true;
-              setShowButton(newShowButton);
-              updateParent({ show_button: newShowButton });
-            }}
-          />
-          <Label htmlFor="show-button">Mostrar botão</Label>
-        </div>
-      )}
-
-      {showButton && style === "card" && (
-        <div className="space-y-2">
-          <Label htmlFor="button-text">Texto do botão</Label>
-          <Input
-            id="button-text"
-            value={buttonText}
-            onChange={(e) => {
-              const newButtonText = e.target.value;
-              setButtonText(newButtonText);
-              updateParent({ button_text: newButtonText });
-            }}
-            placeholder="Ver produtos"
-          />
-        </div>
-      )}
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
