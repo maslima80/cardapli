@@ -295,13 +295,14 @@ export default function PublicProductPageNew() {
 
   return (
     <SimpleThemeProvider userSlug={userSlug!}>
-      <div className="pb-28 md:pb-8 w-full overflow-x-hidden">
+      <div className="pb-28 md:pb-8 w-full overflow-x-hidden bg-white dark:bg-slate-950">
       {/* Header */}
-      <header className="bg-background/95 backdrop-blur border-b border-border sticky top-0 z-40 w-full">
+      <header className="backdrop-blur border-b sticky top-0 z-40 w-full" style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', borderColor: 'var(--theme-surface)', color: 'var(--theme-foreground)' }}>
         <div className="w-full max-w-6xl mx-auto px-4 py-3 flex items-center justify-between min-w-0">
           <Link 
             to={backUrl || publicProfileUrl(profile.slug)} 
             className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            style={{ color: 'var(--theme-foreground)' }}
           >
             <ArrowLeft className="w-5 h-5" />
             <span className="font-medium truncate max-w-[200px]">{displayName}</span>
@@ -341,10 +342,10 @@ export default function PublicProductPageNew() {
           <div className="space-y-6 min-w-0 w-full">
             {/* Title & Price */}
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold mb-2">{product.title}</h1>
+              <h1 className="text-2xl md:text-3xl font-bold mb-2" style={{ fontFamily: 'var(--font-heading, inherit)', color: 'var(--theme-foreground)' }}>{product.title}</h1>
               
               {getPriceDisplay() && (
-                <p className="text-2xl md:text-3xl font-bold text-primary">
+                <p className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--accent-color, #8B5CF6)' }}>
                   {getPriceDisplay()}
                 </p>
               )}
