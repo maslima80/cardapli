@@ -489,6 +489,7 @@ const CatalogoEditor = () => {
         open={addDrawerOpen}
         onOpenChange={setAddDrawerOpen}
         onSelectType={handleAddBlock}
+        context="catalog"
       />
 
       <BlockSettingsDrawer

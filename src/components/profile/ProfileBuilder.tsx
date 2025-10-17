@@ -253,6 +253,7 @@ export const ProfileBuilder = ({ userSlug, userId }: ProfileBuilderProps) => {
         open={addDrawerOpen}
         onOpenChange={setAddDrawerOpen}
         onSelectType={handleAddBlock}
+        context="profile"
       />
 
       <BlockSettingsDrawer
