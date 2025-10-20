@@ -169,7 +169,6 @@ export const BlockSettingsDrawer = ({
       case "cover":
         const currentLayout = formData.layout || "logo-title-image";
         const isCarouselLayout = currentLayout === "carousel-top";
-        const showLogoOption = currentLayout === "logo-title-image";
         
         return (
           <>
@@ -198,19 +197,22 @@ export const BlockSettingsDrawer = ({
               </p>
             </div>
 
-            {/* Logo Option (only for logo-title-image) */}
-            {showLogoOption && (
-              <div className="flex items-center justify-between py-2">
-                <div>
-                  <Label>Mostrar logo do perfil</Label>
-                  <p className="text-xs text-muted-foreground">Aparece no topo da capa</p>
-                </div>
-                <Switch
-                  checked={formData.use_profile_logo || false}
-                  onCheckedChange={(checked) => setFormData({ ...formData, use_profile_logo: checked, logo_url: checked ? profile?.logo_url : null })}
-                />
+            {/* Logo Option - Available for ALL layouts */}
+            <div className="flex items-center justify-between py-2">
+              <div>
+                <Label>Mostrar logo do perfil</Label>
+                <p className="text-xs text-muted-foreground">
+                  {currentLayout === "logo-title-image" && "Aparece no topo da capa"}
+                  {currentLayout === "image-top" && "Aparece acima do título"}
+                  {currentLayout === "carousel-top" && "Aparece acima do título"}
+                  {currentLayout === "full-background" && "Aparece sobre a imagem"}
+                </p>
               </div>
-            )}
+              <Switch
+                checked={formData.use_profile_logo || false}
+                onCheckedChange={(checked) => setFormData({ ...formData, use_profile_logo: checked, logo_url: checked ? profile?.logo_url : null })}
+              />
+            </div>
 
             {/* Title */}
             <div className="space-y-2">
