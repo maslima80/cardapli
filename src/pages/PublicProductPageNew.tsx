@@ -1,14 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, ArrowLeft, Package, Share2 } from "lucide-react";
+import { MessageCircle, ArrowLeft, Package, Share2, ChevronLeft, ChevronRight } from "lucide-react";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { ExternalMedia } from "@/components/product/ExternalMedia";
 import { VariantSelector } from "@/components/product/VariantSelector";
 import { ProductInfoAccordion } from "@/components/product/ProductInfoAccordion";
 import { ProductShareModal } from "@/components/product/ProductShareModal";
+import { ProductCard } from "@/components/catalog/ProductCard";
 import { SimpleThemeProvider } from "@/components/theme/SimpleThemeProvider";
 import { buildVariants, ProductVariant, getPriceRange } from "@/lib/variants";
 import { publicProfileUrl, absolute, publicProductUrl, publicProductFullUrl } from "@/lib/urls";
@@ -58,6 +59,10 @@ export default function PublicProductPageNew() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [catalog, setCatalog] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+  const relatedScrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   // Variants state
@@ -175,6 +180,26 @@ export default function PublicProductPageNew() {
       // Load variants
       const variants = await buildVariants(productData.id);
       setVariantsData(variants);
+
+      // Load related products from same category
+      if (productData.categories && Array.isArray(productData.categories) && productData.categories.length > 0) {
+        const { data: relatedData } = await supabase
+          .from("products")
+          .select("*")
+          .eq("user_id", profileData.id)
+          .eq("public_link", true)
+          .neq("id", productData.id)
+          .limit(10);
+        
+        if (relatedData) {
+          // Filter products that share at least one category
+          const filtered = relatedData.filter(p => {
+            if (!p.categories || !Array.isArray(p.categories)) return false;
+            return p.categories.some((cat: string) => productData.categories.includes(cat));
+          });
+          setRelatedProducts(filtered.slice(0, 6));
+        }
+      }
 
       setLoading(false);
     } catch (err) {
@@ -492,6 +517,106 @@ export default function PublicProductPageNew() {
           </div>
         </div>
       </main>
+
+      {/* You May Also Like Section */}
+      {relatedProducts.length > 0 && (
+        <section className="py-12 bg-slate-50 dark:bg-slate-900/50">
+          <div className="container max-w-6xl mx-auto px-4">
+            <h2 
+              className="text-2xl font-bold mb-6"
+              style={{ fontFamily: 'var(--font-heading, inherit)', color: 'var(--theme-foreground)' }}
+            >
+              Você também pode gostar
+            </h2>
+            
+            <div className="relative">
+              <div 
+                ref={relatedScrollRef}
+                className="flex overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory scroll-pt-4 -mx-4 px-4 cursor-grab active:cursor-grabbing"
+                style={{ 
+                  scrollbarWidth: 'none', 
+                  msOverflowStyle: 'none',
+                  WebkitOverflowScrolling: 'touch',
+                }}
+                onScroll={() => {
+                  if (relatedScrollRef.current) {
+                    const { scrollLeft, scrollWidth, clientWidth } = relatedScrollRef.current;
+                    setCanScrollLeft(scrollLeft > 0);
+                    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+                  }
+                }}
+                onMouseDown={(e) => {
+                  const ele = e.currentTarget;
+                  const startX = e.pageX - ele.offsetLeft;
+                  const scrollLeft = ele.scrollLeft;
+                  
+                  const handleMouseMove = (e: MouseEvent) => {
+                    const x = e.pageX - ele.offsetLeft;
+                    const walk = (x - startX) * 2;
+                    ele.scrollLeft = scrollLeft - walk;
+                  };
+                  
+                  const handleMouseUp = () => {
+                    document.removeEventListener('mousemove', handleMouseMove);
+                    document.removeEventListener('mouseup', handleMouseUp);
+                  };
+                  
+                  document.addEventListener('mousemove', handleMouseMove);
+                  document.addEventListener('mouseup', handleMouseUp);
+                }}
+              >
+                <div className="flex gap-4">
+                  {relatedProducts.map((relatedProduct) => (
+                    <div key={relatedProduct.id} className="flex-shrink-0 w-[280px] sm:w-[320px] snap-start">
+                      <ProductCard
+                        product={relatedProduct}
+                        layout="grid"
+                        showPrice={true}
+                        showTags={true}
+                        showButton={true}
+                        userSlug={userSlug}
+                        catalogSlug={catalog?.slug}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Desktop Navigation Arrows */}
+              {relatedProducts.length > 2 && (
+                <>
+                  {canScrollLeft && (
+                    <button
+                      onClick={() => {
+                        if (relatedScrollRef.current) {
+                          relatedScrollRef.current.scrollBy({ left: -340, behavior: 'smooth' });
+                        }
+                      }}
+                      className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center rounded-full bg-white dark:bg-slate-900 shadow-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                      style={{ color: 'var(--accent-color, #8B5CF6)' }}
+                    >
+                      <ChevronLeft className="w-6 h-6" />
+                    </button>
+                  )}
+                  {canScrollRight && (
+                    <button
+                      onClick={() => {
+                        if (relatedScrollRef.current) {
+                          relatedScrollRef.current.scrollBy({ left: 340, behavior: 'smooth' });
+                        }
+                      }}
+                      className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center rounded-full bg-white dark:bg-slate-900 shadow-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                      style={{ color: 'var(--accent-color, #8B5CF6)' }}
+                    >
+                      <ChevronRight className="w-6 h-6" />
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Sticky WhatsApp CTA */}
       <div className="fixed inset-x-0 bottom-0 bg-background/95 backdrop-blur border-t border-border z-40 w-full">
