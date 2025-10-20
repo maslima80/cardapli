@@ -85,7 +85,7 @@ export const CatalogSettingsDialog = ({
               <div className="space-y-0.5">
                 <Label>Mostrar navegação por seções</Label>
                 <p className="text-xs text-muted-foreground">
-                  Exibe uma navegação clicável para as seções com âncoras
+                  Navegação rápida entre blocos com título. Aparece no topo (mobile) ou lateral (desktop)
                 </p>
               </div>
               <Switch
