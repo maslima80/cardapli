@@ -17,9 +17,11 @@ export const BottomNav = () => {
   const shouldHide = 
     location.pathname.startsWith("/u/") ||
     location.pathname.includes("/editor") ||
-    location.pathname.startsWith("/entrar") ||
-    location.pathname.startsWith("/cadastro") ||
-    location.pathname === "/";
+    location.pathname === "/" ||
+    location.pathname === "/entrar" ||
+    location.pathname === "/criar-conta" ||
+    location.pathname === "/recuperar" ||
+    location.pathname === "/escolher-slug";
 
   if (shouldHide) return null;
 
