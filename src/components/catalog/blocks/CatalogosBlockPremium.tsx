@@ -81,8 +81,7 @@ export const CatalogosBlockPremium = ({ data, profile }: CatalogosBlockProps) =>
         .from("catalogs")
         .select("*")
         .eq("user_id", profile.id)
-        .eq("status", "publicado")
-        .eq("link_ativo", true)
+        .in("status", ["public", "unlisted"])
         .in("id", data.catalog_ids);
 
       if (error) {
