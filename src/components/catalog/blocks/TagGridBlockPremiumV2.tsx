@@ -169,26 +169,39 @@ export function TagGridBlockPremiumV2({ data, userId, userSlug, catalogSlug }: T
           className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 border border-slate-200 dark:border-slate-700 p-6 transition-all hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
         >
           {/* Gradient overlay on hover */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div 
+            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+            style={{ 
+              background: 'linear-gradient(to bottom right, var(--accent-color, #8B5CF6)0A, var(--accent-color, #8B5CF6)1A)'
+            }}
+          />
           
           {/* Content */}
           <div className="relative flex flex-col items-center text-center space-y-3">
             {/* Icon */}
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Tag className="w-6 h-6 text-primary" />
+            <div 
+              className="w-12 h-12 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform"
+              style={{
+                background: 'linear-gradient(to bottom right, var(--accent-color, #8B5CF6)1A, var(--accent-color, #8B5CF6)33)'
+              }}
+            >
+              <Tag className="w-6 h-6" style={{ color: 'var(--accent-color, #8B5CF6)' }} />
             </div>
             
             {/* Tag name */}
             <h3 
-              className="font-semibold text-base text-slate-900 dark:text-slate-50 group-hover:text-primary transition-colors"
-              style={{ fontFamily: 'var(--font-heading, inherit)' }}
+              className="font-semibold text-base transition-colors"
+              style={{ 
+                fontFamily: 'var(--font-heading, inherit)',
+                color: 'var(--theme-foreground)'
+              }}
             >
               {tag.name}
             </h3>
             
             {/* Count */}
             {showCount && (
-              <div className="flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-400">
+              <div className="flex items-center gap-1.5 text-sm" style={{ color: 'var(--theme-muted)' }}>
                 <span className="font-medium">{tag.count}</span>
                 <span className="text-xs">{tag.count === 1 ? 'produto' : 'produtos'}</span>
               </div>
@@ -196,7 +209,10 @@ export function TagGridBlockPremiumV2({ data, userId, userSlug, catalogSlug }: T
           </div>
           
           {/* Arrow indicator */}
-          <ChevronRight className="absolute bottom-3 right-3 w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+          <ChevronRight 
+            className="absolute bottom-3 right-3 w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" 
+            style={{ color: 'var(--theme-muted)' }}
+          />
         </Link>
       ))}
     </div>
@@ -209,11 +225,18 @@ export function TagGridBlockPremiumV2({ data, userId, userSlug, catalogSlug }: T
         <Link
           key={tag.name}
           to={getTagUrl(tag.name)}
-          className="group inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-full transition-all hover:shadow-lg hover:scale-105 active:scale-95 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 hover:border-primary dark:hover:border-primary"
+          className="group inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-full transition-all hover:shadow-lg hover:scale-105 active:scale-95 border-2"
+          style={{
+            backgroundColor: 'var(--theme-surface)',
+            borderColor: 'var(--theme-border)'
+          }}
         >
           <span 
-            className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-300 group-hover:text-primary transition-colors"
-            style={{ fontFamily: 'var(--font-body, inherit)' }}
+            className="text-sm sm:text-base font-semibold transition-colors"
+            style={{ 
+              fontFamily: 'var(--font-body, inherit)',
+              color: 'var(--theme-foreground)'
+            }}
           >
             {tag.name}
           </span>
@@ -240,7 +263,11 @@ export function TagGridBlockPremiumV2({ data, userId, userSlug, catalogSlug }: T
         {featuredTag && (
           <Link
             to={getTagUrl(featuredTag.name)}
-            className="group relative block overflow-hidden rounded-3xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-2 border-primary/20 p-8 sm:p-12 transition-all hover:shadow-2xl hover:scale-[1.01]"
+            className="group relative block overflow-hidden rounded-3xl border-2 p-8 sm:p-12 transition-all hover:shadow-2xl hover:scale-[1.01]"
+            style={{
+              background: 'linear-gradient(to bottom right, var(--accent-color, #8B5CF6)1A, var(--accent-color, #8B5CF6)0D, transparent)',
+              borderColor: 'var(--accent-color, #8B5CF6)33'
+            }}
           >
             {/* Background pattern */}
             <div className="absolute inset-0 opacity-5">
@@ -251,21 +278,34 @@ export function TagGridBlockPremiumV2({ data, userId, userSlug, catalogSlug }: T
             <div className="relative flex flex-col sm:flex-row items-center justify-between gap-6">
               <div className="flex items-center gap-6">
                 {/* Large icon */}
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                  <Tag className="w-10 h-10 text-white" />
+                <div 
+                  className="w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform"
+                  style={{
+                    backgroundColor: 'var(--accent-color, #8B5CF6)'
+                  }}
+                >
+                  <Tag className="w-10 h-10" style={{ color: '#ffffff' }} />
                 </div>
                 
                 {/* Text */}
                 <div className="text-center sm:text-left">
-                  <div className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">Mais Popular</div>
+                  <div 
+                    className="text-xs font-semibold uppercase tracking-wider mb-2"
+                    style={{ color: 'var(--accent-color, #8B5CF6)' }}
+                  >
+                    Mais Popular
+                  </div>
                   <h3 
-                    className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-slate-50 mb-2"
-                    style={{ fontFamily: 'var(--font-heading, inherit)' }}
+                    className="text-3xl sm:text-4xl font-bold mb-2"
+                    style={{ 
+                      fontFamily: 'var(--font-heading, inherit)',
+                      color: 'var(--theme-foreground)'
+                    }}
                   >
                     {featuredTag.name}
                   </h3>
                   {showCount && (
-                    <p className="text-lg text-slate-600 dark:text-slate-400">
+                    <p className="text-lg" style={{ color: 'var(--theme-muted)' }}>
                       {featuredTag.count} {featuredTag.count === 1 ? 'produto' : 'produtos'}
                     </p>
                   )}
@@ -273,7 +313,10 @@ export function TagGridBlockPremiumV2({ data, userId, userSlug, catalogSlug }: T
               </div>
               
               {/* CTA */}
-              <div className="flex items-center gap-2 text-primary font-semibold group-hover:gap-4 transition-all">
+              <div 
+                className="flex items-center gap-2 font-semibold group-hover:gap-4 transition-all"
+                style={{ color: 'var(--accent-color, #8B5CF6)' }}
+              >
                 <span>Explorar</span>
                 <ChevronRight className="w-5 h-5" />
               </div>
@@ -288,20 +331,32 @@ export function TagGridBlockPremiumV2({ data, userId, userSlug, catalogSlug }: T
               <Link
                 key={tag.name}
                 to={getTagUrl(tag.name)}
-                className="group flex items-center gap-3 p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 transition-all hover:shadow-md hover:border-primary dark:hover:border-primary"
+                className="group flex items-center gap-3 p-4 rounded-xl border transition-all hover:shadow-md"
+                style={{
+                  backgroundColor: 'var(--theme-surface)',
+                  borderColor: 'var(--theme-border)'
+                }}
               >
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center flex-shrink-0">
-                  <Tag className="w-5 h-5 text-primary" />
+                <div 
+                  className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{
+                    background: 'linear-gradient(to bottom right, var(--accent-color, #8B5CF6)1A, var(--accent-color, #8B5CF6)33)'
+                  }}
+                >
+                  <Tag className="w-5 h-5" style={{ color: 'var(--accent-color, #8B5CF6)' }} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 
-                    className="font-semibold text-sm text-slate-900 dark:text-slate-50 truncate"
-                    style={{ fontFamily: 'var(--font-body, inherit)' }}
+                    className="font-semibold text-sm truncate"
+                    style={{ 
+                      fontFamily: 'var(--font-body, inherit)',
+                      color: 'var(--theme-foreground)'
+                    }}
                   >
                     {tag.name}
                   </h4>
                   {showCount && (
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                    <p className="text-xs" style={{ color: 'var(--theme-muted)' }}>
                       {tag.count} {tag.count === 1 ? 'item' : 'itens'}
                     </p>
                   )}
