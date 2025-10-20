@@ -20,6 +20,8 @@ type Profile = {
   whatsapp: string | null;
   phone: string | null;
   email_public: string | null;
+  enable_whatsapp: boolean;
+  enable_phone: boolean;
   socials: any;
   accent_color: string | null;
   background_color: string | null;
@@ -39,6 +41,8 @@ export default function PerfilV2() {
     whatsapp: null,
     phone: null,
     email_public: null,
+    enable_whatsapp: true,
+    enable_phone: false,
     socials: {},
     accent_color: "#8B5CF6",
     background_color: null,
