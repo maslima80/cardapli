@@ -167,15 +167,52 @@ export const BlockSettingsDrawer = ({
 
     switch (block.type) {
       case "cover":
+        const currentLayout = formData.layout || "logo-title-image";
+        const isCarouselLayout = currentLayout === "carousel-top";
+        const showLogoOption = currentLayout === "logo-title-image";
+        
         return (
           <>
-            <div className="space-y-2">
-              <Label>Imagem de Fundo</Label>
-              <SimpleImageUploader
-                currentImageUrl={formData.image_url}
-                onImageChange={(url) => setFormData({ ...formData, image_url: url })}
-              />
+            {/* Layout Selection */}
+            <div className="space-y-3 pb-4 border-b">
+              <Label className="text-base font-semibold">Estilo da Capa</Label>
+              <Select
+                value={currentLayout}
+                onValueChange={(value) => setFormData({ ...formData, layout: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Escolha o estilo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="logo-title-image">🏆 Logo + Título + Foto</SelectItem>
+                  <SelectItem value="image-top">📸 Imagem no Topo</SelectItem>
+                  <SelectItem value="carousel-top">🎠 Galeria de Fotos (3)</SelectItem>
+                  <SelectItem value="full-background">🖼️ Imagem de Fundo</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {currentLayout === "logo-title-image" && "Logo no topo, título e foto principal"}
+                {currentLayout === "image-top" && "Imagem grande com texto embaixo"}
+                {currentLayout === "carousel-top" && "3 fotos em grade com texto embaixo"}
+                {currentLayout === "full-background" && "Foto de fundo com texto sobreposto"}
+              </p>
             </div>
+
+            {/* Logo Option (only for logo-title-image) */}
+            {showLogoOption && (
+              <div className="flex items-center justify-between py-2">
+                <div>
+                  <Label>Mostrar logo do perfil</Label>
+                  <p className="text-xs text-muted-foreground">Aparece no topo da capa</p>
+                </div>
+                <Switch
+                  checked={formData.use_profile_logo || false}
+                  onCheckedChange={(checked) => setFormData({ ...formData, use_profile_logo: checked, logo_url: checked ? profile?.logo_url : null })}
+                />
+              </div>
+            )}
+
+            {/* Title */}
             <div className="space-y-2">
               <Label>Título</Label>
               <Input
@@ -191,6 +228,7 @@ export const BlockSettingsDrawer = ({
               />
             </div>
             
+            {/* Anchor Slug */}
             {showAnchorField && (
               <div className="space-y-2">
                 <Label>ID da seção (para navegação)</Label>
@@ -208,36 +246,58 @@ export const BlockSettingsDrawer = ({
                 </p>
               </div>
             )}
+
+            {/* Subtitle */}
             <div className="space-y-2">
-              <Label>Subtítulo</Label>
-              <Input
+              <Label>Subtítulo (opcional)</Label>
+              <Textarea
                 value={formData.subtitle || ""}
                 onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
-                placeholder="Subtítulo (opcional)"
+                placeholder="Descrição curta do catálogo"
+                rows={2}
               />
             </div>
-            <div className="space-y-2">
-              <Label>Alinhamento</Label>
-              <Select
-                value={formData.align || "center"}
-                onValueChange={(value) => setFormData({ ...formData, align: value, layout: "full" })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Escolha o alinhamento" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="left">Esquerda</SelectItem>
-                  <SelectItem value="center">Centro</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center justify-between">
-              <Label>Usar logo do perfil</Label>
-              <Switch
-                checked={formData.use_profile_logo || false}
-                onCheckedChange={(checked) => setFormData({ ...formData, use_profile_logo: checked, logo_url: checked ? profile?.logo_url : null })}
-              />
-            </div>
+
+            {/* Images - Different UI based on layout */}
+            {isCarouselLayout ? (
+              <div className="space-y-3">
+                <Label>Fotos da Galeria (3 fotos)</Label>
+                {[0, 1, 2].map((index) => {
+                  const images = formData.images || [];
+                  return (
+                    <div key={index} className="space-y-1">
+                      <Label className="text-xs text-muted-foreground">Foto {index + 1}</Label>
+                      <SimpleImageUploader
+                        currentImageUrl={images[index] || ""}
+                        onImageChange={(url) => {
+                          const newImages = [...(formData.images || [])];
+                          newImages[index] = url;
+                          setFormData({ ...formData, images: newImages });
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+                <p className="text-xs text-muted-foreground">
+                  💡 As 3 fotos aparecerão lado a lado no topo
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label>
+                  {currentLayout === "full-background" ? "Imagem de Fundo" : "Foto Principal"}
+                </Label>
+                <SimpleImageUploader
+                  currentImageUrl={formData.image_url}
+                  onImageChange={(url) => setFormData({ ...formData, image_url: url })}
+                />
+                {currentLayout === "full-background" && (
+                  <p className="text-xs text-muted-foreground">
+                    💡 Escolha uma imagem com boa resolução para fundo
+                  </p>
+                )}
+              </div>
+            )}
           </>
         );
 
