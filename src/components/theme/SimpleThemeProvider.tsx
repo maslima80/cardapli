@@ -15,7 +15,7 @@ interface SimpleThemeProviderProps {
 export function SimpleThemeProvider({ userSlug, catalogThemeOverrides, children }: SimpleThemeProviderProps) {
   const [loading, setLoading] = useState(true);
 
-  // Memoize the theme overrides to prevent infinite loops
+  // Memoize the theme overrides to prevent infinite loops (fixed 2025-01-20)
   const themeOverrides = useMemo(() => catalogThemeOverrides, [
     catalogThemeOverrides?.use_brand,
     catalogThemeOverrides?.mode,
