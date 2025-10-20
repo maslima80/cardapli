@@ -41,34 +41,34 @@ export const CoverBlock = ({ data, preview = false }: CoverBlockProps) => {
   // Logo + Title + Image Layout (Borcello style)
   if (layout === "logo-title-image") {
     return (
-      <div className="w-full bg-white dark:bg-slate-950 overflow-hidden">
-        <div className="p-8 sm:p-12 flex flex-col items-center text-center">
+      <div className="w-full bg-white dark:bg-slate-950">
+        <div className="p-6 sm:p-8 flex flex-col items-center text-center">
           {/* Logo - Premium presentation with glow effect */}
           {data.use_profile_logo && data.logo_url && (
-            <div className="relative group mb-6">
+            <div className="relative group mb-4">
               <div className="absolute inset-0 bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <img
                 src={data.logo_url}
                 alt="Logo"
-                className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover shadow-xl ring-4 ring-white/10 dark:ring-slate-800/50"
+                className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover shadow-xl ring-4 ring-white/10 dark:ring-slate-800/50"
               />
             </div>
           )}
           
           {/* Title */}
-          <h1 className="text-3xl sm:text-4xl font-bold mb-2" style={{ color: 'var(--theme-foreground)', fontFamily: 'var(--font-heading, inherit)' }}>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: 'var(--theme-foreground)', fontFamily: 'var(--font-heading, inherit)' }}>
             {data.title || "Novo Catálogo"}
           </h1>
           
           {/* Subtitle */}
           {data.subtitle && (
-            <p className="text-lg mb-6 max-w-2xl leading-relaxed" style={{ color: 'var(--theme-muted)', fontFamily: 'var(--font-body, inherit)' }}>
+            <p className="text-base sm:text-lg mb-4 max-w-2xl leading-relaxed" style={{ color: 'var(--theme-muted)', fontFamily: 'var(--font-body, inherit)' }}>
               {data.subtitle}
             </p>
           )}
         </div>
         
-        {/* Main Image - Square, Full Bleed */}
+        {/* Main Image - Square, Full Bleed (edge to edge) */}
         {data.image_url && (
           <div className="aspect-square w-full">
             <img
@@ -85,8 +85,8 @@ export const CoverBlock = ({ data, preview = false }: CoverBlockProps) => {
   // Image Top Layout
   if (layout === "image-top") {
     return (
-      <div className="w-full bg-white dark:bg-slate-950 overflow-hidden">
-        {/* Image - Square, Full Bleed */}
+      <div className="w-full bg-white dark:bg-slate-950">
+        {/* Image - Square, Full Bleed (edge to edge) */}
         {data.image_url && (
           <div className="aspect-square w-full">
             <img
@@ -98,25 +98,25 @@ export const CoverBlock = ({ data, preview = false }: CoverBlockProps) => {
         )}
         
         {/* Text Content */}
-        <div className="p-8 sm:p-12 flex flex-col items-center text-center">
+        <div className="p-6 sm:p-8 flex flex-col items-center text-center">
           {/* Logo - Premium presentation */}
           {data.use_profile_logo && data.logo_url && (
-            <div className="relative group mb-6">
+            <div className="relative group mb-4">
               <div className="absolute inset-0 bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <img
                 src={data.logo_url}
                 alt="Logo"
-                className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover shadow-xl ring-4 ring-white/10 dark:ring-slate-800/50"
+                className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover shadow-xl ring-4 ring-white/10 dark:ring-slate-800/50"
               />
             </div>
           )}
           
-          <h1 className="text-3xl sm:text-4xl font-bold mb-3" style={{ color: 'var(--theme-foreground)', fontFamily: 'var(--font-heading, inherit)' }}>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: 'var(--theme-foreground)', fontFamily: 'var(--font-heading, inherit)' }}>
             {data.title || "Novo Catálogo"}
           </h1>
           
           {data.subtitle && (
-            <p className="text-lg max-w-2xl leading-relaxed" style={{ color: 'var(--theme-muted)', fontFamily: 'var(--font-body, inherit)' }}>
+            <p className="text-base sm:text-lg max-w-2xl leading-relaxed" style={{ color: 'var(--theme-muted)', fontFamily: 'var(--font-body, inherit)' }}>
               {data.subtitle}
             </p>
           )}
