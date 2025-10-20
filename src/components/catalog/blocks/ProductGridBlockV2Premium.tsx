@@ -305,6 +305,55 @@ export function ProductGridBlockV2Premium({
         renderSkeleton()
       ) : products.length === 0 ? (
         renderEmpty()
+      ) : layout === "grid_cinematic" ? (
+        // Grade Cinematic - Premium visual grid
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+          {products.map((product) => {
+            const imageUrl = product.photos?.[0]?.url || product.photos?.[0]?.image_url;
+            const productUrl = catalogSlug 
+              ? `/u/${userSlug}/${catalogSlug}/p/${product.slug}`
+              : `/u/${userSlug}/p/${product.slug}`;
+            
+            return (
+              <a
+                key={product.id}
+                href={productUrl}
+                className="group relative aspect-square overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-900"
+              >
+                {imageUrl ? (
+                  <>
+                    <img
+                      src={imageUrl}
+                      alt={product.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      loading="lazy"
+                    />
+                    {/* Hover overlay with title */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="absolute bottom-0 left-0 right-0 p-4">
+                        <h3 
+                          className="text-white font-semibold text-sm md:text-base line-clamp-2"
+                          style={{ fontFamily: 'var(--font-heading, inherit)' }}
+                        >
+                          {product.title}
+                        </h3>
+                        {!product.price_hidden && product.price && (
+                          <p className="text-white/90 text-xs md:text-sm mt-1">
+                            R$ {product.price}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Package className="w-12 h-12 text-slate-300 dark:text-slate-700" />
+                  </div>
+                )}
+              </a>
+            );
+          })}
+        </div>
       ) : layout === "list" ? (
         // Lista mode - vertical stack
         <div className="space-y-4">

@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { 
   Select, 
   SelectContent, 
@@ -19,7 +20,7 @@ import {
 } from "@/components/ui/accordion";
 import { MultiSelectChips } from "./MultiSelectChips";
 import ProductPickerModal from "./ProductPickerModalBridge";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, LayoutGrid, List, Grid3x3 } from "lucide-react";
 
 interface ProductGridBlockSettingsProps {
   formData: any;
@@ -378,21 +379,67 @@ export function ProductGridBlockSettings({
             </AccordionTrigger>
             <AccordionContent className="space-y-4">
               {/* Layout selection */}
-              <div className="space-y-2">
-                <Label>Layout</Label>
-                <Select
+              <div className="space-y-3">
+                <Label className="text-base font-semibold">Layout</Label>
+                <RadioGroup
                   value={formData.layout || "grid"}
                   onValueChange={(value) => setFormData({ ...formData, layout: value })}
+                  className="space-y-3"
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Escolha o layout" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="grid">Grade</SelectItem>
-                    <SelectItem value="list">Lista</SelectItem>
-                    {/* <SelectItem value="carousel">Carrossel</SelectItem> */}
-                  </SelectContent>
-                </Select>
+                  {/* Grade - Horizontal Swipe */}
+                  <label
+                    htmlFor="layout-grid"
+                    className="flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all hover:border-violet-200 dark:hover:border-violet-800 has-[:checked]:border-violet-500 has-[:checked]:bg-violet-50 dark:has-[:checked]:bg-violet-950/20"
+                  >
+                    <RadioGroupItem value="grid" id="layout-grid" className="mt-1" />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <LayoutGrid className="w-5 h-5 text-violet-600" />
+                        <span className="font-semibold">Grade</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Deslize horizontal com detalhes completos
+                      </p>
+                    </div>
+                  </label>
+
+                  {/* Grade Cinematic - Visual Grid */}
+                  <label
+                    htmlFor="layout-grid-cinematic"
+                    className="flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all hover:border-violet-200 dark:hover:border-violet-800 has-[:checked]:border-violet-500 has-[:checked]:bg-violet-50 dark:has-[:checked]:bg-violet-950/20"
+                  >
+                    <RadioGroupItem value="grid_cinematic" id="layout-grid-cinematic" className="mt-1" />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Grid3x3 className="w-5 h-5 text-violet-600" />
+                        <span className="font-semibold">Grade Cinematic</span>
+                        <span className="text-xs bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 px-2 py-0.5 rounded-full font-medium">
+                          Premium
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Grade visual só com fotos (2 colunas mobile, 3 desktop)
+                      </p>
+                    </div>
+                  </label>
+
+                  {/* Lista - Vertical Stack */}
+                  <label
+                    htmlFor="layout-list"
+                    className="flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all hover:border-violet-200 dark:hover:border-violet-800 has-[:checked]:border-violet-500 has-[:checked]:bg-violet-50 dark:has-[:checked]:bg-violet-950/20"
+                  >
+                    <RadioGroupItem value="list" id="layout-list" className="mt-1" />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <List className="w-5 h-5 text-violet-600" />
+                        <span className="font-semibold">Lista</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Cards verticais completos empilhados
+                      </p>
+                    </div>
+                  </label>
+                </RadioGroup>
               </div>
 
               {/* Show price toggle */}
