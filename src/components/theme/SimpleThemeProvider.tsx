@@ -1,4 +1,4 @@
-import { useEffect, useState, ReactNode } from 'react';
+import { useEffect, useState, ReactNode, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface SimpleThemeProviderProps {
@@ -15,6 +15,14 @@ interface SimpleThemeProviderProps {
 export function SimpleThemeProvider({ userSlug, catalogThemeOverrides, children }: SimpleThemeProviderProps) {
   const [loading, setLoading] = useState(true);
 
+  // Memoize the theme overrides to prevent infinite loops
+  const themeOverrides = useMemo(() => catalogThemeOverrides, [
+    catalogThemeOverrides?.use_brand,
+    catalogThemeOverrides?.mode,
+    catalogThemeOverrides?.accent_color,
+    catalogThemeOverrides?.font,
+  ]);
+
   useEffect(() => {
     const loadTheme = async () => {
       try {
@@ -27,17 +35,17 @@ export function SimpleThemeProvider({ userSlug, catalogThemeOverrides, children 
 
         if (profile) {
           // Check if catalog has theme overrides
-          const useBrand = catalogThemeOverrides?.use_brand !== false;
+          const useBrand = themeOverrides?.use_brand !== false;
           
           // Determine which theme to use
-          const themeMode = !useBrand && catalogThemeOverrides?.mode 
-            ? catalogThemeOverrides.mode 
+          const themeMode = !useBrand && themeOverrides?.mode 
+            ? themeOverrides.mode 
             : profile.theme_mode;
-          const accentColor = !useBrand && catalogThemeOverrides?.accent_color
-            ? catalogThemeOverrides.accent_color
+          const accentColor = !useBrand && themeOverrides?.accent_color
+            ? themeOverrides.accent_color
             : profile.accent_color;
-          const fontTheme = !useBrand && catalogThemeOverrides?.font
-            ? catalogThemeOverrides.font
+          const fontTheme = !useBrand && themeOverrides?.font
+            ? themeOverrides.font
             : profile.font_theme;
           
           // Apply dark mode class to html element
@@ -102,7 +110,7 @@ export function SimpleThemeProvider({ userSlug, catalogThemeOverrides, children 
       document.documentElement.style.removeProperty('--font-heading');
       document.documentElement.style.removeProperty('--font-body');
     };
-  }, [userSlug, catalogThemeOverrides]);
+  }, [userSlug, themeOverrides]);
 
   if (loading) {
     return (
