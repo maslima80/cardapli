@@ -7,7 +7,8 @@ import { toast } from "sonner";
 import { BlockCard } from "@/components/catalog/BlockCard";
 import { AddBlockDrawer } from "@/components/catalog/AddBlockDrawer";
 import { BlockSettingsDrawer } from "@/components/catalog/BlockSettingsDrawer";
-import { BlockRenderer } from "@/components/catalog/BlockRenderer";
+import { BlockRendererPremium } from "@/components/catalog/BlockRendererPremium";
+import { SimpleThemeProvider } from "@/components/theme/SimpleThemeProvider";
 import { PublishModal } from "@/components/catalog/PublishModal";
 import { PublishSuccessModal } from "@/components/catalog/PublishSuccessModal";
 import { CatalogSettingsDialog } from "@/components/catalog/CatalogSettingsDialog";
@@ -469,22 +470,25 @@ const CatalogoEditor = () => {
             </div>
           </div>
         ) : previewMode ? (
-          <div 
-            className={`space-y-6 rounded-2xl shadow-lg overflow-hidden bg-white dark:bg-slate-950 ${fontClass}`}
-            style={{ 
-              '--accent-color': profile?.accent_color || '#8B5CF6'
-            } as any}
+          <SimpleThemeProvider 
+            userSlug={profile?.slug}
+            catalogThemeOverrides={catalog?.theme_overrides}
           >
-            {blocks.filter(b => b.visible).map((block) => (
-              <div key={block.id} className="catalog-preview-block">
-                <BlockRenderer
+            <div className="rounded-2xl shadow-lg overflow-hidden">
+              {blocks.filter(b => b.visible).map((block, index) => (
+                <BlockRendererPremium
+                  key={block.id}
                   block={block}
                   profile={profile}
                   userId={catalog?.user_id}
+                  userSlug={profile?.slug}
+                  catalogSlug={catalog?.slug}
+                  catalogTitle={catalog?.title}
+                  index={index}
                 />
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </SimpleThemeProvider>
         ) : (
           <DndContext
             sensors={sensors}
