@@ -166,7 +166,11 @@ export function TagGridBlockPremiumV2({ data, userId, userSlug, catalogSlug }: T
         <Link
           key={tag.name}
           to={getTagUrl(tag.name)}
-          className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 border border-slate-200 dark:border-slate-700 p-6 transition-all hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
+          className="group relative overflow-hidden rounded-2xl bg-white dark:bg-slate-900 p-6 transition-all hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
+          style={{
+            border: '1px solid rgba(0, 0, 0, 0.06)',
+            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04)'
+          }}
         >
           {/* Gradient overlay on hover */}
           <div 
@@ -225,10 +229,11 @@ export function TagGridBlockPremiumV2({ data, userId, userSlug, catalogSlug }: T
         <Link
           key={tag.name}
           to={getTagUrl(tag.name)}
-          className="group inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-full transition-all hover:shadow-lg hover:scale-105 active:scale-95 border-2"
+          className="group inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-full transition-all hover:shadow-lg hover:scale-105 active:scale-95"
           style={{
             backgroundColor: 'var(--theme-surface)',
-            borderColor: 'var(--theme-border)'
+            border: '1px solid rgba(0, 0, 0, 0.08)',
+            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04)'
           }}
         >
           <span 
@@ -263,10 +268,11 @@ export function TagGridBlockPremiumV2({ data, userId, userSlug, catalogSlug }: T
         {featuredTag && (
           <Link
             to={getTagUrl(featuredTag.name)}
-            className="group relative block overflow-hidden rounded-3xl border-2 p-8 sm:p-12 transition-all hover:shadow-2xl hover:scale-[1.01]"
+            className="group relative block overflow-hidden rounded-3xl p-8 sm:p-12 transition-all hover:shadow-2xl hover:scale-[1.01]"
             style={{
               background: 'linear-gradient(to bottom right, var(--accent-color, #8B5CF6)1A, var(--accent-color, #8B5CF6)0D, transparent)',
-              borderColor: 'var(--accent-color, #8B5CF6)33'
+              border: '1px solid var(--accent-color, #8B5CF6)33',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
             }}
           >
             {/* Background pattern */}
@@ -331,10 +337,11 @@ export function TagGridBlockPremiumV2({ data, userId, userSlug, catalogSlug }: T
               <Link
                 key={tag.name}
                 to={getTagUrl(tag.name)}
-                className="group flex items-center gap-3 p-4 rounded-xl border transition-all hover:shadow-md"
+                className="group flex items-center gap-3 p-4 rounded-xl transition-all hover:shadow-md"
                 style={{
                   backgroundColor: 'var(--theme-surface)',
-                  borderColor: 'var(--theme-border)'
+                  border: '1px solid rgba(0, 0, 0, 0.06)',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.04)'
                 }}
               >
                 <div 
