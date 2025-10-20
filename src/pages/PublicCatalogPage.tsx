@@ -249,13 +249,13 @@ const PublicCatalogPage = () => {
                 {/* Mobile: List View */}
                 <div className="md:hidden space-y-4">
                   {products.map((product) => (
-                    <ProductCard key={product.id} product={product} layout="list" showPrice showTags showButton userSlug={userSlug} />
+                    <ProductCard key={product.id} product={product} layout="list" showPrice showTags showButton userSlug={userSlug} catalogSlug={catalogSlug} />
                   ))}
                 </div>
                 {/* Desktop: Grid View */}
                 <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {products.map((product) => (
-                    <ProductCard key={product.id} product={product} layout="grid" showPrice showTags showButton userSlug={userSlug} />
+                    <ProductCard key={product.id} product={product} layout="grid" showPrice showTags showButton userSlug={userSlug} catalogSlug={catalogSlug} />
                   ))}
                 </div>
               </>
@@ -288,6 +288,30 @@ const PublicCatalogPage = () => {
       userSlug={userSlug!}
       catalogThemeOverrides={catalog?.theme_overrides}
     >
+      {/* Header with back navigation */}
+      <div className="border-b sticky top-0 z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur" style={{ borderColor: 'var(--theme-surface)' }}>
+        <div className="container max-w-6xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <Button 
+              variant="ghost" 
+              onClick={() => window.location.href = publicProfileUrl(userSlug!)} 
+              className="gap-2"
+              style={{ color: 'var(--theme-foreground)' }}
+            >
+              <ArrowLeft className="w-5 h-5" />
+              Voltar
+            </Button>
+            <h1 
+              className="text-lg font-semibold truncate mx-4"
+              style={{ fontFamily: 'var(--font-heading, inherit)', color: 'var(--theme-foreground)' }}
+            >
+              {catalog?.title}
+            </h1>
+            <div className="w-20"></div> {/* Spacer for centering */}
+          </div>
+        </div>
+      </div>
+
       {showSectionNav && <SectionNavigation sections={sections} />}
       
       {blocks.map((block, index) => (
