@@ -41,7 +41,7 @@ export const CoverBlock = ({ data, preview = false }: CoverBlockProps) => {
   // Logo + Title + Image Layout (Borcello style)
   if (layout === "logo-title-image") {
     return (
-      <div className="w-full bg-white dark:bg-slate-950 rounded-2xl overflow-hidden">
+      <div className="w-full bg-white dark:bg-slate-950 overflow-hidden">
         <div className="p-8 sm:p-12 flex flex-col items-center text-center">
           {/* Logo */}
           {data.use_profile_logo && data.logo_url && (
@@ -65,9 +65,9 @@ export const CoverBlock = ({ data, preview = false }: CoverBlockProps) => {
           )}
         </div>
         
-        {/* Main Image */}
+        {/* Main Image - Square, Full Bleed */}
         {data.image_url && (
-          <div className="aspect-[4/3] w-full">
+          <div className="aspect-square w-full">
             <img
               src={getOptimizedImageUrl(data.image_url, false)}
               alt={data.title || "Cover"}
@@ -82,10 +82,10 @@ export const CoverBlock = ({ data, preview = false }: CoverBlockProps) => {
   // Image Top Layout
   if (layout === "image-top") {
     return (
-      <div className="w-full bg-white dark:bg-slate-950 rounded-2xl overflow-hidden">
-        {/* Image */}
+      <div className="w-full bg-white dark:bg-slate-950 overflow-hidden">
+        {/* Image - Square, Full Bleed */}
         {data.image_url && (
-          <div className="aspect-[16/9] w-full">
+          <div className="aspect-square w-full">
             <img
               src={getOptimizedImageUrl(data.image_url, false)}
               alt={data.title || "Cover"}
@@ -149,8 +149,8 @@ export const CoverBlock = ({ data, preview = false }: CoverBlockProps) => {
   // Full Background Layout
   if (layout === "full-background") {
     return (
-      <div className="relative w-full h-[60vh] min-h-[400px] rounded-2xl overflow-hidden">
-        {/* Background Image */}
+      <div className="relative w-full aspect-[3/4] sm:aspect-square overflow-hidden">
+        {/* Background Image - Full Bleed */}
         {data.image_url && (
           <div
             className="absolute inset-0 bg-cover bg-center"
