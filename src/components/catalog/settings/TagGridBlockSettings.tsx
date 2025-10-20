@@ -6,7 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tag } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tag, LayoutGrid, Sparkles, Grid3x3 } from "lucide-react";
 
 interface TagGridBlockSettingsProps {
   data: any;
@@ -17,6 +18,7 @@ export function TagGridBlockSettings({ data, onUpdate }: TagGridBlockSettingsPro
   const [title, setTitle] = useState(data?.title || "Tags");
   const [description, setDescription] = useState(data?.description || "");
   const [showCount, setShowCount] = useState(data?.show_count !== false);
+  const [layout, setLayout] = useState(data?.layout || "grid");
   const [selectedTags, setSelectedTags] = useState<string[]>(data?.selected_tags || []);
   const [tags, setTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,6 +28,7 @@ export function TagGridBlockSettings({ data, onUpdate }: TagGridBlockSettingsPro
     setTitle(data?.title || "Tags");
     setDescription(data?.description || "");
     setShowCount(data?.show_count !== false);
+    setLayout(data?.layout || "grid");
     setSelectedTags(data?.selected_tags || []);
   }, [data]);
 
@@ -77,6 +80,7 @@ export function TagGridBlockSettings({ data, onUpdate }: TagGridBlockSettingsPro
       title,
       description,
       show_count: showCount,
+      layout,
       selected_tags: selectedTags,
       ...overrides,
     };
@@ -136,6 +140,47 @@ export function TagGridBlockSettings({ data, onUpdate }: TagGridBlockSettingsPro
           placeholder="Explore nossos produtos por tag"
           rows={3}
         />
+      </div>
+
+      {/* Layout Selector */}
+      <div className="space-y-3 pb-4 border-b">
+        <Label className="text-base font-semibold">Estilo de Exibição</Label>
+        <Select
+          value={layout}
+          onValueChange={(value) => {
+            setLayout(value);
+            updateParent({ layout: value });
+          }}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Escolha o estilo" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="grid">
+              <div className="flex items-center gap-2">
+                <LayoutGrid className="w-4 h-4" />
+                <span>Grade de Cartões</span>
+              </div>
+            </SelectItem>
+            <SelectItem value="chips">
+              <div className="flex items-center gap-2">
+                <Grid3x3 className="w-4 h-4" />
+                <span>Pills Compactos</span>
+              </div>
+            </SelectItem>
+            <SelectItem value="featured">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4" />
+                <span>Destaque + Grade</span>
+              </div>
+            </SelectItem>
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-muted-foreground">
+          {layout === "grid" && "Cartões grandes e fáceis de tocar (recomendado para catálogos)"}
+          {layout === "chips" && "Pills compactos que se ajustam ao espaço disponível"}
+          {layout === "featured" && "Tag mais popular em destaque + outras em grade"}
+        </p>
       </div>
 
       <div className="flex items-center space-x-2">
