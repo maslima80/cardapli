@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { SimpleImageUploader } from "./SimpleImageUploader";
+import { CoverTemplateSelector, CoverTemplate } from "./CoverTemplateSelector";
 
 interface CreateCatalogDialogProps {
   open: boolean;
@@ -31,9 +32,12 @@ interface CreateCatalogDialogProps {
 
 export function CreateCatalogDialog({ open, onOpenChange, onSuccess }: CreateCatalogDialogProps) {
   const navigate = useNavigate();
+  const [step, setStep] = useState<"template" | "details">("template");
+  const [selectedTemplate, setSelectedTemplate] = useState<CoverTemplate | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [coverImage, setCoverImage] = useState("");
+  const [coverImages, setCoverImages] = useState<string[]>([]); // For carousel template
   const [slug, setSlug] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -128,7 +132,22 @@ export function CreateCatalogDialog({ open, onOpenChange, onSuccess }: CreateCat
       }
       setLoading(false);
     } else {
-      // Create the cover block automatically
+      // Create the cover block automatically with template layout
+      const coverData: any = {
+        title: title.trim(),
+        subtitle: description.trim() || "",
+        align: "center",
+        use_profile_logo: false,
+        layout: selectedTemplate?.layout || "image-top",
+      };
+
+      // Add images based on template type
+      if (selectedTemplate?.requiresMultipleImages) {
+        coverData.images = coverImages.filter(img => img); // Remove empty strings
+      } else {
+        coverData.image_url = coverImage || "";
+      }
+
       await supabase
         .from("catalog_blocks")
         .insert({
@@ -136,13 +155,7 @@ export function CreateCatalogDialog({ open, onOpenChange, onSuccess }: CreateCat
           type: "cover",
           sort: 0,
           visible: true,
-          data: {
-            title: title.trim(),
-            subtitle: description.trim() || "",
-            image_url: coverImage || "",
-            align: "center",
-            use_profile_logo: false,
-          },
+          data: coverData,
         });
 
       // Reset form
@@ -168,15 +181,28 @@ export function CreateCatalogDialog({ open, onOpenChange, onSuccess }: CreateCat
     }
   };
 
+  const handleTemplateSelect = (template: CoverTemplate) => {
+    setSelectedTemplate(template);
+    setStep("details");
+  };
+
+  const handleBack = () => {
+    setStep("template");
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Criar Catálogo</DialogTitle>
-          <DialogDescription>
-            Vamos criar algo bonito para você compartilhar ✨
-          </DialogDescription>
-        </DialogHeader>
+        {step === "template" ? (
+          <CoverTemplateSelector onSelect={handleTemplateSelect} />
+        ) : (
+          <>
+            <DialogHeader>
+              <DialogTitle>Criar Catálogo</DialogTitle>
+              <DialogDescription>
+                Vamos criar algo bonito para você compartilhar ✨
+              </DialogDescription>
+            </DialogHeader>
 
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
@@ -204,11 +230,33 @@ export function CreateCatalogDialog({ open, onOpenChange, onSuccess }: CreateCat
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="cover-image">Imagem de Capa (opcional)</Label>
-            <SimpleImageUploader
-              currentImageUrl={coverImage}
-              onImageChange={setCoverImage}
-            />
+            <Label htmlFor="cover-image">
+              {selectedTemplate?.requiresMultipleImages 
+                ? "Imagens da Capa (3 fotos)" 
+                : "Imagem de Capa (opcional)"}
+            </Label>
+            {selectedTemplate?.requiresMultipleImages ? (
+              <div className="space-y-3">
+                {[0, 1, 2].map((index) => (
+                  <div key={index}>
+                    <Label className="text-xs text-muted-foreground">Foto {index + 1}</Label>
+                    <SimpleImageUploader
+                      currentImageUrl={coverImages[index] || ""}
+                      onImageChange={(url) => {
+                        const newImages = [...coverImages];
+                        newImages[index] = url;
+                        setCoverImages(newImages);
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <SimpleImageUploader
+                currentImageUrl={coverImage}
+                onImageChange={setCoverImage}
+              />
+            )}
             <p className="text-xs text-muted-foreground">
               💡 Você pode adicionar ou trocar depois
             </p>
@@ -249,15 +297,17 @@ export function CreateCatalogDialog({ open, onOpenChange, onSuccess }: CreateCat
         <DialogFooter>
           <Button
             variant="outline"
-            onClick={() => onOpenChange(false)}
+            onClick={handleBack}
             disabled={loading}
           >
-            Cancelar
+            Voltar
           </Button>
           <Button onClick={handleCreate} disabled={!title.trim() || loading || !!slugError}>
             {loading ? "Criando..." : "Criar e Começar"}
           </Button>
         </DialogFooter>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
