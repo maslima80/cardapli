@@ -8,11 +8,19 @@ export interface CoverTemplate {
   name: string;
   description: string;
   preview: string;
-  layout: "image-top" | "carousel-top" | "full-background";
+  layout: "logo-title-image" | "image-top" | "carousel-top" | "full-background";
   requiresMultipleImages: boolean;
 }
 
 const COVER_TEMPLATES: CoverTemplate[] = [
+  {
+    id: "logo-title-image",
+    name: "Logo + Título + Foto",
+    description: "Logo no topo, título e foto principal (elegante)",
+    preview: "/cover-templates/logo-title-image.svg",
+    layout: "logo-title-image",
+    requiresMultipleImages: false,
+  },
   {
     id: "image-top",
     name: "Imagem no Topo",
@@ -91,6 +99,29 @@ export function CoverTemplateSelector({ onSelect, onBack }: CoverTemplateSelecto
           <Card className="p-6 bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/20 dark:to-purple-950/20 border-2 border-violet-200 dark:border-violet-800">
             <div className="aspect-[9/16] max-h-[400px] mx-auto bg-white dark:bg-slate-900 rounded-lg shadow-xl overflow-hidden relative">
               {/* Template Preview Illustration */}
+              {selectedTemplate.layout === "logo-title-image" && (
+                <div className="h-full flex flex-col p-6">
+                  {/* Logo at top */}
+                  <div className="flex justify-center mb-4">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-200 to-orange-200 dark:from-amber-900 dark:to-orange-900 flex items-center justify-center">
+                      <div className="text-xs text-amber-700 dark:text-amber-300">Logo</div>
+                    </div>
+                  </div>
+                  {/* Title */}
+                  <div className="text-center mb-4">
+                    <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-3/4 mx-auto mb-2" />
+                    <div className="h-2 bg-slate-100 dark:bg-slate-800 rounded w-1/2 mx-auto" />
+                  </div>
+                  {/* Main Image */}
+                  <div className="flex-1 bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 rounded-lg flex items-center justify-center">
+                    <div className="text-center text-amber-600 dark:text-amber-400">
+                      <div className="w-16 h-16 mx-auto mb-2 rounded bg-white/50 dark:bg-black/20" />
+                      <p className="text-xs">Foto principal</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               {selectedTemplate.layout === "image-top" && (
                 <div className="h-full flex flex-col">
                   <div className="h-2/3 bg-gradient-to-br from-violet-200 to-purple-200 dark:from-violet-900 dark:to-purple-900 flex items-center justify-center">
