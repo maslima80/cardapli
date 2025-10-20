@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductCard, ProductCardSkeleton } from "../ProductCard";
 import { SectionHeader } from "../Section";
 import { Button } from "@/components/ui/button";
-import { Package, Plus } from "lucide-react";
+import { Package, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ProductGridBlockProps {
@@ -12,6 +12,7 @@ interface ProductGridBlockProps {
   preview?: boolean;
   userId?: string;
   userSlug?: string;
+  catalogSlug?: string;
 }
 
 export function ProductGridBlockV2Premium({ 
@@ -19,14 +20,27 @@ export function ProductGridBlockV2Premium({
   className = "", 
   preview = false, 
   userId,
-  userSlug 
+  userSlug,
+  catalogSlug
 }: ProductGridBlockProps) {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
 
   useEffect(() => {
     loadProducts();
   }, [data, userId]);
+
+  // Initialize scroll state after products load
+  useEffect(() => {
+    if (!loading && scrollContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  }, [loading, products]);
 
   const loadProducts = async () => {
     setLoading(true);
@@ -303,6 +317,7 @@ export function ProductGridBlockV2Premium({
               showTags={data.show_tags !== false}
               showButton={data.show_button !== false}
               userSlug={userSlug}
+              catalogSlug={catalogSlug}
             />
           ))}
         </div>
@@ -310,7 +325,15 @@ export function ProductGridBlockV2Premium({
         // Grade mode - horizontal swipe
         <div className="relative">
           <div 
+            ref={scrollContainerRef}
             className="flex overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory scroll-pt-4 pl-4 pr-4 cursor-grab active:cursor-grabbing"
+            onScroll={() => {
+              if (scrollContainerRef.current) {
+                const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+                setCanScrollLeft(scrollLeft > 0);
+                setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+              }
+            }}
             style={{ 
               scrollbarWidth: 'none', 
               msOverflowStyle: 'none',
@@ -346,15 +369,48 @@ export function ProductGridBlockV2Premium({
                     showTags={data.show_tags !== false}
                     showButton={data.show_button !== false}
                     userSlug={userSlug}
+                    catalogSlug={catalogSlug}
                   />
                 </div>
               ))}
             </div>
           </div>
           
+          {/* Desktop Navigation Arrows */}
+          {products.length > 2 && (
+            <>
+              {canScrollLeft && (
+                <button
+                  onClick={() => {
+                    if (scrollContainerRef.current) {
+                      scrollContainerRef.current.scrollBy({ left: -340, behavior: 'smooth' });
+                    }
+                  }}
+                  className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center rounded-full bg-white dark:bg-slate-900 shadow-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                  style={{ color: 'var(--accent-color, #8B5CF6)' }}
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+              )}
+              {canScrollRight && (
+                <button
+                  onClick={() => {
+                    if (scrollContainerRef.current) {
+                      scrollContainerRef.current.scrollBy({ left: 340, behavior: 'smooth' });
+                    }
+                  }}
+                  className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center rounded-full bg-white dark:bg-slate-900 shadow-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                  style={{ color: 'var(--accent-color, #8B5CF6)' }}
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+              )}
+            </>
+          )}
+          
           {/* Scroll hint */}
           {products.length > 1 && (
-            <p className="text-center text-xs text-slate-500 dark:text-slate-500 mt-2">
+            <p className="text-center text-xs text-slate-500 dark:text-slate-500 mt-2 md:hidden">
               ← Deslize para ver mais →
             </p>
           )}
