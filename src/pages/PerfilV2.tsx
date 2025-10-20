@@ -86,6 +86,8 @@ export default function PerfilV2() {
           whatsapp: data.whatsapp,
           phone: data.phone,
           email_public: data.email_public,
+          enable_whatsapp: data.enable_whatsapp !== false,
+          enable_phone: data.enable_phone === true,
           socials: data.socials || {},
           accent_color: data.accent_color || "#8B5CF6",
           background_color: data.background_color || null,
