@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, ArrowLeft, Package, Share2, ChevronLeft, ChevronRight } from "lucide-react";
+import { MessageCircle, ArrowLeft, Package, Share2, ChevronLeft, ChevronRight, Phone } from "lucide-react";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { ExternalMedia } from "@/components/product/ExternalMedia";
 import { VariantSelector } from "@/components/product/VariantSelector";
@@ -49,6 +49,9 @@ interface Profile {
   slug: string;
   business_name: string | null;
   whatsapp: string | null;
+  phone: string | null;
+  enable_whatsapp: boolean;
+  enable_phone: boolean;
 }
 
 export default function PublicProductPageNew() {
@@ -124,7 +127,7 @@ export default function PublicProductPageNew() {
       // Load profile
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
-        .select("id, slug, business_name, whatsapp")
+        .select("id, slug, business_name, whatsapp, phone, enable_whatsapp, enable_phone")
         .eq("slug", userSlug)
         .single();
 
@@ -214,6 +217,12 @@ export default function PublicProductPageNew() {
     setSelectedCombination(combination);
   };
 
+
+  const getPhoneUrl = () => {
+    if (!profile?.phone) return "#";
+    const cleanPhone = profile.phone.replace(/\D/g, '');
+    return `tel:+55${cleanPhone}`;
+  };
 
   const getWhatsAppUrl = () => {
     if (!product || !profile) return "#";
@@ -618,27 +627,85 @@ export default function PublicProductPageNew() {
         </section>
       )}
 
-      {/* Sticky WhatsApp CTA */}
+      {/* Sticky Contact CTA */}
       <div className="fixed inset-x-0 bottom-0 bg-background/95 backdrop-blur border-t border-border z-40 w-full">
         <div className="w-full max-w-6xl mx-auto px-4 py-4 pb-[max(env(safe-area-inset-bottom),16px)] min-w-0">
-          <a
-            href={getWhatsAppUrl()}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block"
-          >
-            <Button 
-              size="lg" 
-              className="w-full gap-2 bg-green-600 hover:bg-green-700 text-white"
-              disabled={selectedVariant?.is_available === false}
-            >
-              <MessageCircle className="w-5 h-5" />
-              {selectedVariant?.is_available === false 
-                ? "Produto indisponível"
-                : "Entrar em contato no WhatsApp"
-              }
-            </Button>
-          </a>
+          {(() => {
+            const showWhatsApp = profile?.enable_whatsapp !== false && profile?.whatsapp;
+            const showPhone = profile?.enable_phone === true && profile?.phone;
+            const isUnavailable = selectedVariant?.is_available === false;
+            
+            // Both enabled - show two buttons side by side
+            if (showWhatsApp && showPhone) {
+              return (
+                <div className="grid grid-cols-2 gap-3">
+                  <a
+                    href={getPhoneUrl()}
+                    className="block"
+                  >
+                    <Button 
+                      size="lg" 
+                      className="w-full gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                      disabled={isUnavailable}
+                    >
+                      <Phone className="w-5 h-5" />
+                      <span className="hidden sm:inline">Ligar</span>
+                    </Button>
+                  </a>
+                  <a
+                    href={getWhatsAppUrl()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block"
+                  >
+                    <Button 
+                      size="lg" 
+                      className="w-full gap-2 bg-green-600 hover:bg-green-700 text-white"
+                      disabled={isUnavailable}
+                    >
+                      <MessageCircle className="w-5 h-5" />
+                      <span className="hidden sm:inline">WhatsApp</span>
+                    </Button>
+                  </a>
+                </div>
+              );
+            }
+            
+            // Only phone enabled
+            if (showPhone) {
+              return (
+                <a href={getPhoneUrl()} className="block">
+                  <Button 
+                    size="lg" 
+                    className="w-full gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                    disabled={isUnavailable}
+                  >
+                    <Phone className="w-5 h-5" />
+                    {isUnavailable ? "Produto indisponível" : "Ligar"}
+                  </Button>
+                </a>
+              );
+            }
+            
+            // Only WhatsApp or default
+            return (
+              <a
+                href={getWhatsAppUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block"
+              >
+                <Button 
+                  size="lg" 
+                  className="w-full gap-2 bg-green-600 hover:bg-green-700 text-white"
+                  disabled={isUnavailable}
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  {isUnavailable ? "Produto indisponível" : "WhatsApp"}
+                </Button>
+              </a>
+            );
+          })()}
         </div>
       </div>
 
