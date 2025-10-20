@@ -100,9 +100,16 @@ export const BlockRenderer = ({ block, profile, userId }: BlockRendererProps) =>
   if (!content) return null;
 
   // Determine if this is a full-bleed block (like image or video)
+  // For cover blocks: logo-title-image, image-top, and full-background are full-bleed
+  // carousel-top is NOT full-bleed (has padding and rounded corners)
   const isFullBleed = (block.type === "image" && block.data?.width === "full") || 
                      (block.type === "video" && block.data?.layout === "full") || 
-                     (block.type === "cover" && block.data?.layout === "full");
+                     (block.type === "cover" && (
+                       block.data?.layout === "logo-title-image" || 
+                       block.data?.layout === "image-top" || 
+                       block.data?.layout === "full-background" ||
+                       block.data?.layout === "full" // legacy
+                     ));
                      
   // Get the appropriate background for this block
   const background = getBlockBackground(block.type, block.data);

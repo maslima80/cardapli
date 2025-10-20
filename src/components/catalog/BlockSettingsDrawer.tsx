@@ -192,7 +192,7 @@ export const BlockSettingsDrawer = ({
               <p className="text-xs text-muted-foreground">
                 {currentLayout === "logo-title-image" && "Logo no topo, título e foto principal"}
                 {currentLayout === "image-top" && "Imagem grande com texto embaixo"}
-                {currentLayout === "carousel-top" && "3 fotos em grade com texto embaixo"}
+                {currentLayout === "carousel-top" && "3 fotos deslizáveis com imagem central em destaque"}
                 {currentLayout === "full-background" && "Foto de fundo com texto sobreposto"}
               </p>
             </div>
@@ -204,7 +204,7 @@ export const BlockSettingsDrawer = ({
                 <p className="text-xs text-muted-foreground">
                   {currentLayout === "logo-title-image" && "Aparece no topo da capa"}
                   {currentLayout === "image-top" && "Aparece acima do título"}
-                  {currentLayout === "carousel-top" && "Aparece acima do título"}
+                  {currentLayout === "carousel-top" && "Aparece no topo, acima das fotos"}
                   {currentLayout === "full-background" && "Aparece sobre a imagem"}
                 </p>
               </div>
@@ -281,7 +281,7 @@ export const BlockSettingsDrawer = ({
                   );
                 })}
                 <p className="text-xs text-muted-foreground">
-                  💡 As 3 fotos aparecerão lado a lado no topo
+                  💡 Foto central em destaque com laterais visíveis para indicar scroll
                 </p>
               </div>
             ) : (

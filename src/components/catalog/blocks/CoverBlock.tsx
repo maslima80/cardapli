@@ -38,11 +38,11 @@ export const CoverBlock = ({ data, preview = false }: CoverBlockProps) => {
   // Legacy layouts
   const isFullBleed = layout === "full";
 
-  // Logo + Title + Image Layout (Borcello style)
+  // Logo + Title + Image Layout (Borcello style) - FULL BLEED
   if (layout === "logo-title-image") {
     return (
       <div className="w-full bg-white dark:bg-slate-950">
-        <div className="p-6 sm:p-8 flex flex-col items-center text-center">
+        <div className="px-6 sm:px-8 pt-6 sm:pt-8 pb-0 flex flex-col items-center text-center">
           {/* Logo - Premium presentation with glow effect */}
           {data.use_profile_logo && data.logo_url && (
             <div className="relative group mb-4">
@@ -72,7 +72,7 @@ export const CoverBlock = ({ data, preview = false }: CoverBlockProps) => {
         {data.image_url && (
           <div className="aspect-square w-full">
             <img
-              src={getOptimizedImageUrl(data.image_url, false)}
+              src={getOptimizedImageUrl(data.image_url, true)}
               alt={data.title || "Cover"}
               className="w-full h-full object-cover"
             />
@@ -82,7 +82,7 @@ export const CoverBlock = ({ data, preview = false }: CoverBlockProps) => {
     );
   }
 
-  // Image Top Layout
+  // Image Top Layout - FULL BLEED
   if (layout === "image-top") {
     return (
       <div className="w-full bg-white dark:bg-slate-950">
@@ -90,7 +90,7 @@ export const CoverBlock = ({ data, preview = false }: CoverBlockProps) => {
         {data.image_url && (
           <div className="aspect-square w-full">
             <img
-              src={getOptimizedImageUrl(data.image_url, false)}
+              src={getOptimizedImageUrl(data.image_url, true)}
               alt={data.title || "Cover"}
               className="w-full h-full object-cover"
             />
@@ -98,7 +98,7 @@ export const CoverBlock = ({ data, preview = false }: CoverBlockProps) => {
         )}
         
         {/* Text Content */}
-        <div className="p-6 sm:p-8 flex flex-col items-center text-center">
+        <div className="px-6 sm:px-8 pt-6 pb-6 sm:pb-8 flex flex-col items-center text-center">
           {/* Logo - Premium presentation */}
           {data.use_profile_logo && data.logo_url && (
             <div className="relative group mb-4">
@@ -125,27 +125,48 @@ export const CoverBlock = ({ data, preview = false }: CoverBlockProps) => {
     );
   }
 
-  // Carousel Top Layout (3 images) - Infinite swipeable carousel
+  // Carousel Top Layout (3 images) - Center image with side previews
   if (layout === "carousel-top") {
     const images = data.images || [];
-    // Create infinite loop by repeating images multiple times
-    const infiniteImages = images.length > 0 ? [...images, ...images, ...images, ...images] : [];
     
     return (
       <div className="w-full bg-white dark:bg-slate-950 overflow-hidden">
-        {/* Image Carousel - Swipeable with center focus */}
+        {/* Logo at top if enabled */}
+        {data.use_profile_logo && data.logo_url && (
+          <div className="pt-6 pb-4 flex justify-center">
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <img
+                src={data.logo_url}
+                alt="Logo"
+                className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover shadow-xl ring-4 ring-white/10 dark:ring-slate-800/50"
+              />
+            </div>
+          </div>
+        )}
+        
+        {/* Image Carousel - Center image with side previews */}
         {images.length > 0 && (
-          <div className="relative w-full">
-            <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide px-[10%] py-6">
-              {infiniteImages.map((img, index) => (
+          <div className="relative w-full py-6">
+            <div 
+              className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide px-[15%] sm:px-[20%]"
+              ref={(el) => {
+                // Scroll to center image (index 1) on mount
+                if (el && images.length >= 2) {
+                  const imageWidth = el.scrollWidth / images.length;
+                  el.scrollLeft = imageWidth;
+                }
+              }}
+            >
+              {images.map((img, index) => (
                 <div 
                   key={index} 
-                  className="flex-shrink-0 w-[80%] aspect-square snap-center"
+                  className="flex-shrink-0 w-[70%] sm:w-[60%] aspect-[4/5] snap-center"
                 >
                   <img
                     src={getOptimizedImageUrl(img, false)}
-                    alt={`Image ${(index % images.length) + 1}`}
-                    className="w-full h-full object-cover rounded-3xl shadow-2xl"
+                    alt={`Image ${index + 1}`}
+                    className="w-full h-full object-cover rounded-2xl shadow-2xl"
                   />
                 </div>
               ))}
@@ -154,25 +175,13 @@ export const CoverBlock = ({ data, preview = false }: CoverBlockProps) => {
         )}
         
         {/* Text Content */}
-        <div className="p-8 sm:p-12 flex flex-col items-center text-center">
-          {/* Logo - Premium presentation */}
-          {data.use_profile_logo && data.logo_url && (
-            <div className="relative group mb-6">
-              <div className="absolute inset-0 bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <img
-                src={data.logo_url}
-                alt="Logo"
-                className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover shadow-xl ring-4 ring-white/10 dark:ring-slate-800/50"
-              />
-            </div>
-          )}
-          
-          <h1 className="text-3xl sm:text-4xl font-bold mb-3" style={{ color: 'var(--theme-foreground)', fontFamily: 'var(--font-heading, inherit)' }}>
+        <div className="px-6 sm:px-8 pb-8 flex flex-col items-center text-center">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-3" style={{ color: 'var(--theme-foreground)', fontFamily: 'var(--font-heading, inherit)' }}>
             {data.title || "Novo Catálogo"}
           </h1>
           
           {data.subtitle && (
-            <p className="text-lg max-w-2xl leading-relaxed" style={{ color: 'var(--theme-muted)', fontFamily: 'var(--font-body, inherit)' }}>
+            <p className="text-base sm:text-lg max-w-2xl leading-relaxed" style={{ color: 'var(--theme-muted)', fontFamily: 'var(--font-body, inherit)' }}>
               {data.subtitle}
             </p>
           )}
@@ -181,7 +190,7 @@ export const CoverBlock = ({ data, preview = false }: CoverBlockProps) => {
     );
   }
 
-  // Full Background Layout
+  // Full Background Layout - FULL BLEED
   if (layout === "full-background") {
     return (
       <div className="relative w-full aspect-[3/4] sm:aspect-square overflow-hidden">
@@ -189,7 +198,7 @@ export const CoverBlock = ({ data, preview = false }: CoverBlockProps) => {
         {data.image_url && (
           <div
             className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${getOptimizedImageUrl(data.image_url, false)})` }}
+            style={{ backgroundImage: `url(${getOptimizedImageUrl(data.image_url, true)})` }}
           />
         )}
         
@@ -228,8 +237,7 @@ export const CoverBlock = ({ data, preview = false }: CoverBlockProps) => {
   return (
     <div className={cn(
       "relative w-full h-[60vh] min-h-[400px] overflow-hidden",
-      !isFullBleed && "rounded-2xl",
-      isFullBleed && "mx-[-1.5rem] sm:mx-[-1.5rem] w-[calc(100%+3rem)]"
+      !isFullBleed && "rounded-2xl"
     )}>
       {/* Background Image */}
       {data.image_url && (

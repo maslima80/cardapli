@@ -43,7 +43,14 @@ export const BlockRendererPremium = ({
   const useAltBackground = false;
   
   // Determine if this is a full-bleed block (no container padding)
-  const isFullBleed = (block.type === "cover" && block.data?.layout === "full") ||
+  // For cover blocks: logo-title-image, image-top, and full-background are full-bleed
+  // carousel-top is NOT full-bleed (has padding and rounded corners)
+  const isFullBleed = (block.type === "cover" && (
+                       block.data?.layout === "logo-title-image" || 
+                       block.data?.layout === "image-top" || 
+                       block.data?.layout === "full-background" ||
+                       block.data?.layout === "full" // legacy
+                     )) ||
                      (block.type === "image" && block.data?.width === "full") ||
                      (block.type === "video" && block.data?.layout === "full");
 
