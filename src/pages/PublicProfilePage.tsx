@@ -25,7 +25,7 @@ const PublicProfilePage = () => {
 
   useEffect(() => {
     loadProfile();
-  }, [userSlug]);
+  }, [userSlug, category, tag]);
 
   const loadProfile = async () => {
     try {

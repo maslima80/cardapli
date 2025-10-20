@@ -31,7 +31,7 @@ const PublicCatalogPage = () => {
 
   useEffect(() => {
     loadCatalog();
-  }, [userSlug, catalogSlug]);
+  }, [userSlug, catalogSlug, category, tag]);
 
   const loadCatalog = async () => {
     try {
