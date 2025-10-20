@@ -104,17 +104,24 @@ export function LocationBlockPremium({ data, profile }: LocationBlockProps) {
       try {
         const selectedLocationIds = JSON.parse(selectedIdsString);
         
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          setLoading(false);
-          return;
-        }
+        // Use profile prop if available (public view), otherwise get authenticated user
+        let profileData = profile;
         
-        const { data: profileData } = await supabase
-          .from("profiles")
-          .select("locations")
-          .eq("id", user.id)
-          .single();
+        if (!profileData) {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) {
+            setLoading(false);
+            return;
+          }
+          
+          const { data: fetchedProfile } = await supabase
+            .from("profiles")
+            .select("locations")
+            .eq("id", user.id)
+            .single();
+          
+          profileData = fetchedProfile;
+        }
         
         if (profileData?.locations && Array.isArray(profileData.locations)) {
           const locationsWithIds = profileData.locations
@@ -141,7 +148,7 @@ export function LocationBlockPremium({ data, profile }: LocationBlockProps) {
     }
     
     fetchProfileLocations();
-  }, [selectedIdsString]);
+  }, [selectedIdsString, profile]);
 
   if (loading) {
     return (
