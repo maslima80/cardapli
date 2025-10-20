@@ -220,7 +220,8 @@ export default function PublicProductPageNew() {
 
   const getPhoneUrl = () => {
     if (!profile?.phone) return "#";
-    const cleanPhone = profile.phone.replace(/\D/g, '');
+    const phoneStr = String(profile.phone);
+    const cleanPhone = phoneStr.replace(/\D/g, '');
     return `tel:+55${cleanPhone}`;
   };
 
