@@ -14,6 +14,7 @@ import { ProductGridBlockSettings } from "./ProductGridBlockSettings";
 import { LocationBlockSettings } from "./settings/LocationBlockSettings";
 import { CategoryGridBlockSettings } from "./settings/CategoryGridBlockSettings";
 import { TagGridBlockSettings } from "./settings/TagGridBlockSettings";
+import { NavigationSettings } from "./NavigationSettings";
 import { CatalogosBlockSettings } from "./blocks/CatalogosBlockSettings";
 import { ExternalLinksBlockSettings } from "./settings/ExternalLinksBlockSettings";
 import { ProfileHeaderBlockSettings } from "./blocks/ProfileHeaderBlockSettings";
@@ -230,46 +231,14 @@ export const BlockSettingsDrawer = ({
               />
             </div>
             
-            {/* Navigation Label */}
+            {/* Navigation Settings */}
             {showAnchorField && (
-              <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
-                <div className="space-y-2">
-                  <Label>Título na navegação (opcional)</Label>
-                  <Input
-                    value={block.navigation_label || ""}
-                    onChange={(e) => {
-                      const navLabel = e.target.value;
-                      if (onUpdate) {
-                        onUpdate({ 
-                          ...block, 
-                          navigation_label: navLabel,
-                          anchor_slug: navLabel ? generateSlug(navLabel) : (formData.title ? generateSlug(formData.title) : "")
-                        });
-                      }
-                    }}
-                    placeholder={formData.title || "Ex: Produtos"}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Texto curto que aparece no menu de navegação. Se vazio, usa o título do bloco.
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">ID da seção (gerado automaticamente)</Label>
-                  <Input
-                    value={block.anchor_slug || ""}
-                    onChange={(e) => {
-                      if (onUpdate) {
-                        onUpdate({ ...block, anchor_slug: generateSlug(e.target.value) });
-                      }
-                    }}
-                    placeholder="id-da-secao"
-                    className="text-xs font-mono"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    URL amigável para links diretos (editável)
-                  </p>
-                </div>
-              </div>
+              <NavigationSettings
+                block={block}
+                onUpdate={onUpdate}
+                blockTitle={formData.title}
+                generateSlug={generateSlug}
+              />
             )}
 
             {/* Subtitle */}
@@ -347,18 +316,12 @@ export const BlockSettingsDrawer = ({
             </div>
             
             {showAnchorField && formData.title && (
-              <div className="space-y-2">
-                <Label>ID da seção</Label>
-                <Input
-                  value={block.anchor_slug || ""}
-                  onChange={(e) => {
-                    if (onUpdate) {
-                      onUpdate({ ...block, anchor_slug: generateSlug(e.target.value) });
-                    }
-                  }}
-                  placeholder="id-da-secao"
-                />
-              </div>
+              <NavigationSettings
+                block={block}
+                onUpdate={onUpdate}
+                blockTitle={formData.title}
+                generateSlug={generateSlug}
+              />
             )}
             <div className="space-y-2">
               <Label>Corpo do Texto</Label>
@@ -552,18 +515,12 @@ export const BlockSettingsDrawer = ({
             </div>
             
             {showAnchorField && formData.title && (
-              <div className="space-y-2">
-                <Label>ID da seção</Label>
-                <Input
-                  value={block.anchor_slug || ""}
-                  onChange={(e) => {
-                    if (onUpdate) {
-                      onUpdate({ ...block, anchor_slug: generateSlug(e.target.value) });
-                    }
-                  }}
-                  placeholder="id-da-secao"
-                />
-              </div>
+              <NavigationSettings
+                block={block}
+                onUpdate={onUpdate}
+                blockTitle={formData.title}
+                generateSlug={generateSlug}
+              />
             )}
             {/* Autoplay option removed for V1, will be added back in V2 */}
           </>
@@ -895,18 +852,12 @@ export const BlockSettingsDrawer = ({
             </div>
 
             {showAnchorField && (
-              <div className="space-y-2">
-                <Label>ID da seção</Label>
-                <Input
-                  value={block.anchor_slug || ""}
-                  onChange={(e) => {
-                    if (onUpdate) {
-                      onUpdate({ ...block, anchor_slug: generateSlug(e.target.value) });
-                    }
-                  }}
-                  placeholder="id-da-secao"
-                />
-              </div>
+              <NavigationSettings
+                block={block}
+                onUpdate={onUpdate}
+                blockTitle={formData.title}
+                generateSlug={generateSlug}
+              />
             )}
 
             <div className="space-y-3">
@@ -994,18 +945,12 @@ export const BlockSettingsDrawer = ({
             </div>
 
             {showAnchorField && (
-              <div className="space-y-2">
-                <Label>ID da seção</Label>
-                <Input
-                  value={block.anchor_slug || ""}
-                  onChange={(e) => {
-                    if (onUpdate) {
-                      onUpdate({ ...block, anchor_slug: generateSlug(e.target.value) });
-                    }
-                  }}
-                  placeholder="id-da-secao"
-                />
-              </div>
+              <NavigationSettings
+                block={block}
+                onUpdate={onUpdate}
+                blockTitle={formData.title}
+                generateSlug={generateSlug}
+              />
             )}
 
             <div className="space-y-3">
@@ -1088,18 +1033,12 @@ export const BlockSettingsDrawer = ({
             </div>
 
             {showAnchorField && (
-              <div className="space-y-2">
-                <Label>ID da seção</Label>
-                <Input
-                  value={block.anchor_slug || ""}
-                  onChange={(e) => {
-                    if (onUpdate) {
-                      onUpdate({ ...block, anchor_slug: generateSlug(e.target.value) });
-                    }
-                  }}
-                  placeholder="id-da-secao"
-                />
-              </div>
+              <NavigationSettings
+                block={block}
+                onUpdate={onUpdate}
+                blockTitle={formData.title}
+                generateSlug={generateSlug}
+              />
             )}
             
             <div className="space-y-2">
@@ -1266,18 +1205,12 @@ export const BlockSettingsDrawer = ({
             </div>
             
             {showAnchorField && (
-              <div className="space-y-2">
-                <Label>ID da seção</Label>
-                <Input
-                  value={block.anchor_slug || ""}
-                  onChange={(e) => {
-                    if (onUpdate) {
-                      onUpdate({ ...block, anchor_slug: generateSlug(e.target.value) });
-                    }
-                  }}
-                  placeholder="id-da-secao"
-                />
-              </div>
+              <NavigationSettings
+                block={block}
+                onUpdate={onUpdate}
+                blockTitle={formData.title}
+                generateSlug={generateSlug}
+              />
             )}
             
             <div className="space-y-2">
@@ -1632,18 +1565,12 @@ export const BlockSettingsDrawer = ({
             </div>
 
             {showAnchorField && (
-              <div className="space-y-2">
-                <Label>ID da seção</Label>
-                <Input
-                  value={block.anchor_slug || ""}
-                  onChange={(e) => {
-                    if (onUpdate) {
-                      onUpdate({ ...block, anchor_slug: generateSlug(e.target.value) });
-                    }
-                  }}
-                  placeholder="id-da-secao"
-                />
-              </div>
+              <NavigationSettings
+                block={block}
+                onUpdate={onUpdate}
+                blockTitle={formData.title}
+                generateSlug={generateSlug}
+              />
             )}
             
             <div className="space-y-2">
