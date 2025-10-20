@@ -72,25 +72,39 @@ export const CatalogosBlockPremium = ({ data, profile }: CatalogosBlockProps) =>
     try {
       // Only show catalogs that are in catalog_ids (manual selection only)
       if (!data.catalog_ids || data.catalog_ids.length === 0) {
+        console.log('CatalogosBlock: No catalog_ids provided');
         setCatalogs([]);
         setLoading(false);
         return;
       }
 
+      console.log('CatalogosBlock: Loading catalogs', { 
+        catalog_ids: data.catalog_ids, 
+        user_id: profile.id 
+      });
+
       const { data: catalogsData, error } = await supabase
         .from("catalogs")
         .select("*")
         .eq("user_id", profile.id)
-        .in("status", ["public", "unlisted"])
         .in("id", data.catalog_ids);
+
+      console.log('CatalogosBlock: Query result', { catalogsData, error });
 
       if (error) {
         console.error("Error loading catalogs:", error);
         setCatalogs([]);
       } else {
+        // Filter for public/unlisted catalogs only
+        const publicCatalogs = catalogsData?.filter(c => 
+          c.status === 'public' || c.status === 'unlisted' || c.status === 'publicado'
+        ) || [];
+        
+        console.log('CatalogosBlock: Filtered catalogs', publicCatalogs);
+        
         // Maintain the order from catalog_ids
         const orderedCatalogs = data.catalog_ids
-          .map(id => catalogsData?.find(c => c.id === id))
+          .map(id => publicCatalogs.find(c => c.id === id))
           .filter(Boolean) as Catalog[];
         
         setCatalogs(orderedCatalogs);
