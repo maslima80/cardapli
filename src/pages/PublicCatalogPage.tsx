@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useSearchParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { BlockRendererPremium } from "@/components/catalog/BlockRendererPremium";
 import { SectionNavigation } from "@/components/catalog/SectionNavigation";
@@ -282,12 +283,42 @@ const PublicCatalogPage = () => {
 
   const showSectionNav = catalog?.settings?.show_section_nav && sections.length > 0;
 
+  // Prepare Open Graph data
+  const ogTitle = catalog?.name ? `${catalog.name} — ${profile?.business_name || userSlug}` : profile?.business_name || userSlug || '';
+  const ogDescription = catalog?.description || `Catálogo de ${profile?.business_name || userSlug}`;
+  const ogImage = catalog?.cover_image || '';
+  const ogUrl = window.location.href;
+
   // Normal catalog view
   return (
     <SimpleThemeProvider 
       userSlug={userSlug!}
       catalogThemeOverrides={catalog?.theme_overrides}
     >
+      {/* Open Graph Meta Tags for Rich Link Previews */}
+      <Helmet>
+        <title>{ogTitle}</title>
+        <meta name="description" content={ogDescription} />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={ogUrl} />
+        <meta property="og:title" content={ogTitle} />
+        <meta property="og:description" content={ogDescription} />
+        {ogImage && <meta property="og:image" content={ogImage} />}
+        {ogImage && <meta property="og:image:width" content="1200" />}
+        {ogImage && <meta property="og:image:height" content="630" />}
+        <meta property="og:site_name" content="Cardapli" />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content={ogUrl} />
+        <meta name="twitter:title" content={ogTitle} />
+        <meta name="twitter:description" content={ogDescription} />
+        {ogImage && <meta name="twitter:image" content={ogImage} />}
+      </Helmet>
+
+
       {/* Header with back navigation */}
       <div className="border-b sticky top-0 z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur" style={{ borderColor: 'var(--theme-surface)' }}>
         <div className="container max-w-6xl mx-auto px-4 py-3">

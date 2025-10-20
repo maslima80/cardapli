@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -362,11 +363,49 @@ export default function PublicProductPageNew() {
   const photos = Array.isArray(product.photos) ? product.photos : [];
   const hasVariants = variantsData.options.length > 0;
 
+  // Prepare Open Graph data
+  const ogImage = photos[0]?.url || photos[0]?.image_url || '';
+  const ogTitle = `${product.title} — ${displayName}`;
+  const ogDescription = product.description || 
+    (product.price && !product.price_hidden ? `R$ ${product.price}` : `Produto de ${displayName}`);
+  const ogUrl = window.location.href;
+
   return (
     <SimpleThemeProvider 
       userSlug={userSlug!}
       catalogThemeOverrides={catalog?.theme_overrides}
     >
+      {/* Open Graph Meta Tags for Rich Link Previews */}
+      <Helmet>
+        <title>{ogTitle}</title>
+        <meta name="description" content={ogDescription} />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="product" />
+        <meta property="og:url" content={ogUrl} />
+        <meta property="og:title" content={ogTitle} />
+        <meta property="og:description" content={ogDescription} />
+        {ogImage && <meta property="og:image" content={ogImage} />}
+        {ogImage && <meta property="og:image:width" content="1200" />}
+        {ogImage && <meta property="og:image:height" content="630" />}
+        <meta property="og:site_name" content="Cardapli" />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content={ogUrl} />
+        <meta name="twitter:title" content={ogTitle} />
+        <meta name="twitter:description" content={ogDescription} />
+        {ogImage && <meta name="twitter:image" content={ogImage} />}
+        
+        {/* Product specific */}
+        {product.price && !product.price_hidden && (
+          <>
+            <meta property="product:price:amount" content={product.price} />
+            <meta property="product:price:currency" content="BRL" />
+          </>
+        )}
+      </Helmet>
+
       <div className="pb-28 md:pb-8 w-full overflow-x-hidden bg-white dark:bg-slate-950">
       {/* Header */}
       <header className="backdrop-blur border-b sticky top-0 z-40 w-full bg-white/95 dark:bg-slate-950/95" style={{ borderColor: 'var(--theme-surface)' }}>
