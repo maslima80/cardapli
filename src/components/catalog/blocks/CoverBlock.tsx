@@ -125,23 +125,31 @@ export const CoverBlock = ({ data, preview = false }: CoverBlockProps) => {
     );
   }
 
-  // Carousel Top Layout (3 images)
+  // Carousel Top Layout (3 images) - Infinite swipeable carousel
   if (layout === "carousel-top") {
     const images = data.images || [];
+    // Create infinite loop by repeating images multiple times
+    const infiniteImages = images.length > 0 ? [...images, ...images, ...images, ...images] : [];
+    
     return (
-      <div className="w-full bg-white dark:bg-slate-950 rounded-2xl overflow-hidden">
-        {/* Image Carousel */}
+      <div className="w-full bg-white dark:bg-slate-950 overflow-hidden">
+        {/* Image Carousel - Swipeable with center focus */}
         {images.length > 0 && (
-          <div className="grid grid-cols-3 gap-2 p-4">
-            {images.slice(0, 3).map((img, index) => (
-              <div key={index} className="aspect-square rounded-lg overflow-hidden">
-                <img
-                  src={getOptimizedImageUrl(img, false)}
-                  alt={`Image ${index + 1}`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ))}
+          <div className="relative w-full">
+            <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide px-[10%] py-6">
+              {infiniteImages.map((img, index) => (
+                <div 
+                  key={index} 
+                  className="flex-shrink-0 w-[80%] aspect-square snap-center"
+                >
+                  <img
+                    src={getOptimizedImageUrl(img, false)}
+                    alt={`Image ${(index % images.length) + 1}`}
+                    className="w-full h-full object-cover rounded-3xl shadow-2xl"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         )}
         
@@ -185,29 +193,29 @@ export const CoverBlock = ({ data, preview = false }: CoverBlockProps) => {
           />
         )}
         
-        {/* Dark Overlay */}
-        <div className="absolute inset-0 bg-black/50" />
+        {/* Gradient Overlay - Stronger at bottom */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
 
-        {/* Content */}
-        <div className="relative h-full flex flex-col justify-center items-center text-center p-8 sm:p-12">
+        {/* Content - Positioned at bottom, centered */}
+        <div className="relative h-full flex flex-col justify-end items-center text-center p-8 sm:p-12">
           {/* Logo - Premium presentation on dark background */}
           {data.use_profile_logo && data.logo_url && (
-            <div className="relative group mb-6">
+            <div className="relative group mb-4">
               <div className="absolute inset-0 bg-gradient-to-br from-violet-500/30 to-fuchsia-500/30 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <img
                 src={data.logo_url}
                 alt="Logo"
-                className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover shadow-2xl ring-4 ring-white/20"
+                className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover shadow-2xl ring-4 ring-white/20"
               />
             </div>
           )}
           
-          <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4 drop-shadow-lg" style={{ fontFamily: 'var(--font-heading, inherit)' }}>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-3 drop-shadow-lg" style={{ fontFamily: 'var(--font-heading, inherit)' }}>
             {data.title || "Novo Catálogo"}
           </h1>
           
           {data.subtitle && (
-            <p className="text-lg sm:text-xl text-white/90 max-w-2xl drop-shadow-md leading-relaxed" style={{ fontFamily: 'var(--font-body, inherit)' }}>
+            <p className="text-base sm:text-lg text-white/90 max-w-2xl drop-shadow-md leading-relaxed" style={{ fontFamily: 'var(--font-body, inherit)' }}>
               {data.subtitle}
             </p>
           )}
