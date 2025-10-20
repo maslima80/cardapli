@@ -230,22 +230,45 @@ export const BlockSettingsDrawer = ({
               />
             </div>
             
-            {/* Anchor Slug */}
+            {/* Navigation Label */}
             {showAnchorField && (
-              <div className="space-y-2">
-                <Label>ID da seção (para navegação)</Label>
-                <Input
-                  value={block.anchor_slug || ""}
-                  onChange={(e) => {
-                    if (onUpdate) {
-                      onUpdate({ ...block, anchor_slug: generateSlug(e.target.value) });
-                    }
-                  }}
-                  placeholder="id-da-secao"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Usado para criar links diretos para esta seção
-                </p>
+              <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
+                <div className="space-y-2">
+                  <Label>Título na navegação (opcional)</Label>
+                  <Input
+                    value={block.navigation_label || ""}
+                    onChange={(e) => {
+                      const navLabel = e.target.value;
+                      if (onUpdate) {
+                        onUpdate({ 
+                          ...block, 
+                          navigation_label: navLabel,
+                          anchor_slug: navLabel ? generateSlug(navLabel) : (formData.title ? generateSlug(formData.title) : "")
+                        });
+                      }
+                    }}
+                    placeholder={formData.title || "Ex: Produtos"}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Texto curto que aparece no menu de navegação. Se vazio, usa o título do bloco.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">ID da seção (gerado automaticamente)</Label>
+                  <Input
+                    value={block.anchor_slug || ""}
+                    onChange={(e) => {
+                      if (onUpdate) {
+                        onUpdate({ ...block, anchor_slug: generateSlug(e.target.value) });
+                      }
+                    }}
+                    placeholder="id-da-secao"
+                    className="text-xs font-mono"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    URL amigável para links diretos (editável)
+                  </p>
+                </div>
               </div>
             )}
 

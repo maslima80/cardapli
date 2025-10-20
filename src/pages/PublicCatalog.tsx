@@ -99,10 +99,10 @@ const PublicCatalog = () => {
 
   // Build sections for navigation
   const sections = blocks
-    .filter((block) => block.anchor_slug && block.data?.title)
+    .filter((block) => block.anchor_slug && (block.navigation_label || block.data?.title))
     .map((block) => ({
       id: block.id,
-      title: block.data.title,
+      title: block.navigation_label || block.data.title,
       anchor: block.anchor_slug,
     }));
 
