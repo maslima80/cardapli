@@ -17,7 +17,8 @@ export default function QuickCatalogCreate() {
   const [description, setDescription] = useState("");
   const [coverImage, setCoverImage] = useState("");
   const [coverLayout, setCoverLayout] = useState<"logo-title-image" | "image-top" | "carousel-top" | "full-background">("image-top");
-  const [layout, setLayout] = useState<"grid" | "list">("grid");
+  const [showLogo, setShowLogo] = useState(false);
+  const [layout, setLayout] = useState<"grid" | "list" | "grid_cinematic">("grid");
 
   useEffect(() => {
     // Get selected products from sessionStorage
@@ -126,7 +127,7 @@ export default function QuickCatalogCreate() {
         subtitle: description.trim() || '',
         layout: coverLayout,
         align: 'center',
-        use_profile_logo: coverLayout === 'logo-title-image',
+        use_profile_logo: showLogo,
       };
 
       // Add images based on layout
@@ -342,6 +343,32 @@ export default function QuickCatalogCreate() {
               </p>
             </div>
 
+            {/* Show Logo Toggle */}
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="space-y-0.5">
+                <Label>Mostrar logo do perfil</Label>
+                <p className="text-xs text-muted-foreground">
+                  {coverLayout === "logo-title-image" && "Aparece no topo da capa"}
+                  {coverLayout === "image-top" && "Aparece acima do título"}
+                  {coverLayout === "carousel-top" && "Aparece no topo, acima das fotos"}
+                  {coverLayout === "full-background" && "Aparece sobre a imagem"}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowLogo(!showLogo)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  showLogo ? "bg-primary" : "bg-muted"
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    showLogo ? "translate-x-6" : "translate-x-1"
+                  }`}
+                />
+              </button>
+            </div>
+
             {/* Cover Image Preview */}
             {coverImage && (
               <div className="space-y-2">
@@ -359,43 +386,96 @@ export default function QuickCatalogCreate() {
               </div>
             )}
 
-            {/* Layout */}
+            {/* Product Grid Layout */}
             <div className="space-y-3">
               <Label>Layout dos produtos</Label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-3">
+                {/* Grid */}
                 <button
                   type="button"
                   onClick={() => setLayout("grid")}
-                  className={`p-4 rounded-lg border-2 transition-all ${
+                  className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
                     layout === "grid"
                       ? "border-primary bg-primary/5"
                       : "border-border hover:border-primary/50"
                   }`}
                 >
-                  <div className="space-y-2">
-                    <div className="grid grid-cols-2 gap-1">
-                      <div className="aspect-square bg-muted rounded"></div>
-                      <div className="aspect-square bg-muted rounded"></div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 mt-1">
+                      <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="7" height="7" rx="1" />
+                        <rect x="14" y="3" width="7" height="7" rx="1" />
+                        <rect x="3" y="14" width="7" height="7" rx="1" />
+                        <rect x="14" y="14" width="7" height="7" rx="1" />
+                      </svg>
                     </div>
-                    <p className="text-sm font-medium">Grade</p>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold mb-1">Grade</p>
+                      <p className="text-xs text-muted-foreground">
+                        Deslize horizontal com detalhes completos
+                      </p>
+                    </div>
                   </div>
                 </button>
 
+                {/* Cinematic */}
+                <button
+                  type="button"
+                  onClick={() => setLayout("grid_cinematic")}
+                  className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
+                    layout === "grid_cinematic"
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:border-primary/50"
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 mt-1">
+                      <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect x="2" y="3" width="20" height="14" rx="2" />
+                        <path d="M8 21h8M12 17v4" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="text-sm font-semibold">Grade Cinemática</p>
+                        <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
+                          Premium
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Grade visual só com fotos (2 colunas mobile, 3 desktop)
+                      </p>
+                    </div>
+                  </div>
+                </button>
+
+                {/* List */}
                 <button
                   type="button"
                   onClick={() => setLayout("list")}
-                  className={`p-4 rounded-lg border-2 transition-all ${
+                  className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
                     layout === "list"
                       ? "border-primary bg-primary/5"
                       : "border-border hover:border-primary/50"
                   }`}
                 >
-                  <div className="space-y-2">
-                    <div className="space-y-1">
-                      <div className="h-3 bg-muted rounded"></div>
-                      <div className="h-3 bg-muted rounded"></div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 mt-1">
+                      <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <line x1="8" y1="6" x2="21" y2="6" />
+                        <line x1="8" y1="12" x2="21" y2="12" />
+                        <line x1="8" y1="18" x2="21" y2="18" />
+                        <line x1="3" y1="6" x2="3.01" y2="6" />
+                        <line x1="3" y1="12" x2="3.01" y2="12" />
+                        <line x1="3" y1="18" x2="3.01" y2="18" />
+                      </svg>
                     </div>
-                    <p className="text-sm font-medium">Lista</p>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold mb-1">Lista</p>
+                      <p className="text-xs text-muted-foreground">
+                        Cards verticais completos empilhados
+                      </p>
+                    </div>
                   </div>
                 </button>
               </div>
