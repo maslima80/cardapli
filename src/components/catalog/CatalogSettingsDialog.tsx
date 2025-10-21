@@ -75,26 +75,13 @@ export const CatalogSettingsDialog = ({
         </DialogHeader>
 
         <Tabs defaultValue="general" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="general">Geral</TabsTrigger>
+            <TabsTrigger value="navigation">Navegação</TabsTrigger>
             <TabsTrigger value="theme">Tema</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general" className="space-y-4 mt-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>Mostrar navegação por seções</Label>
-                <p className="text-xs text-muted-foreground">
-                  Navegação rápida entre blocos com título. Aparece no topo (mobile) ou lateral (desktop)
-                </p>
-              </div>
-              <Switch
-                checked={settings?.show_section_nav || false}
-                onCheckedChange={(checked) =>
-                  onSave({ ...settings, show_section_nav: checked })
-                }
-              />
-            </div>
 
             {/* WhatsApp Bubble Toggle */}
             <div className="flex items-center justify-between pt-4 border-t">
@@ -118,6 +105,46 @@ export const CatalogSettingsDialog = ({
                 }
                 disabled={!hasWhatsApp}
               />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="navigation" className="space-y-4 mt-4">
+            {/* Bottom Navigation */}
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Menu Inferior</Label>
+                <p className="text-xs text-muted-foreground">
+                  Menu fixo na parte inferior para navegação rápida entre seções
+                </p>
+              </div>
+              <Switch
+                checked={settings?.show_bottom_nav || false}
+                onCheckedChange={(checked) =>
+                  onSave({ ...settings, show_bottom_nav: checked })
+                }
+              />
+            </div>
+
+            {/* Section Navigation (old) */}
+            <div className="flex items-center justify-between pt-4 border-t">
+              <div className="space-y-0.5">
+                <Label>Navegação Lateral</Label>
+                <p className="text-xs text-muted-foreground">
+                  Menu no topo (mobile) ou lateral (desktop)
+                </p>
+              </div>
+              <Switch
+                checked={settings?.show_section_nav || false}
+                onCheckedChange={(checked) =>
+                  onSave({ ...settings, show_section_nav: checked })
+                }
+              />
+            </div>
+
+            <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+              <p className="text-sm text-blue-900 dark:text-blue-100">
+                💡 <strong>Dica:</strong> Configure quais blocos aparecem no menu na aba "Blocos" do editor.
+              </p>
             </div>
           </TabsContent>
 

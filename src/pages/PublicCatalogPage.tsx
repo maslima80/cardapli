@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { BlockRendererPremium } from "@/components/catalog/BlockRendererPremium";
 import { SectionNavigation } from "@/components/catalog/SectionNavigation";
+import { BottomNavigation } from "@/components/catalog/BottomNavigation";
 import { SimpleThemeProvider } from "@/components/theme/SimpleThemeProvider";
 import { WhatsAppBubble } from "@/components/WhatsAppBubble";
 import { ProductCard } from "@/components/catalog/ProductCard";
@@ -282,6 +283,16 @@ const PublicCatalogPage = () => {
     }));
 
   const showSectionNav = catalog?.settings?.show_section_nav && sections.length > 0;
+  const showBottomNav = catalog?.settings?.show_bottom_nav && sections.length > 0;
+
+  // Build bottom navigation items
+  const bottomNavItems = blocks
+    .filter((block) => block.anchor_slug && block.navigation_label)
+    .map((block) => ({
+      id: block.id,
+      label: block.navigation_label,
+      anchor: block.anchor_slug,
+    }));
 
   // Prepare Open Graph data
   const ogTitle = catalog?.name ? `${catalog.name} — ${profile?.business_name || userSlug}` : profile?.business_name || userSlug || '';
@@ -344,6 +355,7 @@ const PublicCatalogPage = () => {
       </div>
 
       {showSectionNav && <SectionNavigation sections={sections} />}
+      {showBottomNav && <BottomNavigation items={bottomNavItems} />}
       
       {blocks.map((block, index) => (
         <BlockRendererPremium
