@@ -78,10 +78,10 @@ export default function QuickCatalogCreate() {
         return;
       }
 
-      // Get user's slug
+      // Get user's slug and logo
       const { data: profile } = await supabase
         .from("profiles")
-        .select("slug")
+        .select("slug, logo_url")
         .eq("id", user.id)
         .single();
 
@@ -128,6 +128,7 @@ export default function QuickCatalogCreate() {
         layout: coverLayout,
         align: 'center',
         use_profile_logo: showLogo,
+        logo_url: showLogo ? profile.logo_url : null,
       };
 
       // Add images based on layout
