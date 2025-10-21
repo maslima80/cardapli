@@ -16,6 +16,7 @@ export default function QuickCatalogCreate() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [coverImage, setCoverImage] = useState("");
+  const [coverLayout, setCoverLayout] = useState<"logo-title-image" | "image-top" | "carousel-top" | "full-background">("image-top");
   const [layout, setLayout] = useState<"grid" | "list">("grid");
 
   useEffect(() => {
@@ -109,7 +110,32 @@ export default function QuickCatalogCreate() {
 
       if (catalogError) throw catalogError;
 
+      // Collect images for carousel layout
+      const coverImages: string[] = [];
+      if (coverLayout === 'carousel-top') {
+        // Get first 3 images from products
+        for (const product of products.slice(0, 3)) {
+          const img = product.photos?.[0]?.url || product.photos?.[0]?.image_url;
+          if (img) coverImages.push(img);
+        }
+      }
+
       // Create Capa block
+      const coverData: any = {
+        title: title.trim(),
+        subtitle: description.trim() || '',
+        layout: coverLayout,
+        align: 'center',
+        use_profile_logo: coverLayout === 'logo-title-image',
+      };
+
+      // Add images based on layout
+      if (coverLayout === 'carousel-top') {
+        coverData.images = coverImages;
+      } else {
+        coverData.image_url = coverImage || '';
+      }
+
       const { error: capaError } = await supabase
         .from("catalog_blocks")
         .insert({
@@ -117,13 +143,7 @@ export default function QuickCatalogCreate() {
           type: 'cover',
           sort: 0,
           visible: true,
-          data: {
-            title: title.trim(),
-            subtitle: description.trim() || '',
-            image_url: coverImage || '',
-            layout: 'full',
-            alignment: 'center',
-          },
+          data: coverData,
         });
 
       if (capaError) throw capaError;
@@ -246,10 +266,86 @@ export default function QuickCatalogCreate() {
               </p>
             </div>
 
+            {/* Cover Layout */}
+            <div className="space-y-3">
+              <Label>Estilo da Capa</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setCoverLayout("logo-title-image")}
+                  className={`p-4 rounded-lg border-2 transition-all ${
+                    coverLayout === "logo-title-image"
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:border-primary/50"
+                  }`}
+                >
+                  <div className="space-y-2">
+                    <div className="text-2xl">🏆</div>
+                    <p className="text-sm font-medium">Logo + Título</p>
+                    <p className="text-xs text-muted-foreground">Elegante</p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setCoverLayout("image-top")}
+                  className={`p-4 rounded-lg border-2 transition-all ${
+                    coverLayout === "image-top"
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:border-primary/50"
+                  }`}
+                >
+                  <div className="space-y-2">
+                    <div className="text-2xl">📸</div>
+                    <p className="text-sm font-medium">Imagem Grande</p>
+                    <p className="text-xs text-muted-foreground">Impactante</p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setCoverLayout("carousel-top")}
+                  className={`p-4 rounded-lg border-2 transition-all ${
+                    coverLayout === "carousel-top"
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:border-primary/50"
+                  }`}
+                >
+                  <div className="space-y-2">
+                    <div className="text-2xl">🎠</div>
+                    <p className="text-sm font-medium">Galeria</p>
+                    <p className="text-xs text-muted-foreground">3 fotos</p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setCoverLayout("full-background")}
+                  className={`p-4 rounded-lg border-2 transition-all ${
+                    coverLayout === "full-background"
+                      ? "border-primary bg-primary/5"
+                      : "border-border hover:border-primary/50"
+                  }`}
+                >
+                  <div className="space-y-2">
+                    <div className="text-2xl">🖼️</div>
+                    <p className="text-sm font-medium">Fundo</p>
+                    <p className="text-xs text-muted-foreground">Moderno</p>
+                  </div>
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {coverLayout === "logo-title-image" && "Logo do perfil + título + foto principal"}
+                {coverLayout === "image-top" && "Imagem grande com título embaixo"}
+                {coverLayout === "carousel-top" && "3 fotos deslizáveis (usa primeiras 3 fotos dos produtos)"}
+                {coverLayout === "full-background" && "Foto de fundo com texto sobreposto"}
+              </p>
+            </div>
+
             {/* Cover Image Preview */}
             {coverImage && (
               <div className="space-y-2">
-                <Label>Imagem de capa</Label>
+                <Label>Prévia da Imagem</Label>
                 <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
                   <img
                     src={coverImage}
