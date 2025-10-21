@@ -138,6 +138,10 @@ export default function QuickCatalogCreate() {
         coverData.image_url = coverImage || '';
       }
 
+      console.log('Creating cover block with data:', coverData);
+      console.log('Profile logo_url:', profile.logo_url);
+      console.log('Show logo:', showLogo);
+
       const { error: capaError } = await supabase
         .from("catalog_blocks")
         .insert({
