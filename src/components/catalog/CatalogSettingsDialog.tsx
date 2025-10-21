@@ -13,6 +13,7 @@ interface CatalogSettingsDialogProps {
   settings: {
     show_section_nav?: boolean;
     show_whatsapp_bubble?: boolean;
+    show_bottom_nav?: boolean;
   };
   themeOverrides?: {
     use_brand?: boolean;
@@ -24,6 +25,7 @@ interface CatalogSettingsDialogProps {
   };
   profile?: any;
   hasWhatsApp?: boolean;
+  defaultTab?: "general" | "navigation" | "theme";
   onSave: (settings: any) => void;
   onThemeChange: (theme: any) => void;
 }
@@ -31,10 +33,11 @@ interface CatalogSettingsDialogProps {
 export const CatalogSettingsDialog = ({
   open,
   onOpenChange,
-  settings = { show_section_nav: false, show_whatsapp_bubble: false },
+  settings = { show_section_nav: false, show_whatsapp_bubble: false, show_bottom_nav: false },
   themeOverrides = {},
   profile,
   hasWhatsApp = false,
+  defaultTab = "general",
   onSave,
   onThemeChange,
 }: CatalogSettingsDialogProps) => {
@@ -71,10 +74,10 @@ export const CatalogSettingsDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Configurações do Catálogo</DialogTitle>
+          <DialogTitle>Configurações Avançadas</DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue="general" className="w-full">
+        <Tabs defaultValue={defaultTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="general">Geral</TabsTrigger>
             <TabsTrigger value="navigation">Navegação</TabsTrigger>
@@ -109,28 +112,20 @@ export const CatalogSettingsDialog = ({
           </TabsContent>
 
           <TabsContent value="navigation" className="space-y-4 mt-4">
-            {/* Bottom Navigation */}
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>Menu Inferior</Label>
-                <p className="text-xs text-muted-foreground">
-                  Menu fixo na parte inferior para navegação rápida entre seções
-                </p>
-              </div>
-              <Switch
-                checked={settings?.show_bottom_nav || false}
-                onCheckedChange={(checked) =>
-                  onSave({ ...settings, show_bottom_nav: checked })
-                }
-              />
+            <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+              <p className="text-sm text-blue-900 dark:text-blue-100">
+                💡 <strong>Dica:</strong> Use os botões de alternância no topo da página para ativar/desativar 
+                o menu de navegação rapidamente. Quando ativo, clique em "Configurar" para escolher quais 
+                seções aparecem no menu.
+              </p>
             </div>
 
-            {/* Section Navigation (old) */}
+            {/* Section Navigation (legacy - keep for backward compatibility) */}
             <div className="flex items-center justify-between pt-4 border-t">
               <div className="space-y-0.5">
-                <Label>Navegação Lateral</Label>
+                <Label>Navegação Lateral (Legado)</Label>
                 <p className="text-xs text-muted-foreground">
-                  Menu no topo (mobile) ou lateral (desktop)
+                  Menu lateral antigo - recomendamos usar o Menu Inferior
                 </p>
               </div>
               <Switch
@@ -139,12 +134,6 @@ export const CatalogSettingsDialog = ({
                   onSave({ ...settings, show_section_nav: checked })
                 }
               />
-            </div>
-
-            <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-              <p className="text-sm text-blue-900 dark:text-blue-100">
-                💡 <strong>Dica:</strong> Configure quais blocos aparecem no menu na aba "Blocos" do editor.
-              </p>
             </div>
           </TabsContent>
 

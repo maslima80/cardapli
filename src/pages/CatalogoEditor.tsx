@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, Eye, Settings } from "lucide-react";
+import { ArrowLeft, Plus, Eye, Settings, Navigation, MessageCircle, Palette } from "lucide-react";
 import { toast } from "sonner";
 import { BlockCard } from "@/components/catalog/BlockCard";
 import { AddBlockDrawer } from "@/components/catalog/AddBlockDrawer";
@@ -12,6 +12,10 @@ import { SimpleThemeProvider } from "@/components/theme/SimpleThemeProvider";
 import { PublishModal } from "@/components/catalog/PublishModal";
 import { PublishSuccessModal } from "@/components/catalog/PublishSuccessModal";
 import { CatalogSettingsDialog } from "@/components/catalog/CatalogSettingsDialog";
+import { NavigationManagerDialog } from "@/components/catalog/NavigationManagerDialog";
+import { WhatsAppSettingsDialog } from "@/components/catalog/WhatsAppSettingsDialog";
+import { MenuSettingsDialog } from "@/components/catalog/MenuSettingsDialog";
+import { ColorsSettingsDialog } from "@/components/catalog/ColorsSettingsDialog";
 import { getEffectiveTheme, generateThemeVariables } from "@/lib/theme-utils";
 import {
   DndContext,
@@ -41,6 +45,11 @@ const CatalogoEditor = () => {
   const [publishModalOpen, setPublishModalOpen] = useState(false);
   const [successModalOpen, setSuccessModalOpen] = useState(false);
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
+  const [settingsDefaultTab, setSettingsDefaultTab] = useState<"general" | "navigation" | "theme">("general");
+  const [navManagerOpen, setNavManagerOpen] = useState(false);
+  const [whatsappDialogOpen, setWhatsappDialogOpen] = useState(false);
+  const [menuDialogOpen, setMenuDialogOpen] = useState(false);
+  const [colorsDialogOpen, setColorsDialogOpen] = useState(false);
   const [profile, setProfile] = useState<any>(null);
 
   const sensors = useSensors(
@@ -365,16 +374,9 @@ const CatalogoEditor = () => {
               </Button>
               <h1 className="text-lg font-semibold truncate flex-1">{catalog?.title}</h1>
             </div>
-            {/* Second Row: Actions */}
+            
+            {/* Second Row: Main Actions */}
             <div className="flex items-center gap-2 pl-11">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSettingsDialogOpen(true)}
-                title="Configurações"
-              >
-                <Settings className="w-4 h-4" />
-              </Button>
               <Button
                 variant="outline"
                 size="sm"
@@ -394,46 +396,125 @@ const CatalogoEditor = () => {
                 Publicar
               </Button>
             </div>
+
+            {/* Third Row: Quick Settings Buttons */}
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pl-11">
+              {/* WhatsApp Button */}
+              <button
+                onClick={() => setWhatsappDialogOpen(true)}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${
+                  catalog?.settings?.show_whatsapp_bubble
+                    ? "bg-[#25D366] text-white"
+                    : "bg-muted text-muted-foreground"
+                }`}
+              >
+                <MessageCircle className="w-3 h-3" />
+                <span>WhatsApp</span>
+              </button>
+
+              {/* Menu Button */}
+              <button
+                onClick={() => setMenuDialogOpen(true)}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${
+                  catalog?.settings?.show_bottom_nav
+                    ? "bg-purple-600 text-white"
+                    : "bg-muted text-muted-foreground"
+                }`}
+              >
+                <Navigation className="w-3 h-3" />
+                <span>Menu</span>
+              </button>
+
+              {/* Colors Button */}
+              <button
+                onClick={() => setColorsDialogOpen(true)}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${
+                  catalog?.theme_overrides?.use_brand !== false
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
+                }`}
+              >
+                <Palette className="w-3 h-3" />
+                <span>Cores</span>
+              </button>
+            </div>
           </div>
 
           {/* Desktop: Horizontal Layout */}
-          <div className="hidden sm:flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 min-w-0">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigate("/catalogos")}
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </Button>
-              <h1 className="text-lg font-semibold truncate">{catalog?.title}</h1>
+          <div className="hidden sm:block">
+            {/* First Row: Title and Main Actions */}
+            <div className="flex items-center justify-between gap-4 mb-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => navigate("/catalogos")}
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </Button>
+                <h1 className="text-lg font-semibold truncate">{catalog?.title}</h1>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPreviewMode(!previewMode)}
+                  className="gap-2"
+                >
+                  <Eye className="w-4 h-4" />
+                  {previewMode ? "Editar" : "Preview"}
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => setPublishModalOpen(true)}
+                  disabled={!canPublish}
+                  title={publishTooltip}
+                >
+                  Publicar
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSettingsDialogOpen(true)}
-                title="Configurações"
+
+            {/* Second Row: Quick Settings Buttons */}
+            <div className="flex items-center gap-3 pb-2">
+              {/* WhatsApp Button */}
+              <button
+                onClick={() => setWhatsappDialogOpen(true)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                  catalog?.settings?.show_whatsapp_bubble
+                    ? "bg-[#25D366] text-white shadow-sm"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                } cursor-pointer`}
               >
-                <Settings className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPreviewMode(!previewMode)}
-                className="gap-2"
+                <MessageCircle className="w-3.5 h-3.5" />
+                <span>WhatsApp</span>
+              </button>
+
+              {/* Menu Button */}
+              <button
+                onClick={() => setMenuDialogOpen(true)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                  catalog?.settings?.show_bottom_nav
+                    ? "bg-purple-600 text-white shadow-sm"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                } cursor-pointer`}
               >
-                <Eye className="w-4 h-4" />
-                {previewMode ? "Editar" : "Preview"}
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => setPublishModalOpen(true)}
-                disabled={!canPublish}
-                title={publishTooltip}
+                <Navigation className="w-3.5 h-3.5" />
+                <span>Menu</span>
+              </button>
+
+              {/* Colors Button */}
+              <button
+                onClick={() => setColorsDialogOpen(true)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                  catalog?.theme_overrides?.use_brand !== false
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                } cursor-pointer`}
               >
-                Publicar
-              </Button>
+                <Palette className="w-3.5 h-3.5" />
+                <span>Cores</span>
+              </button>
             </div>
           </div>
         </div>
@@ -511,6 +592,32 @@ const CatalogoEditor = () => {
               ))}
             </SortableContext>
 
+            {/* Navigation Setup Prompt */}
+            {blocks.length >= 2 && !blocks.some(b => b.navigation_label) && (
+              <div className="mt-6 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 border-2 border-purple-200 dark:border-purple-800 rounded-2xl p-6">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center">
+                    <Navigation className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-100 mb-1">
+                      🚀 Facilite a navegação dos seus clientes!
+                    </h3>
+                    <p className="text-sm text-purple-700 dark:text-purple-300 mb-4">
+                      Adicione um menu de navegação para que seus clientes possam pular rapidamente entre as seções do catálogo.
+                    </p>
+                    <Button
+                      onClick={() => setNavManagerOpen(true)}
+                      className="bg-purple-600 hover:bg-purple-700 gap-2"
+                    >
+                      <Navigation className="w-4 h-4" />
+                      Configurar Menu de Navegação
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Add Block Placeholder */}
             <button
               onClick={() => setAddDrawerOpen(true)}
@@ -552,6 +659,13 @@ const CatalogoEditor = () => {
         onUpdate={(updatedBlock) => handleUpdateBlock(updatedBlock.id, updatedBlock)}
       />
 
+      <NavigationManagerDialog
+        open={navManagerOpen}
+        onOpenChange={setNavManagerOpen}
+        blocks={blocks}
+        onUpdate={loadCatalog}
+      />
+
       <CatalogSettingsDialog
         open={settingsDialogOpen}
         onOpenChange={setSettingsDialogOpen}
@@ -559,6 +673,7 @@ const CatalogoEditor = () => {
         themeOverrides={catalog?.theme_overrides}
         profile={profile}
         hasWhatsApp={!!profile?.whatsapp}
+        defaultTab={settingsDefaultTab}
         onSave={handleSaveSettings}
         onThemeChange={handleThemeChange}
       />
@@ -579,6 +694,34 @@ const CatalogoEditor = () => {
         userSlug={profile?.slug || ""}
         catalogSlug={catalog?.slug || ""}
         catalogTitle={catalog?.title || ""}
+      />
+
+      {/* New Settings Dialogs */}
+      <WhatsAppSettingsDialog
+        open={whatsappDialogOpen}
+        onOpenChange={setWhatsappDialogOpen}
+        enabled={catalog?.settings?.show_whatsapp_bubble || false}
+        hasWhatsApp={!!profile?.whatsapp}
+        whatsappNumber={profile?.whatsapp}
+        onToggle={(enabled) => handleSaveSettings({ ...catalog?.settings, show_whatsapp_bubble: enabled })}
+      />
+
+      <MenuSettingsDialog
+        open={menuDialogOpen}
+        onOpenChange={setMenuDialogOpen}
+        enabled={catalog?.settings?.show_bottom_nav || false}
+        onToggle={(enabled) => handleSaveSettings({ ...catalog?.settings, show_bottom_nav: enabled })}
+        onConfigure={() => setNavManagerOpen(true)}
+      />
+
+      <ColorsSettingsDialog
+        open={colorsDialogOpen}
+        onOpenChange={setColorsDialogOpen}
+        useBrandColors={catalog?.theme_overrides?.use_brand !== false}
+        themeOverrides={catalog?.theme_overrides}
+        profile={profile}
+        onToggle={(useBrand) => handleThemeChange({ ...catalog?.theme_overrides, use_brand: useBrand })}
+        onThemeChange={handleThemeChange}
       />
     </div>
   );
