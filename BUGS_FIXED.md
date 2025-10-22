@@ -155,5 +155,30 @@ Files changed:
 
 ---
 
-**Status:** ✅ Both critical bugs fixed
+### **Issue 4: 500 Errors - Missing dependencies** ❌→✅
+
+**Error:**
+```
+GET http://localhost:8080/src/components/blocks/ShippingBlock.tsx 500 (Internal Server Error)
+GET http://localhost:8080/src/components/blocks/DeliveryPickupBlock.tsx 500 (Internal Server Error)
+GET http://localhost:8080/src/components/blocks/PaymentsBlock.tsx 500 (Internal Server Error)
+GET http://localhost:8080/src/components/blocks/PolicyBlock.tsx 500 (Internal Server Error)
+```
+
+**Root Cause:**
+- New specialized blocks import `react-markdown` which wasn't installed
+- Badge component didn't support `variant` prop (used by blocks)
+
+**Fix:**
+- Installed `react-markdown` package: `npm install react-markdown`
+- Updated Badge component to support variants (default, secondary, destructive, outline)
+- Added `class-variance-authority` for badge styling
+
+**Files:** 
+- `package.json` - Added react-markdown
+- `src/components/ui/badge.tsx` - Added variant support
+
+---
+
+**Status:** ✅ All critical bugs fixed
 **Ready for:** Migration + End-to-end testing
