@@ -167,6 +167,30 @@ export async function deleteTestimonial(id: string) {
   if (error) throw error;
 }
 
+// Helper: Check if business info exists
+export async function hasBusinessInfo(type: BusinessInfoType, scope: BusinessInfoScope = 'global', scopeId?: string) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  let query = supabase
+    .from('business_info_sections')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('type', type)
+    .eq('scope', scope)
+    .limit(1);
+
+  if (scopeId) {
+    query = query.eq('scope_id', scopeId);
+  } else {
+    query = query.is('scope_id', null);
+  }
+
+  const { data, error } = await query.maybeSingle();
+  if (error) return false;
+  return !!data;
+}
+
 // Helper: Get display names for business info types (Portuguese)
 export const businessInfoTypeLabels: Record<BusinessInfoType, { icon: string; title: string; description: string }> = {
   how_to_buy: {
