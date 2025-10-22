@@ -1032,15 +1032,6 @@ export const BlockSettingsDrawer = ({
                 placeholder="Um breve texto explicativo"
               />
             </div>
-
-            {showAnchorField && (
-              <NavigationSettings
-                block={block}
-                onUpdate={onUpdate}
-                blockTitle={formData.title}
-                generateSlug={generateSlug}
-              />
-            )}
             
             <div className="space-y-2">
               <Label>Layout</Label>
@@ -1059,11 +1050,11 @@ export const BlockSettingsDrawer = ({
             </div>
 
             <div className="space-y-3">
-              <Label>Diferenciais</Label>
+              <Label>Opções</Label>
               {(formData.items || []).map((item: any, index: number) => (
                 <div key={index} className="p-4 border rounded-xl space-y-2">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium">Diferencial {index + 1}</span>
+                    <span className="text-sm font-medium">Opção {index + 1}</span>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -1139,7 +1130,7 @@ export const BlockSettingsDrawer = ({
                   setFormData({ ...formData, items });
                 }}
               >
-                + Adicionar Diferencial
+                + Adicionar Opção
               </Button>
             </div>
           </>

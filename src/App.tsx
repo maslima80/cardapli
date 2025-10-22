@@ -11,6 +11,7 @@ import Entrar from "./pages/Entrar";
 import Recuperar from "./pages/Recuperar";
 import Dashboard from "./pages/Dashboard";
 import PerfilV2 from "./pages/PerfilV2";
+import InformacoesNegocio from "./pages/InformacoesNegocio";
 import Produtos from "./pages/Produtos";
 import Catalogos from "./pages/Catalogos";
 import CatalogoEditor from "./pages/CatalogoEditor";
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/recuperar" element={<Recuperar />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/perfil" element={<PerfilV2 />} />
+            <Route path="/informacoes-negocio" element={<InformacoesNegocio />} />
             <Route path="/produtos" element={<Produtos />} />
             <Route path="/catalogos" element={<Catalogos />} />
             <Route path="/catalogos/:id/editor" element={<CatalogoEditor />} />
