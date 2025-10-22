@@ -178,12 +178,29 @@ export default function QuickCatalogCreate() {
     setGenerating(true);
 
     try {
-      const { pageId } = await generateCatalogFromWizard(
+      const { pageId, catalogId } = await generateCatalogFromWizard(
         supabase,
         userId,
         profile,
         wizardState as WizardState
       );
+
+      // Fetch the created catalog to get the actual slug
+      const { data: catalog } = await supabase
+        .from("catalogs")
+        .select("id, title, slug")
+        .eq("id", catalogId)
+        .single();
+
+      if (catalog) {
+        // Store catalog info for success page
+        sessionStorage.setItem('newCatalog', JSON.stringify({
+          id: catalog.id,
+          title: catalog.title,
+          slug: catalog.slug,
+          userSlug: profile.slug,
+        }));
+      }
 
       toast.success("Catálogo criado com sucesso!");
       navigate(`/compartilhar/sucesso?pageId=${pageId}`);
