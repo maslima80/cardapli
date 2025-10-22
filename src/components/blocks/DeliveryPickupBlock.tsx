@@ -18,21 +18,26 @@ import { DEFAULT_DELIVERY_PICKUP, type DeliveryPickupBlockProps, type DeliveryPi
 import { supabase } from '@/integrations/supabase/client';
 import ReactMarkdown from 'react-markdown';
 
-export function DeliveryPickupBlock(props: DeliveryPickupBlockProps) {
+export function DeliveryPickupBlock(props: DeliveryPickupBlockProps & { userId?: string }) {
   const [content, setContent] = useState<DeliveryPickupContent | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadContent();
-  }, [props.mode, props.auto, props.custom, props.snapshot]);
+  }, [props.mode, props.auto, props.custom, props.snapshot, props.userId]);
 
   async function loadContent() {
     setLoading(true);
     
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setContent(null);
+      let userId = props.userId;
+      if (!userId) {
+        const { data: { user } } = await supabase.auth.getUser();
+        userId = user?.id;
+      }
+
+      if (!userId) {
+        setContent(DEFAULT_DELIVERY_PICKUP);
         setLoading(false);
         return;
       }
@@ -41,8 +46,8 @@ export function DeliveryPickupBlock(props: DeliveryPickupBlockProps) {
         setContent(props.custom || DEFAULT_DELIVERY_PICKUP);
       } else {
         // Auto mode: fetch both delivery and pickup
-        const deliveryData = await resolveBusinessInfo(user.id, 'delivery', props.auto);
-        const pickupData = await resolveBusinessInfo(user.id, 'pickup', props.auto);
+        const deliveryData = await resolveBusinessInfo(userId, 'delivery', props.auto);
+        const pickupData = await resolveBusinessInfo(userId, 'pickup', props.auto);
         const mapped = mapToDeliveryPickup(deliveryData, pickupData);
         setContent(mapped || DEFAULT_DELIVERY_PICKUP);
       }

@@ -17,21 +17,26 @@ import { DEFAULT_PAYMENT, type PaymentsBlockProps, type PaymentContent, type Pay
 import { supabase } from '@/integrations/supabase/client';
 import ReactMarkdown from 'react-markdown';
 
-export function PaymentsBlock(props: PaymentsBlockProps) {
+export function PaymentsBlock(props: PaymentsBlockProps & { userId?: string }) {
   const [content, setContent] = useState<PaymentContent | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadContent();
-  }, [props.mode, props.auto, props.custom, props.snapshot]);
+  }, [props.mode, props.auto, props.custom, props.snapshot, props.userId]);
 
   async function loadContent() {
     setLoading(true);
     
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setContent(null);
+      let userId = props.userId;
+      if (!userId) {
+        const { data: { user } } = await supabase.auth.getUser();
+        userId = user?.id;
+      }
+
+      if (!userId) {
+        setContent(DEFAULT_PAYMENT);
         setLoading(false);
         return;
       }
@@ -40,7 +45,7 @@ export function PaymentsBlock(props: PaymentsBlockProps) {
         setContent(props.custom || DEFAULT_PAYMENT);
       } else {
         // Auto mode
-        const rawData = await resolveBlockContent(user.id, 'payment', props);
+        const rawData = await resolveBlockContent(userId, 'payment', props);
         const mapped = mapToPayment(rawData);
         setContent(mapped || DEFAULT_PAYMENT);
       }

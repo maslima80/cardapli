@@ -17,21 +17,26 @@ import { DEFAULT_POLICY, type PolicyBlockProps, type PolicyContent, type PolicyC
 import { supabase } from '@/integrations/supabase/client';
 import ReactMarkdown from 'react-markdown';
 
-export function PolicyBlock(props: PolicyBlockProps) {
+export function PolicyBlock(props: PolicyBlockProps & { userId?: string }) {
   const [content, setContent] = useState<PolicyContent | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadContent();
-  }, [props.mode, props.auto, props.custom, props.snapshot]);
+  }, [props.mode, props.auto, props.custom, props.snapshot, props.userId]);
 
   async function loadContent() {
     setLoading(true);
     
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setContent(null);
+      let userId = props.userId;
+      if (!userId) {
+        const { data: { user } } = await supabase.auth.getUser();
+        userId = user?.id;
+      }
+
+      if (!userId) {
+        setContent(DEFAULT_POLICY);
         setLoading(false);
         return;
       }
@@ -40,7 +45,7 @@ export function PolicyBlock(props: PolicyBlockProps) {
         setContent(props.custom || DEFAULT_POLICY);
       } else {
         // Auto mode
-        const rawData = await resolveBlockContent(user.id, 'guarantee', props);
+        const rawData = await resolveBlockContent(userId, 'guarantee', props);
         const mapped = mapToPolicy(rawData);
         setContent(mapped || DEFAULT_POLICY);
       }

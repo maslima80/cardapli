@@ -62,6 +62,7 @@ export async function resolveBusinessInfo(
       .eq('user_id', userId)
       .eq('type', type)
       .eq('scope', scope)
+      .order('updated_at', { ascending: false }) // Get the LATEST entry
       .limit(1);
     
     if (scope_id) {

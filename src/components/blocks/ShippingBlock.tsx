@@ -18,21 +18,26 @@ import { DEFAULT_SHIPPING, type ShippingBlockProps, type ShippingContent } from 
 import { supabase } from '@/integrations/supabase/client';
 import ReactMarkdown from 'react-markdown';
 
-export function ShippingBlock(props: ShippingBlockProps) {
+export function ShippingBlock(props: ShippingBlockProps & { userId?: string }) {
   const [content, setContent] = useState<ShippingContent | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadContent();
-  }, [props.mode, props.auto, props.custom, props.snapshot]);
+  }, [props.mode, props.auto, props.custom, props.snapshot, props.userId]);
 
   async function loadContent() {
     setLoading(true);
     
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setContent(null);
+      let userId = props.userId;
+      if (!userId) {
+        const { data: { user } } = await supabase.auth.getUser();
+        userId = user?.id;
+      }
+
+      if (!userId) {
+        setContent(DEFAULT_SHIPPING);
         setLoading(false);
         return;
       }
@@ -41,7 +46,7 @@ export function ShippingBlock(props: ShippingBlockProps) {
         setContent(props.custom || DEFAULT_SHIPPING);
       } else {
         // Auto mode
-        const rawData = await resolveBlockContent(user.id, 'shipping', props);
+        const rawData = await resolveBlockContent(userId, 'shipping', props);
         const mapped = mapToShipping(rawData);
         setContent(mapped || DEFAULT_SHIPPING);
       }
