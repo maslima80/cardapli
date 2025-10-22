@@ -17,6 +17,11 @@ import { LocationBlockPremium } from "./blocks/LocationBlockPremium";
 import { CatalogosBlockPremium } from "./blocks/CatalogosBlockPremium";
 import { ExternalLinksBlockPremium } from "./blocks/ExternalLinksBlockPremium";
 import { ProfileHeaderBlock } from "./blocks/ProfileHeaderBlock";
+import { HowToBuyBlock } from "../blocks/HowToBuyBlock";
+import { DeliveryPickupBlock } from "../blocks/DeliveryPickupBlock";
+import { ShippingBlock } from "../blocks/ShippingBlock";
+import { PaymentsBlock } from "../blocks/PaymentsBlock";
+import { PolicyBlock } from "../blocks/PolicyBlock";
 import { Section } from "./Section";
 
 interface BlockRendererProps {
@@ -136,7 +141,20 @@ export const BlockRendererPremium = ({
       case "informacoes":
         return <InformacoesBlockPremium data={block.data} />;
       
-    
+      case "how_to_buy":
+        return <HowToBuyBlock {...block.data} />;
+      
+      case "delivery_pickup":
+        return <DeliveryPickupBlock {...block.data} />;
+      
+      case "shipping_info":
+        return <ShippingBlock {...block.data} />;
+      
+      case "payments_info":
+        return <PaymentsBlock {...block.data} />;
+      
+      case "policy_info":
+        return <PolicyBlock {...block.data} />;
     
       case "catalogs":
         return <CatalogosBlockPremium data={block.data} profile={profile} />;

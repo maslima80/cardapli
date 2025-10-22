@@ -28,6 +28,11 @@ import {
   User,
   Link2,
   Sparkles,
+  ShoppingBag,
+  Truck,
+  Package,
+  CreditCard,
+  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -88,6 +93,11 @@ const blockCategories = [
     label: "ℹ️ Informação & Ajuda",
     description: "Guias e dúvidas",
     blocks: [
+      { type: "how_to_buy", icon: ShoppingBag, label: "Como Comprar", description: "Passos para encomendar", contexts: ["catalog", "profile"], popular: true },
+      { type: "delivery_pickup", icon: Truck, label: "Entrega & Retirada", description: "Opções de recebimento", contexts: ["catalog", "profile"], popular: true },
+      { type: "shipping_info", icon: Package, label: "Envios", description: "Informações de envio", contexts: ["catalog", "profile"] },
+      { type: "payments_info", icon: CreditCard, label: "Pagamentos", description: "Formas de pagamento", contexts: ["catalog", "profile"], popular: true },
+      { type: "policy_info", icon: ShieldCheck, label: "Garantia & Política", description: "Política de trocas", contexts: ["catalog", "profile"] },
       { type: "informacoes", icon: List, label: "Informações", description: "Destaque informações", contexts: ["catalog", "profile"] },
       { type: "faq", icon: HelpCircle, label: "FAQ", description: "Perguntas frequentes", contexts: ["catalog", "profile"] },
       { type: "external_links", icon: Link2, label: "Links Externos", description: "Links para qualquer site", contexts: ["catalog", "profile"] },

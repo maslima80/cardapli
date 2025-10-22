@@ -195,36 +195,139 @@ export async function generateCatalogFromWizard(
     }
   }
 
-  // 5. Business Info Blocks (Informações)
-  const infoBlocksConfig = [
-    { key: 'how_to_buy', type: 'how_to_buy', title: 'Como Comprar', layout: 'list' },
-    { key: 'delivery', type: 'delivery', title: 'Entrega & Retirada', layout: 'grid' },
-    { key: 'shipping', type: 'shipping', title: 'Envio', layout: 'grid' },
-    { key: 'payment', type: 'payment', title: 'Pagamentos', layout: 'grid' },
-    { key: 'guarantee', type: 'guarantee', title: 'Garantia / Política', layout: 'list' },
-  ];
-
-  for (const config of infoBlocksConfig) {
-    if (state.autoSections[config.key as keyof typeof state.autoSections]) {
-      blocksToInsert.push({
-        catalog_id: catalog.id,
-        type: 'informacoes',
-        sort: currentSort,
-        visible: true,
-        anchor_slug: generateAnchorSlug('info', currentSort),
-        data: {
-          mode: 'auto',
-          section: config.type,
-          title: config.title,
-          layout: config.layout,
-          auto: {
-            scope: 'global',
-            fallback_to_global: true,
-          },
+  // 5. Specialized Business Info Blocks
+  // How to Buy (steps block)
+  if (state.autoSections.how_to_buy) {
+    blocksToInsert.push({
+      catalog_id: catalog.id,
+      type: 'how_to_buy',
+      sort: currentSort,
+      visible: true,
+      anchor_slug: generateAnchorSlug('how-to-buy', currentSort),
+      data: {
+        mode: 'auto',
+        auto: {
+          scope: 'global',
+          fallback_to_global: true,
         },
-      });
-      currentSort++;
-    }
+        snapshot: {
+          sync: true, // Live by default
+        },
+        design: {
+          accent: 'brand',
+          frame: true,
+          bg: 'soft',
+        },
+      },
+    });
+    currentSort++;
+  }
+
+  // Delivery & Pickup (merged card)
+  if (state.autoSections.delivery || state.autoSections.pickup) {
+    blocksToInsert.push({
+      catalog_id: catalog.id,
+      type: 'delivery_pickup',
+      sort: currentSort,
+      visible: true,
+      anchor_slug: generateAnchorSlug('delivery-pickup', currentSort),
+      data: {
+        mode: 'auto',
+        auto: {
+          scope: 'global',
+          fallback_to_global: true,
+        },
+        snapshot: {
+          sync: true,
+        },
+        design: {
+          style: 'card',
+          icon: 'truck',
+          frame: true,
+        },
+      },
+    });
+    currentSort++;
+  }
+
+  // Shipping (card)
+  if (state.autoSections.shipping) {
+    blocksToInsert.push({
+      catalog_id: catalog.id,
+      type: 'shipping_info',
+      sort: currentSort,
+      visible: true,
+      anchor_slug: generateAnchorSlug('shipping', currentSort),
+      data: {
+        mode: 'auto',
+        auto: {
+          scope: 'global',
+          fallback_to_global: true,
+        },
+        snapshot: {
+          sync: true,
+        },
+        design: {
+          style: 'card',
+          icon: 'package',
+          frame: true,
+        },
+      },
+    });
+    currentSort++;
+  }
+
+  // Payment (badges + terms)
+  if (state.autoSections.payment) {
+    blocksToInsert.push({
+      catalog_id: catalog.id,
+      type: 'payments_info',
+      sort: currentSort,
+      visible: true,
+      anchor_slug: generateAnchorSlug('payments', currentSort),
+      data: {
+        mode: 'auto',
+        auto: {
+          scope: 'global',
+          fallback_to_global: true,
+        },
+        snapshot: {
+          sync: true,
+        },
+        design: {
+          style: 'badges_card',
+          frame: true,
+        },
+      },
+    });
+    currentSort++;
+  }
+
+  // Guarantee / Policy (policy card)
+  if (state.autoSections.guarantee) {
+    blocksToInsert.push({
+      catalog_id: catalog.id,
+      type: 'policy_info',
+      sort: currentSort,
+      visible: true,
+      anchor_slug: generateAnchorSlug('policy', currentSort),
+      data: {
+        mode: 'auto',
+        auto: {
+          scope: 'global',
+          fallback_to_global: true,
+        },
+        snapshot: {
+          sync: true,
+        },
+        design: {
+          style: 'card',
+          icon: 'shield-check',
+          frame: true,
+        },
+      },
+    });
+    currentSort++;
   }
 
   // 6. Testimonials Block (if selected)
