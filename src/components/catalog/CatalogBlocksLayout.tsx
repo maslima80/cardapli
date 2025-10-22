@@ -1,15 +1,17 @@
 /**
- * CatalogBlocksLayout - Smart layout for catalog blocks
+ * CatalogBlocksLayout - Cinematic catalog experience
  * 
  * Features:
- * - Groups related blocks visually
- * - Progressive spacing (not equal gaps)
- * - Subtle section backgrounds
- * - Proper hierarchy and flow
+ * - Premium adaptive spacing (48px → 96px)
+ * - Visual grouping with unified sections
+ * - Narrative flow over blocky cards
+ * - Editorial design hierarchy
  */
 
 import { ReactNode } from 'react';
 import { BlockRendererPremium } from './BlockRendererPremium';
+import { CinematicSection, SectionDivider } from './CatalogThemeLayoutPremium';
+import { DeliveryShippingGroupPremium } from '../blocks/DeliveryShippingGroupPremium';
 
 interface CatalogBlocksLayoutProps {
   blocks: any[];
@@ -87,24 +89,88 @@ function getGroupTitle(group: string): string | undefined {
   return titles[group];
 }
 
-function getGroupSpacing(group: string): string {
-  // Different spacing for different group types
-  const spacing: Record<string, string> = {
-    cover: 'mb-8',
-    about: 'mb-8',
-    products: 'mb-12',
-    buying_process: 'mb-8',
-    payment_policy: 'mb-8',
-    trust: 'mb-8',
-    contact: 'mb-6',
-    other: 'mb-6',
+function getGroupSpacing(group: string): 'tight' | 'normal' | 'loose' | 'extra-loose' {
+  // Cinematic adaptive spacing based on content type
+  const spacing: Record<string, 'tight' | 'normal' | 'loose' | 'extra-loose'> = {
+    cover: 'tight',        // 48px - Cover to content connection
+    about: 'tight',        // 48px - Story flows naturally
+    products: 'normal',    // 64px - Breathing room after products
+    buying_process: 'normal', // 64px - Clear section start
+    payment_policy: 'loose',  // 80px - Separate trust section
+    trust: 'normal',       // 64px - Standard flow
+    contact: 'extra-loose', // 96px - Footer separation
+    other: 'normal',       // 64px - Default
   };
-  return spacing[group] || 'mb-6';
+  return spacing[group] || 'normal';
 }
 
-function shouldHaveBackground(group: string): boolean {
-  // Add subtle background to operational/info groups
-  return ['buying_process', 'payment_policy'].includes(group);
+function getGroupBackground(group: string): 'none' | 'soft' | 'accent' | 'trust' {
+  // Premium background variants for visual grouping
+  const backgrounds: Record<string, 'none' | 'soft' | 'accent' | 'trust'> = {
+    buying_process: 'none',  // Handled by individual blocks
+    payment_policy: 'none',  // Handled by individual blocks
+    trust: 'soft',           // Subtle background for trust elements
+  };
+  return backgrounds[group] || 'none';
+}
+
+function renderGroupBlocks(
+  blocks: any[],
+  groupType: string,
+  profile: any,
+  userId?: string,
+  userSlug?: string,
+  catalogSlug?: string,
+  catalogTitle?: string,
+  groupIndex?: number
+) {
+  // Special handling for buying_process group: combine delivery + shipping
+  if (groupType === 'buying_process') {
+    const deliveryBlock = blocks.find(b => b.type === 'delivery_pickup');
+    const shippingBlock = blocks.find(b => b.type === 'shipping_info');
+    const otherBlocks = blocks.filter(b => b.type !== 'delivery_pickup' && b.type !== 'shipping_info');
+
+    return (
+      <>
+        {/* Render other blocks (like how_to_buy) first */}
+        {otherBlocks.map((block, blockIndex) => (
+          <BlockRendererPremium
+            key={block.id}
+            block={block}
+            profile={profile}
+            userId={userId}
+            userSlug={userSlug}
+            catalogSlug={catalogSlug}
+            catalogTitle={catalogTitle}
+            index={(groupIndex || 0) * 100 + blockIndex}
+          />
+        ))}
+
+        {/* Render combined delivery + shipping if either exists */}
+        {(deliveryBlock || shippingBlock) && (
+          <DeliveryShippingGroupPremium
+            userId={userId}
+            deliveryProps={deliveryBlock?.data || {}}
+            shippingProps={shippingBlock?.data || {}}
+          />
+        )}
+      </>
+    );
+  }
+
+  // Default rendering for other groups
+  return blocks.map((block, blockIndex) => (
+    <BlockRendererPremium
+      key={block.id}
+      block={block}
+      profile={profile}
+      userId={userId}
+      userSlug={userSlug}
+      catalogSlug={catalogSlug}
+      catalogTitle={catalogTitle}
+      index={(groupIndex || 0) * 100 + blockIndex}
+    />
+  ));
 }
 
 export function CatalogBlocksLayout({
@@ -118,50 +184,31 @@ export function CatalogBlocksLayout({
   const groupedBlocks = groupBlocks(blocks);
 
   return (
-    <div className="space-y-0">
+    <div className="max-w-3xl mx-auto px-6 md:px-8">
       {groupedBlocks.map((group, groupIndex) => {
-        const hasBackground = shouldHaveBackground(group.group);
         const spacing = getGroupSpacing(group.group);
-        const showTitle = group.title && group.blocks.length > 1;
+        const background = getGroupBackground(group.group);
 
         return (
-          <div key={`group-${groupIndex}`} className={spacing}>
-            {/* Optional group title */}
-            {showTitle && (
-              <div className="container max-w-[1120px] mx-auto px-4 mb-4">
-                <h3 className="text-sm text-muted-foreground uppercase tracking-wide font-medium">
-                  {group.title}
-                </h3>
-              </div>
-            )}
-
-            {/* Group container with optional background */}
-            <div
-              className={`
-                ${hasBackground ? 'bg-muted/20 py-6' : ''}
-                ${group.blocks.length > 1 ? 'space-y-3' : ''}
-              `}
-            >
-              {group.blocks.map((block, blockIndex) => (
-                <div
-                  key={block.id}
-                  className={`
-                    ${blockIndex > 0 && !hasBackground ? 'pt-4' : ''}
-                  `}
-                >
-                  <BlockRendererPremium
-                    block={block}
-                    profile={profile}
-                    userId={userId}
-                    userSlug={userSlug}
-                    catalogSlug={catalogSlug}
-                    catalogTitle={catalogTitle}
-                    index={groupIndex * 100 + blockIndex}
-                  />
-                </div>
-              ))}
+          <CinematicSection
+            key={`group-${groupIndex}`}
+            spacing={spacing}
+            background={background}
+          >
+            {/* Blocks within group */}
+            <div className={group.blocks.length > 1 ? 'space-y-6' : ''}>
+              {renderGroupBlocks(
+                group.blocks,
+                group.group,
+                profile,
+                userId,
+                userSlug,
+                catalogSlug,
+                catalogTitle,
+                groupIndex
+              )}
             </div>
-          </div>
+          </CinematicSection>
         );
       })}
     </div>

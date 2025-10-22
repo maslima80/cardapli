@@ -143,7 +143,7 @@ export async function generateCatalogFromWizard(
         data: {
           title: category,
           subtitle: `${categoryProducts.length} produto${categoryProducts.length !== 1 ? 's' : ''}`,
-          layout: 'image-top',
+          layout: 'full-background', // Premium background image layout
           align: 'center',
           image_url: firstImage || '',
         },
@@ -198,7 +198,7 @@ export async function generateCatalogFromWizard(
         data: {
           title: tag,
           subtitle: `${tagProducts.length} produto${tagProducts.length !== 1 ? 's' : ''}`,
-          layout: 'image-top',
+          layout: 'full-background', // Premium background image layout
           align: 'center',
           image_url: firstImage || '',
         },

@@ -52,11 +52,13 @@ const socialLabels = {
 const SocialIcon = ({ 
   platform, 
   url, 
-  useAccentColor = false 
+  useAccentColor = false,
+  accentColor = '#8B5CF6'
 }: { 
   platform: keyof typeof socialColors; 
   url: string;
   useAccentColor?: boolean;
+  accentColor?: string;
 }) => {
   const icons = {
     instagram: Instagram,
@@ -82,7 +84,7 @@ const SocialIcon = ({
         <div
           className="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 hover:opacity-80"
           style={{
-            backgroundColor: 'var(--accent-color, #8B5CF6)',
+            backgroundColor: accentColor,
           }}
         >
           <Icon className="w-5 h-5 text-white" />
@@ -109,7 +111,9 @@ export function SocialsBlockPremium({ data, profile }: SocialsBlockProps) {
   const showYoutube = data.show_youtube !== false;
   const showFacebook = data.show_facebook !== false;
   const showWebsite = data.show_website !== false;
-  const useAccentColor = data.use_accent_color || false;
+  // Default to true for cohesive premium look
+  const useAccentColor = data.use_accent_color !== false;
+  const accentColor = profile?.accent_color || '#8B5CF6';
 
   const displayedSocials: Array<{ platform: keyof typeof socialColors; url: string }> = [];
   if (showInstagram && socials.instagram) displayedSocials.push({ platform: "instagram", url: socials.instagram });
@@ -141,6 +145,7 @@ export function SocialsBlockPremium({ data, profile }: SocialsBlockProps) {
             platform={platform} 
             url={url} 
             useAccentColor={useAccentColor}
+            accentColor={accentColor}
           />
         ))}
       </div>

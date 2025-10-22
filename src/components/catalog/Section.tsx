@@ -27,7 +27,8 @@ export function Section({
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.4, ease: "easeOut" }}
       className={cn(
-        !noPadding && "py-8 sm:py-12",
+        // Minimal padding for premium flow - spacing handled by layout
+        !noPadding && "py-0",
         className
       )}
     >

@@ -1,0 +1,292 @@
+/**
+ * Premium Catalog Styling
+ * 
+ * Global typography, spacing, and visual system for cinematic catalog experience
+ * Inspired by: Apple product pages × Canva layouts × Magazine storytelling
+ */
+
+/* ============================================================================
+   Typography System
+   ============================================================================ */
+
+/* Section Titles - Bold, impactful */
+.catalog-section-title {
+  @apply text-2xl md:text-3xl font-bold tracking-tight;
+  letter-spacing: -0.02em;
+}
+
+/* Subsection Headers */
+.catalog-subsection-title {
+  @apply text-lg md:text-xl font-semibold tracking-tight;
+}
+
+/* Body Text - Comfortable reading */
+.catalog-body {
+  @apply text-base leading-relaxed;
+  line-height: 1.7;
+}
+
+/* Fine Print */
+.catalog-fine-print {
+  @apply text-sm text-muted-foreground;
+  line-height: 1.6;
+}
+
+/* Accent Text */
+.catalog-accent {
+  @apply text-primary font-semibold;
+}
+
+/* ============================================================================
+   Spacing System - Fluid & Adaptive
+   ============================================================================ */
+
+/* Tight spacing - Connected content (48px) */
+.catalog-spacing-tight {
+  margin-top: clamp(2.5rem, 4vw, 3rem);
+}
+
+/* Normal spacing - Standard flow (64px) */
+.catalog-spacing-normal {
+  margin-top: clamp(3rem, 5vw, 4rem);
+}
+
+/* Loose spacing - Clear separation (80px) */
+.catalog-spacing-loose {
+  margin-top: clamp(3.5rem, 6vw, 5rem);
+}
+
+/* Extra loose - Major transitions (96px) */
+.catalog-spacing-extra-loose {
+  margin-top: clamp(4rem, 7vw, 6rem);
+}
+
+/* ============================================================================
+   Premium Cards & Containers
+   ============================================================================ */
+
+/* Minimal card - No borders, subtle */
+.catalog-card-minimal {
+  @apply bg-transparent;
+}
+
+/* Soft card - Gentle background */
+.catalog-card-soft {
+  @apply bg-muted/5 rounded-2xl p-6;
+  transition: all 0.3s ease;
+}
+
+.catalog-card-soft:hover {
+  @apply bg-muted/10;
+}
+
+/* Bordered card - Clean outline */
+.catalog-card-bordered {
+  @apply bg-card border border-border/50 rounded-2xl p-6;
+  transition: all 0.3s ease;
+}
+
+.catalog-card-bordered:hover {
+  @apply shadow-sm border-border;
+  transform: translateY(-1px);
+}
+
+/* ============================================================================
+   Section Backgrounds
+   ============================================================================ */
+
+/* Soft background for grouping */
+.catalog-bg-soft {
+  @apply bg-muted/5;
+}
+
+/* Accent background */
+.catalog-bg-accent {
+  @apply bg-primary/5 border border-primary/10;
+}
+
+/* Trust background (blue tint) */
+.catalog-bg-trust {
+  @apply bg-sky-50/50 dark:bg-sky-950/20;
+}
+
+/* ============================================================================
+   Badges & Chips
+   ============================================================================ */
+
+/* Premium badge */
+.catalog-badge {
+  @apply inline-flex items-center gap-2 px-4 py-2 rounded-xl;
+  @apply bg-background/80 border border-border/50;
+  @apply text-sm font-medium;
+  @apply transition-all duration-200;
+}
+
+.catalog-badge:hover {
+  @apply border-primary/50 shadow-sm;
+  transform: translateY(-1px);
+}
+
+/* Info chip */
+.catalog-chip {
+  @apply inline-flex items-center px-3 py-1.5 rounded-full text-sm;
+  @apply bg-background/80 border border-border/50;
+  @apply transition-colors duration-200;
+}
+
+.catalog-chip:hover {
+  @apply bg-muted/50;
+}
+
+/* ============================================================================
+   Icons & Visual Elements
+   ============================================================================ */
+
+/* Icon container - Circular background */
+.catalog-icon-container {
+  @apply w-10 h-10 rounded-full flex items-center justify-center;
+  @apply bg-primary/10 text-primary;
+}
+
+.catalog-icon-container-lg {
+  @apply w-12 h-12 rounded-full flex items-center justify-center;
+  @apply bg-primary/10 text-primary;
+}
+
+/* Gradient icon container */
+.catalog-icon-gradient {
+  @apply w-10 h-10 rounded-full flex items-center justify-center;
+  @apply bg-gradient-to-br from-primary to-primary/70;
+  @apply text-primary-foreground shadow-lg shadow-primary/20;
+}
+
+/* ============================================================================
+   Animations & Transitions
+   ============================================================================ */
+
+/* Fade in from bottom */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.catalog-fade-in-up {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* Stagger delay utilities */
+.catalog-stagger-1 {
+  animation-delay: 0.05s;
+}
+
+.catalog-stagger-2 {
+  animation-delay: 0.1s;
+}
+
+.catalog-stagger-3 {
+  animation-delay: 0.15s;
+}
+
+.catalog-stagger-4 {
+  animation-delay: 0.2s;
+}
+
+/* Hover lift effect */
+.catalog-hover-lift {
+  @apply transition-all duration-300;
+}
+
+.catalog-hover-lift:hover {
+  @apply shadow-sm;
+  transform: translateY(-2px);
+}
+
+/* ============================================================================
+   Dividers
+   ============================================================================ */
+
+/* Section divider */
+.catalog-divider {
+  @apply border-t border-border/50;
+}
+
+/* Labeled divider */
+.catalog-divider-labeled {
+  @apply flex items-center gap-4 my-8;
+}
+
+.catalog-divider-labeled::before,
+.catalog-divider-labeled::after {
+  content: '';
+  @apply flex-1 border-t border-border/50;
+}
+
+/* ============================================================================
+   Responsive Utilities
+   ============================================================================ */
+
+/* Mobile: Reduce spacing */
+@media (max-width: 640px) {
+  .catalog-spacing-tight {
+    margin-top: 2rem;
+  }
+  
+  .catalog-spacing-normal {
+    margin-top: 2.5rem;
+  }
+  
+  .catalog-spacing-loose {
+    margin-top: 3rem;
+  }
+  
+  .catalog-spacing-extra-loose {
+    margin-top: 3.5rem;
+  }
+  
+  .catalog-card-soft,
+  .catalog-card-bordered {
+    @apply p-5;
+  }
+}
+
+/* ============================================================================
+   Markdown Content Styling
+   ============================================================================ */
+
+.catalog-prose {
+  @apply max-w-none text-sm;
+}
+
+.catalog-prose h1,
+.catalog-prose h2,
+.catalog-prose h3,
+.catalog-prose h4 {
+  @apply font-semibold tracking-tight mb-2;
+}
+
+.catalog-prose p {
+  @apply leading-relaxed text-muted-foreground mb-3;
+}
+
+.catalog-prose a {
+  @apply text-primary no-underline hover:underline;
+}
+
+.catalog-prose strong {
+  @apply text-foreground font-semibold;
+}
+
+.catalog-prose ul,
+.catalog-prose ol {
+  @apply text-muted-foreground ml-4 mb-3;
+}
+
+.catalog-prose li {
+  @apply mb-1;
+}

@@ -17,11 +17,10 @@ import { LocationBlockPremium } from "./blocks/LocationBlockPremium";
 import { CatalogosBlockPremium } from "./blocks/CatalogosBlockPremium";
 import { ExternalLinksBlockPremium } from "./blocks/ExternalLinksBlockPremium";
 import { ProfileHeaderBlock } from "./blocks/ProfileHeaderBlock";
-import { HowToBuyBlock } from "../blocks/HowToBuyBlock";
-import { DeliveryPickupBlock } from "../blocks/DeliveryPickupBlock";
-import { ShippingBlock } from "../blocks/ShippingBlock";
-import { PaymentsBlock } from "../blocks/PaymentsBlock";
-import { PolicyBlock } from "../blocks/PolicyBlock";
+import { HowToBuyBlockPremium } from "../blocks/HowToBuyBlockPremium";
+import { DeliveryShippingGroupPremium } from "../blocks/DeliveryShippingGroupPremium";
+import { PaymentsBlockPremium } from "../blocks/PaymentsBlockPremium";
+import { PolicyBlockPremium } from "../blocks/PolicyBlockPremium";
 import { Section } from "./Section";
 
 interface BlockRendererProps {
@@ -142,19 +141,22 @@ export const BlockRendererPremium = ({
         return <InformacoesBlockPremium data={block.data} />;
       
       case "how_to_buy":
-        return <HowToBuyBlock {...block.data} userId={userId} />;
+        return <HowToBuyBlockPremium {...block.data} userId={userId} />;
       
       case "delivery_pickup":
-        return <DeliveryPickupBlock {...block.data} userId={userId} />;
+        // Note: Delivery and Shipping are now combined in DeliveryShippingGroupPremium
+        // This is handled at the layout level, but we keep individual support
+        return null;
       
       case "shipping_info":
-        return <ShippingBlock {...block.data} userId={userId} />;
+        // Combined with delivery_pickup in premium layout
+        return null;
       
       case "payments_info":
-        return <PaymentsBlock {...block.data} userId={userId} />;
+        return <PaymentsBlockPremium {...block.data} userId={userId} />;
       
       case "policy_info":
-        return <PolicyBlock {...block.data} userId={userId} />;
+        return <PolicyBlockPremium {...block.data} userId={userId} />;
     
       case "catalogs":
         return <CatalogosBlockPremium data={block.data} profile={profile} />;
