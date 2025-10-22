@@ -15,21 +15,28 @@ import { mapToHowToBuy } from './shared/contentMappers';
 import { DEFAULT_HOW_TO_BUY, type HowToBuyBlockProps, type HowToBuyContent } from './types/specializedBlocks';
 import { supabase } from '@/integrations/supabase/client';
 
-export function HowToBuyBlock(props: HowToBuyBlockProps) {
+export function HowToBuyBlock(props: HowToBuyBlockProps & { userId?: string }) {
   const [content, setContent] = useState<HowToBuyContent | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadContent();
-  }, [props.mode, props.auto, props.custom, props.snapshot]);
+  }, [props.mode, props.auto, props.custom, props.snapshot, props.userId]);
 
   async function loadContent() {
     setLoading(true);
     
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setContent(null);
+      // Use passed userId (for public catalogs) or get from auth (for editor)
+      let userId = props.userId;
+      if (!userId) {
+        const { data: { user } } = await supabase.auth.getUser();
+        userId = user?.id;
+      }
+
+      if (!userId) {
+        console.warn('HowToBuyBlock: No userId available');
+        setContent(DEFAULT_HOW_TO_BUY);
         setLoading(false);
         return;
       }
@@ -38,12 +45,15 @@ export function HowToBuyBlock(props: HowToBuyBlockProps) {
         setContent(props.custom || DEFAULT_HOW_TO_BUY);
       } else {
         // Auto mode
-        const rawData = await resolveBlockContent(user.id, 'how_to_buy', props);
+        console.log('🔧 HowToBuyBlock - Resolving auto content for userId:', userId);
+        const rawData = await resolveBlockContent(userId, 'how_to_buy', props);
+        console.log('✅ HowToBuyBlock - Resolved data:', rawData);
         const mapped = mapToHowToBuy(rawData);
+        console.log('📦 HowToBuyBlock - Mapped content:', mapped);
         setContent(mapped || DEFAULT_HOW_TO_BUY);
       }
     } catch (error) {
-      console.error('Error loading HowToBuyBlock content:', error);
+      console.error('❌ Error loading HowToBuyBlock content:', error);
       setContent(DEFAULT_HOW_TO_BUY);
     } finally {
       setLoading(false);

@@ -142,19 +142,19 @@ export const BlockRendererPremium = ({
         return <InformacoesBlockPremium data={block.data} />;
       
       case "how_to_buy":
-        return <HowToBuyBlock {...block.data} />;
+        return <HowToBuyBlock {...block.data} userId={userId} />;
       
       case "delivery_pickup":
-        return <DeliveryPickupBlock {...block.data} />;
+        return <DeliveryPickupBlock {...block.data} userId={userId} />;
       
       case "shipping_info":
-        return <ShippingBlock {...block.data} />;
+        return <ShippingBlock {...block.data} userId={userId} />;
       
       case "payments_info":
-        return <PaymentsBlock {...block.data} />;
+        return <PaymentsBlock {...block.data} userId={userId} />;
       
       case "policy_info":
-        return <PolicyBlock {...block.data} />;
+        return <PolicyBlock {...block.data} userId={userId} />;
     
       case "catalogs":
         return <CatalogosBlockPremium data={block.data} profile={profile} />;
