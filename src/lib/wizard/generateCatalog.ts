@@ -7,19 +7,44 @@ export async function generateCatalogFromWizard(
   state: WizardState
 ): Promise<{ pageId: string; catalogId: string }> {
   
-  // 1. Create the catalog (page)
-  const { data: catalog, error: catalogError } = await supabase
-    .from("catalogs")
-    .insert({
-      user_id: userId,
-      title: state.title,
-      slug: generateSlug(state.title),
-      status: "publicado",
-    })
-    .select()
-    .single();
+  // 1. Create the catalog (page) with unique slug
+  let baseSlug = generateSlug(state.title);
+  let slug = baseSlug;
+  let attempt = 0;
+  let catalog = null;
+  let catalogError = null;
+
+  // Try to insert with unique slug (handle conflicts)
+  while (attempt < 10) {
+    const result = await supabase
+      .from("catalogs")
+      .insert({
+        user_id: userId,
+        title: state.title,
+        slug: slug,
+        status: "publicado",
+      })
+      .select()
+      .single();
+
+    catalog = result.data;
+    catalogError = result.error;
+
+    // If successful, break
+    if (!catalogError) break;
+
+    // If it's a slug conflict, try with a suffix
+    if (catalogError?.code === '23505' && catalogError?.message?.includes('catalogs_user_slug_idx')) {
+      attempt++;
+      slug = `${baseSlug}-${attempt}`;
+    } else {
+      // Other error, throw it
+      throw catalogError;
+    }
+  }
 
   if (catalogError) throw catalogError;
+  if (!catalog) throw new Error('Failed to create catalog after multiple attempts');
 
   const blocksToInsert: any[] = [];
   let currentSort = 0;
