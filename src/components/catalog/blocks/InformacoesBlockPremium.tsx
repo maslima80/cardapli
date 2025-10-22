@@ -3,9 +3,18 @@ import {
   Star, Shield, Truck, Leaf, MessageCircle, Gift, 
   Diamond, Clock, Hammer, Globe, ThumbsUp, Check,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { getBusinessInfo, BusinessInfoType } from "@/lib/businessInfo";
 
 interface InformacoesBlockProps {
   data: {
+    mode?: 'auto' | 'custom';
+    section?: BusinessInfoType;
+    auto?: {
+      scope: 'global' | 'category' | 'tag' | 'product';
+      scope_id?: string | null;
+      fallback_to_global?: boolean;
+    };
     title?: string;
     subtitle?: string;
     items?: Array<{
@@ -15,6 +24,7 @@ interface InformacoesBlockProps {
     }>;
     layout?: "grid" | "list";
   };
+  userId?: string;
 }
 
 const iconMap = {
@@ -32,14 +42,87 @@ const iconMap = {
   check: Check,
 };
 
-export const InformacoesBlockPremium = ({ data }: InformacoesBlockProps) => {
-  const items = data.items || [];
+export const InformacoesBlockPremium = ({ data, userId }: InformacoesBlockProps) => {
+  const [items, setItems] = useState(data.items || []);
+  const [loading, setLoading] = useState(false);
   const title = data.title || "Informações importantes";
   const subtitle = data.subtitle || "";
   const layout = data.layout || "grid";
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Fetch business info if mode is auto
+  useEffect(() => {
+    if (data.mode === 'auto' && data.section) {
+      fetchBusinessInfo();
+    }
+  }, [data.mode, data.section, data.auto]);
+
+  const fetchBusinessInfo = async () => {
+    if (!data.section) return;
+    
+    setLoading(true);
+    try {
+      // Try to get business info from the specified scope
+      let businessInfo = await getBusinessInfo(
+        data.section,
+        data.auto?.scope || 'global',
+        data.auto?.scope_id
+      );
+
+      // Fallback to global if not found and fallback is enabled
+      if (!businessInfo && data.auto?.fallback_to_global !== false && data.auto?.scope !== 'global') {
+        businessInfo = await getBusinessInfo(data.section, 'global');
+      }
+
+      if (businessInfo) {
+        // Prefer items JSON
+        if (businessInfo.items && businessInfo.items.length > 0) {
+          // Ensure all required fields are present
+          const validItems = businessInfo.items.map(item => ({
+            icon: item.icon || 'star',
+            title: item.title,
+            description: item.description || '',
+          }));
+          setItems(validItems);
+        } else if (businessInfo.content_md) {
+          // Parse markdown to items (basic parsing)
+          const parsedItems = parseMarkdownToItems(businessInfo.content_md);
+          setItems(parsedItems);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching business info:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const parseMarkdownToItems = (markdown: string) => {
+    const lines = markdown.split('\n').filter(line => line.trim());
+    const items: Array<{ icon: string; title: string; description: string }> = [];
+    
+    for (const line of lines) {
+      // Simple parsing: look for emoji at start, then title
+      const match = line.match(/^([^a-zA-Z0-9\s]+)\s*(.+)$/);
+      if (match) {
+        items.push({
+          icon: 'star', // Default icon
+          title: match[2].trim(),
+          description: '',
+        });
+      } else if (line.startsWith('-') || line.startsWith('•')) {
+        items.push({
+          icon: 'star',
+          title: line.replace(/^[-•]\s*/, '').trim(),
+          description: '',
+        });
+      }
+    }
+    
+    return items;
+  };
 
   // Handle scroll events to update active index (for grid/swipe mode)
   useEffect(() => {
@@ -71,7 +154,40 @@ export const InformacoesBlockPremium = ({ data }: InformacoesBlockProps) => {
     }
   }, [activeIndex, layout]);
 
+  if (loading) {
+    return (
+      <div className="py-8 text-center">
+        <div className="inline-block w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   if (items.length === 0) {
+    // Show placeholder for auto mode
+    if (data.mode === 'auto') {
+      return (
+        <div className="py-12">
+          <div className="container max-w-4xl mx-auto px-4">
+            <div className="text-center p-8 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700">
+              <p className="text-slate-600 dark:text-slate-400 mb-4">
+                Configure esta seção em <strong>Perfil → Informações do Negócio</strong> ou personalize este bloco.
+              </p>
+              {userId && (
+                <a
+                  href="/informacoes-negocio"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors"
+                >
+                  Configurar agora
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
     return (
       <div className="py-8 text-center text-slate-600 dark:text-slate-400">
         Nenhuma informação adicionada ainda

@@ -1,35 +1,90 @@
 import { useRef, useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Quote } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { listTestimonials, Testimonial } from "@/lib/businessInfo";
 
 interface TestimonialsBlockProps {
   data: {
+    mode?: 'auto' | 'custom';
+    source?: {
+      scope: 'global' | 'product' | 'category' | 'tag';
+      scope_id?: string | null;
+      include_global_backfill?: boolean;
+      limit?: number;
+    };
     title?: string;
+    subtitle?: string;
     items?: Array<{
       name: string;
       quote: string;
       avatar_url?: string;
       role?: string;
     }>;
+    layout?: 'grid' | 'list';
   };
+  userId?: string;
 }
 
-export const TestimonialsBlockPremium = ({ data }: TestimonialsBlockProps) => {
-  // Ensure items is always an array
-  let items = [];
-  
-  if (data.items) {
-    if (Array.isArray(data.items)) {
-      items = data.items.filter(item => item && item.name && item.quote);
-    } else if (typeof data.items === 'object') {
-      items = Object.values(data.items).filter((item: any) => item && item.name && item.quote);
-    }
-  }
-  
+export const TestimonialsBlockPremium = ({ data, userId }: TestimonialsBlockProps) => {
+  const [items, setItems] = useState<Array<{name: string; quote: string; avatar_url?: string; role?: string}>>([]);
+  const [loading, setLoading] = useState(false);
   const title = data.title || "O que dizem por aí?";
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Initialize items from data or fetch if auto mode
+  useEffect(() => {
+    if (data.mode === 'auto') {
+      fetchTestimonials();
+    } else if (data.items) {
+      // Custom mode - use provided items
+      let processedItems = [];
+      if (Array.isArray(data.items)) {
+        processedItems = data.items.filter(item => item && item.name && item.quote);
+      } else if (typeof data.items === 'object') {
+        processedItems = Object.values(data.items).filter((item: any) => item && item.name && item.quote);
+      }
+      setItems(processedItems);
+    }
+  }, [data.mode, data.source, data.items]);
+
+  const fetchTestimonials = async () => {
+    setLoading(true);
+    try {
+      const scope = data.source?.scope || 'global';
+      const scopeId = data.source?.scope_id;
+      const limit = data.source?.limit || 6;
+
+      // Fetch testimonials for the specified scope
+      let testimonials = await listTestimonials(scope, scopeId);
+
+      // If include_global_backfill and we don't have enough, add global ones
+      if (data.source?.include_global_backfill && testimonials.length < limit && scope !== 'global') {
+        const globalTestimonials = await listTestimonials('global');
+        const remaining = limit - testimonials.length;
+        testimonials = [...testimonials, ...globalTestimonials.slice(0, remaining)];
+      }
+
+      // Limit results
+      testimonials = testimonials.slice(0, limit);
+
+      // Map to component format
+      const mappedItems = testimonials.map((t: Testimonial) => ({
+        name: t.name,
+        quote: t.message,
+        avatar_url: t.image_url || undefined,
+        role: undefined, // Could add role field to testimonials table later
+      }));
+
+      setItems(mappedItems);
+    } catch (error) {
+      console.error('Error fetching testimonials:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Handle scroll events to update active index
   useEffect(() => {
@@ -59,7 +114,36 @@ export const TestimonialsBlockPremium = ({ data }: TestimonialsBlockProps) => {
     }
   }, [activeIndex]);
 
+  if (loading) {
+    return (
+      <div className="py-8 text-center">
+        <div className="inline-block w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   if (items.length === 0) {
+    // Show placeholder for auto mode
+    if (data.mode === 'auto') {
+      return (
+        <div className="py-12">
+          <div className="container max-w-4xl mx-auto px-4">
+            <h2 
+              className="text-3xl font-bold text-center mb-6 text-slate-900 dark:text-slate-50"
+              style={{ fontFamily: 'var(--font-heading, inherit)' }}
+            >
+              {title}
+            </h2>
+            <div className="text-center p-8 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700">
+              <p className="text-slate-600 dark:text-slate-400">
+                Sem depoimentos ainda.
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
     return (
       <div className="py-8 text-center text-slate-600 dark:text-slate-400">
         Nenhum depoimento adicionado ainda
