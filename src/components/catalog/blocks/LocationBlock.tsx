@@ -79,7 +79,8 @@ export function LocationBlock({ data, profile }: LocationBlockProps) {
             );
             setLocations(filtered);
           } else {
-            setLocations([]);
+            // Show ALL locations when none are specifically selected
+            setLocations(locationsWithIds);
           }
         }
       } catch (error) {
@@ -107,9 +108,9 @@ export function LocationBlock({ data, profile }: LocationBlockProps) {
     return (
       <div className="py-8 text-center">
         <MapPin className="h-12 w-12 mx-auto text-muted-foreground opacity-50 mb-4" />
-        <h3 className="text-lg font-medium mb-2">Nenhuma localização selecionada</h3>
+        <h3 className="text-lg font-medium mb-2">Nenhuma localização disponível</h3>
         <p className="text-muted-foreground max-w-md mx-auto">
-          Edite este bloco para selecionar localizações para exibir.
+          Adicione localizações no seu perfil para exibi-las aqui.
         </p>
       </div>
     );
