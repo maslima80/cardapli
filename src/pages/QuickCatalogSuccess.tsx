@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Copy, Eye, Share2, Plus, MessageCircle } from "lucide-react";
+import { Copy, Eye, Share2, Plus, MessageCircle, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { publicCatalogUrl, whatsappShareCatalog } from "@/lib/urls";
 
@@ -37,6 +37,11 @@ export default function QuickCatalogSuccess() {
   const handleViewCatalog = () => {
     if (!catalogInfo) return;
     window.open(publicCatalogUrl(catalogInfo.userSlug, catalogInfo.slug), '_blank');
+  };
+
+  const handleEditCatalog = () => {
+    if (!catalogInfo) return;
+    navigate(`/catalogos/${catalogInfo.id}/editor`);
   };
 
   const handleCreateAnother = () => {
@@ -79,10 +84,10 @@ export default function QuickCatalogSuccess() {
               </svg>
             </div>
             <h1 className="text-2xl font-bold mb-2">
-              🎉 Catálogo criado com sucesso!
+              ✅ Seu catálogo está pronto!
             </h1>
             <p className="text-muted-foreground">
-              Seu catálogo está publicado e pronto para compartilhar
+              Publicado e pronto para compartilhar
             </p>
           </div>
 
@@ -96,38 +101,54 @@ export default function QuickCatalogSuccess() {
             </p>
           </div>
 
-          {/* Action Buttons */}
+          {/* Helpful Tip */}
+          <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <p className="text-sm text-blue-900 dark:text-blue-100">
+              💡 <strong>Dica:</strong> Você pode mover blocos, alterar textos e adicionar entrega, pagamentos e depoimentos no editor.
+            </p>
+          </div>
+
+          {/* Primary Actions */}
           <div className="space-y-3">
-            {/* WhatsApp */}
+            {/* Primary: View & Share */}
             <Button
-              onClick={handleWhatsAppShare}
-              className="w-full gap-2 bg-green-600 hover:bg-green-700 text-white"
+              onClick={handleViewCatalog}
+              className="w-full gap-2"
               size="lg"
             >
-              <MessageCircle className="w-5 h-5" />
-              Enviar no WhatsApp
+              <Eye className="w-5 h-5" />
+              Ver e compartilhar
             </Button>
 
-            {/* Copy Link */}
+            {/* Secondary: Edit */}
+            <Button
+              onClick={handleEditCatalog}
+              variant="outline"
+              className="w-full gap-2"
+              size="lg"
+            >
+              <Edit className="w-4 h-4" />
+              Editar e adicionar seções
+            </Button>
+          </div>
+
+          {/* Quick Share Actions */}
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              onClick={handleWhatsAppShare}
+              variant="outline"
+              className="gap-2"
+            >
+              <MessageCircle className="w-4 h-4" />
+              WhatsApp
+            </Button>
             <Button
               onClick={handleCopyLink}
               variant="outline"
-              className="w-full gap-2"
-              size="lg"
+              className="gap-2"
             >
               <Copy className="w-4 h-4" />
               Copiar link
-            </Button>
-
-            {/* View Catalog */}
-            <Button
-              onClick={handleViewCatalog}
-              variant="outline"
-              className="w-full gap-2"
-              size="lg"
-            >
-              <Eye className="w-4 h-4" />
-              Ver catálogo
             </Button>
           </div>
 
