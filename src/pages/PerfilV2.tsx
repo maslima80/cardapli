@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ArrowLeft, Eye, Copy, User, Palette, Layout } from "lucide-react";
+import { ArrowLeft, Eye, Copy, User, Palette, Layout, Briefcase } from "lucide-react";
 import { debounce } from "@/lib/utils";
 import { publicProfileUrl } from "@/lib/urls";
 import { ProfileSection } from "@/components/profile/sections/ProfileSection";
@@ -368,6 +368,19 @@ export default function PerfilV2() {
               <CardTitle>Perfil</CardTitle>
               <CardDescription>
                 Nome, logo, slogan, contato e redes sociais
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          {/* Business Info Card */}
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => navigate('/informacoes-negocio')}>
+            <CardHeader>
+              <div className="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-950 flex items-center justify-center mb-3">
+                <Briefcase className="w-6 h-6 text-green-600 dark:text-green-400" />
+              </div>
+              <CardTitle>Informações do Negócio</CardTitle>
+              <CardDescription>
+                Entrega, retirada, pagamentos, como comprar e depoimentos. Defina uma vez e reutilize nos seus catálogos.
               </CardDescription>
             </CardHeader>
           </Card>

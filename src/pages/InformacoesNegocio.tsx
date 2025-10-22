@@ -80,21 +80,22 @@ export default function InformacoesNegocio() {
   return (
     <div className="min-h-screen bg-gradient-subtle pb-20">
       <div className="container max-w-4xl mx-auto px-4 py-6 space-y-6">
+        {/* Breadcrumb */}
+        <Button
+          variant="ghost"
+          onClick={() => navigate("/perfil")}
+          className="mb-2 -ml-2"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Voltar para Perfil
+        </Button>
+
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("/perfil")}
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div className="flex-1">
-            <h1 className="text-2xl font-bold">Informações do Negócio</h1>
-            <p className="text-muted-foreground">
-              Configure informações reutilizáveis para seus catálogos
-            </p>
-          </div>
+        <div>
+          <h1 className="text-2xl font-bold">Informações do Negócio</h1>
+          <p className="text-muted-foreground">
+            Configure informações reutilizáveis para seus catálogos
+          </p>
         </div>
 
         {/* Info Tip */}
