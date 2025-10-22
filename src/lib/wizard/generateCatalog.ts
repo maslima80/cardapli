@@ -14,7 +14,7 @@ export async function generateCatalogFromWizard(
       user_id: userId,
       title: state.title,
       slug: generateSlug(state.title),
-      status: "published",
+      status: "publicado",
     })
     .select()
     .single();
