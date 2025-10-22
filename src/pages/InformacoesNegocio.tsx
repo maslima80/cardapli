@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, ShoppingBag, Truck, Package, CreditCard, ShieldCheck, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import {
   BusinessInfoType,
@@ -11,7 +11,11 @@ import {
   listBusinessInfo,
   BusinessInfoSection,
 } from "@/lib/businessInfo";
-import { BusinessInfoEditorModal } from "@/components/business-info/BusinessInfoEditorModal";
+import { HowToBuyEditor } from "@/components/business-info/editors/HowToBuyEditor";
+import { DeliveryPickupEditor } from "@/components/business-info/editors/DeliveryPickupEditor";
+import { ShippingEditor } from "@/components/business-info/editors/ShippingEditor";
+import { PaymentsEditor } from "@/components/business-info/editors/PaymentsEditor";
+import { PolicyEditor } from "@/components/business-info/editors/PolicyEditor";
 
 export default function InformacoesNegocio() {
   const navigate = useNavigate();
@@ -161,13 +165,49 @@ export default function InformacoesNegocio() {
         </Card>
       </div>
 
-      {/* Editor Modal */}
-      {editingType && (
-        <BusinessInfoEditorModal
-          type={editingType}
-          existingSection={editingSection}
+      {/* Specialized Editors */}
+      {editingType === 'how_to_buy' && (
+        <HowToBuyEditor
           open={true}
-          onClose={handleCloseEditor}
+          onOpenChange={(open) => !open && handleCloseEditor()}
+          initialData={editingSection}
+          onSaved={handleCloseEditor}
+        />
+      )}
+
+      {editingType === 'delivery' && (
+        <DeliveryPickupEditor
+          open={true}
+          onOpenChange={(open) => !open && handleCloseEditor()}
+          initialData={editingSection}
+          onSaved={handleCloseEditor}
+        />
+      )}
+
+      {editingType === 'shipping' && (
+        <ShippingEditor
+          open={true}
+          onOpenChange={(open) => !open && handleCloseEditor()}
+          initialData={editingSection}
+          onSaved={handleCloseEditor}
+        />
+      )}
+
+      {editingType === 'payment' && (
+        <PaymentsEditor
+          open={true}
+          onOpenChange={(open) => !open && handleCloseEditor()}
+          initialData={editingSection}
+          onSaved={handleCloseEditor}
+        />
+      )}
+
+      {editingType === 'guarantee' && (
+        <PolicyEditor
+          open={true}
+          onOpenChange={(open) => !open && handleCloseEditor()}
+          initialData={editingSection}
+          onSaved={handleCloseEditor}
         />
       )}
     </div>

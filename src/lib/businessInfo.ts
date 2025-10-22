@@ -40,19 +40,26 @@ export interface Testimonial {
 
 // Helper: Upsert business info section
 export async function upsertBusinessInfo(
-  row: Partial<BusinessInfoSection> & { type: BusinessInfoType; scope?: BusinessInfoScope }
+  type: BusinessInfoType,
+  scope: BusinessInfoScope = 'global',
+  scopeId: string | undefined,
+  data: { title?: string; items?: any[]; content_md?: string }
 ) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");
 
   const payload = {
     user_id: user.id,
-    scope: 'global' as BusinessInfoScope,
-    ...row,
+    type,
+    scope,
+    scope_id: scopeId || null,
+    title: data.title,
+    items: data.items,
+    content_md: data.content_md,
     updated_at: new Date().toISOString(),
   };
 
-  const { data, error } = await supabase
+  const { data: result, error } = await supabase
     .from('business_info_sections')
     .upsert(payload, { 
       onConflict: 'user_id,type,scope,scope_id',
@@ -62,7 +69,7 @@ export async function upsertBusinessInfo(
     .single();
 
   if (error) throw error;
-  return data as BusinessInfoSection;
+  return result as BusinessInfoSection;
 }
 
 // Helper: List business info sections
