@@ -43,23 +43,27 @@ export async function generateCatalogFromWizard(
   blocksToInsert.push({
     catalog_id: catalog.id,
     type: 'cover',
-    sort: currentSort++,
+    sort: currentSort,
     visible: true,
+    anchor_slug: generateAnchorSlug('cover', currentSort),
     data: coverData,
   });
+  currentSort++;
 
   // 3. About Block (if selected)
   if (state.autoSections.about) {
     blocksToInsert.push({
       catalog_id: catalog.id,
       type: 'about_business',
-      sort: currentSort++,
+      sort: currentSort,
       visible: true,
+      anchor_slug: generateAnchorSlug('about', currentSort),
       data: {
         use_profile: true,
         title: 'Sobre o Negócio',
       },
     });
+    currentSort++;
   }
 
   // 4. Product Sections
@@ -68,8 +72,9 @@ export async function generateCatalogFromWizard(
     blocksToInsert.push({
       catalog_id: catalog.id,
       type: 'product_grid',
-      sort: currentSort++,
+      sort: currentSort,
       visible: true,
+      anchor_slug: generateAnchorSlug('products', currentSort),
       data: {
         source_type: 'manual',
         selected_product_ids: state.selectedIds,
@@ -80,6 +85,7 @@ export async function generateCatalogFromWizard(
         limit: state.selectedIds.length,
       },
     });
+    currentSort++;
   } else if (state.mode === 'categories') {
     // For each category: section cover + product grid
     for (const category of state.selectedIds) {
@@ -100,8 +106,9 @@ export async function generateCatalogFromWizard(
       blocksToInsert.push({
         catalog_id: catalog.id,
         type: 'cover',
-        sort: currentSort++,
+        sort: currentSort,
         visible: true,
+        anchor_slug: generateAnchorSlug('category-cover', currentSort),
         data: {
           title: category,
           subtitle: `${categoryProducts.length} produto${categoryProducts.length !== 1 ? 's' : ''}`,
@@ -110,13 +117,15 @@ export async function generateCatalogFromWizard(
           image_url: firstImage || '',
         },
       });
+      currentSort++;
 
       // Category products
       blocksToInsert.push({
         catalog_id: catalog.id,
         type: 'product_grid',
-        sort: currentSort++,
+        sort: currentSort,
         visible: true,
+        anchor_slug: generateAnchorSlug('category-products', currentSort),
         data: {
           source_type: 'manual',
           selected_product_ids: categoryProducts.map((p: any) => p.id),
@@ -127,6 +136,7 @@ export async function generateCatalogFromWizard(
           limit: categoryProducts.length,
         },
       });
+      currentSort++;
     }
   } else if (state.mode === 'tags') {
     // For each tag: section cover + product grid
@@ -151,8 +161,9 @@ export async function generateCatalogFromWizard(
       blocksToInsert.push({
         catalog_id: catalog.id,
         type: 'cover',
-        sort: currentSort++,
+        sort: currentSort,
         visible: true,
+        anchor_slug: generateAnchorSlug('tag-cover', currentSort),
         data: {
           title: tag,
           subtitle: `${tagProducts.length} produto${tagProducts.length !== 1 ? 's' : ''}`,
@@ -161,13 +172,15 @@ export async function generateCatalogFromWizard(
           image_url: firstImage || '',
         },
       });
+      currentSort++;
 
       // Tag products
       blocksToInsert.push({
         catalog_id: catalog.id,
         type: 'product_grid',
-        sort: currentSort++,
+        sort: currentSort,
         visible: true,
+        anchor_slug: generateAnchorSlug('tag-products', currentSort),
         data: {
           source_type: 'manual',
           selected_product_ids: tagProducts.map((p: any) => p.id),
@@ -178,6 +191,7 @@ export async function generateCatalogFromWizard(
           limit: tagProducts.length,
         },
       });
+      currentSort++;
     }
   }
 
@@ -195,8 +209,9 @@ export async function generateCatalogFromWizard(
       blocksToInsert.push({
         catalog_id: catalog.id,
         type: 'informacoes',
-        sort: currentSort++,
+        sort: currentSort,
         visible: true,
+        anchor_slug: generateAnchorSlug('info', currentSort),
         data: {
           mode: 'auto',
           section: config.type,
@@ -208,6 +223,7 @@ export async function generateCatalogFromWizard(
           },
         },
       });
+      currentSort++;
     }
   }
 
@@ -216,8 +232,9 @@ export async function generateCatalogFromWizard(
     blocksToInsert.push({
       catalog_id: catalog.id,
       type: 'testimonials',
-      sort: currentSort++,
+      sort: currentSort,
       visible: true,
+      anchor_slug: generateAnchorSlug('testimonials', currentSort),
       data: {
         mode: 'auto',
         title: 'Depoimentos',
@@ -230,6 +247,7 @@ export async function generateCatalogFromWizard(
         },
       },
     });
+    currentSort++;
   }
 
   // 7. Location Block (if selected)
@@ -237,13 +255,15 @@ export async function generateCatalogFromWizard(
     blocksToInsert.push({
       catalog_id: catalog.id,
       type: 'location',
-      sort: currentSort++,
+      sort: currentSort,
       visible: true,
+      anchor_slug: generateAnchorSlug('location', currentSort),
       data: {
         use_profile: true,
         title: 'Localização',
       },
     });
+    currentSort++;
   }
 
   // 8. Socials Block (if selected)
@@ -251,13 +271,15 @@ export async function generateCatalogFromWizard(
     blocksToInsert.push({
       catalog_id: catalog.id,
       type: 'socials',
-      sort: currentSort++,
+      sort: currentSort,
       visible: true,
+      anchor_slug: generateAnchorSlug('socials', currentSort),
       data: {
         use_profile: true,
         title: 'Redes Sociais',
       },
     });
+    currentSort++;
   }
 
   // Insert all blocks
@@ -283,4 +305,8 @@ function generateSlug(title: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .substring(0, 50);
+}
+
+function generateAnchorSlug(type: string, sort: number): string {
+  return `${type}-${sort}-${Date.now()}`;
 }

@@ -142,24 +142,19 @@ export default function InformacoesNegocio() {
           })}
         </div>
 
-        {/* Testimonials Card (separate) */}
-        <Card
-          className="cursor-pointer hover:shadow-md transition-shadow"
-          onClick={() => navigate("/depoimentos")}
-        >
+        {/* Testimonials Card (coming soon) */}
+        <Card className="opacity-60">
           <CardContent className="p-6">
             <div className="flex items-start gap-4">
               <div className="text-4xl">💬</div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-lg mb-1">
-                  Depoimentos
-                </h3>
-                <p className="text-sm text-muted-foreground mb-3">
+              <div className="flex-1 space-y-3">
+                <h3 className="font-semibold text-lg">Depoimentos</h3>
+                <p className="text-sm text-muted-foreground">
                   Avaliações dos seus clientes
                 </p>
-                <Button variant="outline" size="sm" className="w-full">
-                  Gerenciar depoimentos
-                </Button>
+                <div className="text-xs text-muted-foreground bg-muted px-3 py-2 rounded-md">
+                  🚧 Em breve: gerenciador de depoimentos
+                </div>
               </div>
             </div>
           </CardContent>
