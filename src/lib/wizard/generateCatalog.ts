@@ -23,6 +23,12 @@ export async function generateCatalogFromWizard(
         title: state.title,
         slug: slug,
         status: "publicado",
+        link_ativo: true,
+        settings: {
+          use_brand_colors: true,
+          show_whatsapp_bubble: false,
+          show_bottom_navigation: false,
+        },
       })
       .select()
       .single();

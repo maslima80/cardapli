@@ -18,6 +18,7 @@ import { NavigationSettings } from "./NavigationSettings";
 import { CatalogosBlockSettings } from "./blocks/CatalogosBlockSettings";
 import { ExternalLinksBlockSettings } from "./settings/ExternalLinksBlockSettings";
 import { ProfileHeaderBlockSettings } from "./blocks/ProfileHeaderBlockSettings";
+import { HowToBuySettings } from "./settings/HowToBuySettings";
 import { supabase } from "@/integrations/supabase/client";
 import { extractVideoInfo } from "@/lib/external-media";
 
@@ -1851,6 +1852,18 @@ export const BlockSettingsDrawer = ({
           <ProfileHeaderBlockSettings
             data={formData}
             onUpdate={(updatedData) => setFormData(updatedData)}
+          />
+        );
+
+      case "how_to_buy":
+      case "delivery_pickup":
+      case "shipping_info":
+      case "payments_info":
+      case "policy_info":
+        return (
+          <HowToBuySettings
+            data={formData}
+            onChange={(updatedData) => setFormData(updatedData)}
           />
         );
 
