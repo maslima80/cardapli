@@ -3,6 +3,7 @@ import { useParams, Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { BlockRendererPremium } from "@/components/catalog/BlockRendererPremium";
+import { CatalogBlocksLayout } from "@/components/catalog/CatalogBlocksLayout";
 import { SectionNavigation } from "@/components/catalog/SectionNavigation";
 import { BottomNavigation } from "@/components/catalog/BottomNavigation";
 import { SimpleThemeProvider } from "@/components/theme/SimpleThemeProvider";
@@ -357,20 +358,16 @@ const PublicCatalogPage = () => {
       {showSectionNav && <SectionNavigation sections={sections} />}
       {showBottomNav && <BottomNavigation items={bottomNavItems} />}
       
-      {blocks.map((block, index) => (
-        <BlockRendererPremium
-          key={block.id}
-          block={block}
+      {blocks.length > 0 ? (
+        <CatalogBlocksLayout
+          blocks={blocks}
           profile={profile}
           userId={profile?.id}
           userSlug={userSlug}
           catalogSlug={catalogSlug}
           catalogTitle={catalog?.title}
-          index={index}
         />
-      ))}
-
-      {blocks.length === 0 && (
+      ) : (
         <div className="container max-w-[1120px] mx-auto text-center py-24 px-4">
           <p className="text-muted-foreground">
             Este catálogo ainda não tem conteúdo.

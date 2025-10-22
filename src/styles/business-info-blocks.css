@@ -1,0 +1,162 @@
+/**
+ * Business Info Blocks - Cohesive styling
+ * 
+ * Consistent padding, hover effects, and visual rhythm
+ * for all specialized business info blocks
+ */
+
+/* Base card styling for all info blocks */
+.business-info-card {
+  @apply rounded-2xl transition-all duration-300;
+  padding: 24px;
+}
+
+/* Hover effect - subtle lift */
+.business-info-card:hover {
+  @apply shadow-sm;
+  transform: translateY(-1px);
+}
+
+/* Specific block styles */
+
+/* Como Comprar - Warm accent */
+.how-to-buy-block {
+  @apply bg-primary/5 border border-primary/10;
+}
+
+.how-to-buy-block:hover {
+  @apply bg-primary/10 border-primary/20;
+}
+
+/* Delivery & Pickup - Neutral */
+.delivery-pickup-block {
+  @apply bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800;
+}
+
+/* Shipping - Neutral */
+.shipping-block {
+  @apply bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800;
+}
+
+/* Payments - Light background */
+.payments-block {
+  @apply bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800;
+}
+
+/* Policy - Subtle blue */
+.policy-block {
+  @apply bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200/50 dark:border-blue-800/50;
+}
+
+/* Group containers */
+.business-info-group {
+  @apply space-y-3 rounded-2xl p-4;
+}
+
+.business-info-group.buying-process {
+  @apply bg-muted/20;
+}
+
+.business-info-group.payment-policy {
+  @apply bg-muted/10;
+}
+
+/* Section titles */
+.business-info-section-title {
+  @apply text-sm text-muted-foreground uppercase tracking-wide font-medium mb-4;
+}
+
+/* Consistent inner spacing */
+.business-info-content {
+  @apply space-y-4;
+}
+
+/* Chip/badge styling */
+.business-info-chip {
+  @apply inline-flex items-center px-3 py-1.5 rounded-full text-sm;
+  @apply bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300;
+  @apply border border-slate-200 dark:border-slate-700;
+  @apply transition-colors duration-200;
+}
+
+.business-info-chip:hover {
+  @apply bg-slate-200 dark:bg-slate-700;
+}
+
+/* Payment badges */
+.payment-badge {
+  @apply inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium;
+  @apply bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700;
+  @apply transition-all duration-200;
+}
+
+.payment-badge:hover {
+  @apply border-primary shadow-sm;
+  transform: translateY(-1px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .business-info-card {
+    padding: 20px;
+  }
+  
+  .business-info-group {
+    padding: 12px;
+  }
+}
+
+/* Animation on scroll (optional - requires Framer Motion or Intersection Observer) */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.business-info-card.animate-in {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* Smooth transitions between blocks */
+.business-info-card + .business-info-card {
+  margin-top: 12px;
+}
+
+/* Max width for readability */
+.business-info-text {
+  @apply max-w-2xl;
+}
+
+/* Icon consistency */
+.business-info-icon {
+  @apply w-5 h-5 flex-shrink-0;
+  color: var(--accent-color, hsl(var(--primary)));
+}
+
+/* Numbered steps */
+.business-info-step-number {
+  @apply w-10 h-10 rounded-full flex items-center justify-center font-bold;
+  @apply bg-primary text-primary-foreground;
+}
+
+/* Callout styles for policy block */
+.business-info-callout {
+  @apply rounded-lg p-4 border-l-4;
+}
+
+.business-info-callout.neutral {
+  @apply bg-slate-50 dark:bg-slate-900/50 border-slate-300 dark:border-slate-700;
+}
+
+.business-info-callout.info {
+  @apply bg-blue-50 dark:bg-blue-950/20 border-blue-400 dark:border-blue-600;
+}
+
+.business-info-callout.warning {
+  @apply bg-yellow-50 dark:bg-yellow-950/20 border-yellow-400 dark:border-yellow-600;
+}
