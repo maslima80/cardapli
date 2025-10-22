@@ -76,6 +76,26 @@ currentSort++;
 
 ---
 
+### **Issue 3: 400 Error - Invalid catalog status value** ❌→✅
+
+**Error:**
+```
+new row for relation "catalogs" violates check constraint "catalogs_status_check"
+```
+
+**Root Cause:**
+- Catalog generation was using `status: "published"`
+- The `catalogs` table constraint only allows: `'rascunho'`, `'publicado'`, `'draft'`, `'public'`, `'unlisted'`
+- `"published"` is not a valid value
+
+**Fix:**
+- Changed `status: "published"` to `status: "publicado"`
+- This is the correct Portuguese value for published catalogs
+
+**File:** `src/lib/wizard/generateCatalog.ts`
+
+---
+
 ## Testing Status
 
 ### **Before Fixes:**
