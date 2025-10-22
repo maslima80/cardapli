@@ -163,7 +163,7 @@ export const BlockSettingsDrawer = ({
   const renderFields = () => {
     if (!block) return null;
 
-    const blocksWithAnchors = ["cover", "text", "heading", "testimonials", "faq", "benefits", "product_grid"];
+    const blocksWithAnchors = ["cover", "text", "heading", "testimonials", "faq", "benefits", "informacoes", "product_grid"];
     const showAnchorField = blocksWithAnchors.includes(block?.type || "");
 
     switch (block.type) {
@@ -1007,12 +1007,13 @@ export const BlockSettingsDrawer = ({
         );
 
       case "benefits":
+      case "informacoes":
         return (
           <>
             <div className="space-y-2">
               <Label>Título do Bloco</Label>
               <Input
-                value={formData.title || "Por que escolher a gente"}
+                value={formData.title || (block.type === "informacoes" ? "Informações importantes" : "Por que escolher a gente")}
                 onChange={(e) => {
                   const newTitle = e.target.value;
                   setFormData({ ...formData, title: newTitle });
