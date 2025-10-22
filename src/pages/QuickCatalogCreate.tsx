@@ -11,7 +11,10 @@ import { toast } from "sonner";
 
 export default function QuickCatalogCreate() {
   const navigate = useNavigate();
+  const [mode, setMode] = useState<'products' | 'categories' | 'tags'>('products');
   const [products, setProducts] = useState<any[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -19,19 +22,21 @@ export default function QuickCatalogCreate() {
   const [coverLayout, setCoverLayout] = useState<"logo-title-image" | "image-top" | "carousel-top" | "full-background">("image-top");
   const [showLogo, setShowLogo] = useState(false);
   const [layout, setLayout] = useState<"grid" | "list" | "grid_cinematic">("grid");
+  
+  // Profile sections to include
+  const [addAbout, setAddAbout] = useState(false);
+  const [addSocials, setAddSocials] = useState(false);
+  const [addLocation, setAddLocation] = useState(false);
 
   useEffect(() => {
-    // Get selected products from sessionStorage
-    const stored = sessionStorage.getItem('quickCatalogProducts');
-    if (!stored) {
-      toast.error("Nenhum produto selecionado");
+    // Get mode from sessionStorage
+    const storedMode = sessionStorage.getItem('quickCatalogMode') as 'products' | 'categories' | 'tags' | null;
+    if (!storedMode) {
+      toast.error("Modo não especificado");
       navigate("/compartilhar");
       return;
     }
-
-    const selectedProducts = JSON.parse(stored);
-    console.log('QuickCatalogCreate - Received products:', selectedProducts.length, selectedProducts.map(p => p.title));
-    setProducts(selectedProducts);
+    setMode(storedMode);
 
     // Auto-fill title with date
     const today = new Date();
@@ -40,13 +45,85 @@ export default function QuickCatalogCreate() {
       month: 'long', 
       year: 'numeric' 
     });
-    setTitle(`Sugestões – ${dateStr}`);
 
-    // Auto-use first product image as cover
-    const firstImage = selectedProducts[0]?.photos?.[0]?.url || 
-                       selectedProducts[0]?.photos?.[0]?.image_url;
-    if (firstImage) {
-      setCoverImage(firstImage);
+    if (storedMode === 'products') {
+      // Get selected products from sessionStorage
+      const stored = sessionStorage.getItem('quickCatalogProducts');
+      if (!stored) {
+        toast.error("Nenhum produto selecionado");
+        navigate("/compartilhar");
+        return;
+      }
+
+      const selectedProducts = JSON.parse(stored);
+      console.log('QuickCatalogCreate - Received products:', selectedProducts.length, selectedProducts.map((p: any) => p.title));
+      setProducts(selectedProducts);
+      setTitle(`Sugestões – ${dateStr}`);
+
+      // Auto-use first product image as cover
+      const firstImage = selectedProducts[0]?.photos?.[0]?.url || 
+                         selectedProducts[0]?.photos?.[0]?.image_url;
+      if (firstImage) {
+        setCoverImage(firstImage);
+      }
+    } else if (storedMode === 'categories') {
+      // Get selected categories
+      const storedCategories = sessionStorage.getItem('quickCatalogCategories');
+      const storedProducts = sessionStorage.getItem('quickCatalogAllProducts');
+      if (!storedCategories || !storedProducts) {
+        toast.error("Dados não encontrados");
+        navigate("/compartilhar");
+        return;
+      }
+
+      const categories = JSON.parse(storedCategories);
+      const allProducts = JSON.parse(storedProducts);
+      setSelectedCategories(categories);
+      setProducts(allProducts);
+      setTitle(`Catálogo por Categorias – ${dateStr}`);
+
+      // Use first product image from first category
+      const firstCategoryProducts = allProducts.filter((p: any) => 
+        p.category === categories[0] || 
+        (Array.isArray(p.categories) && p.categories.includes(categories[0]))
+      );
+      const firstImage = firstCategoryProducts[0]?.photos?.[0]?.url || 
+                         firstCategoryProducts[0]?.photos?.[0]?.image_url;
+      if (firstImage) {
+        setCoverImage(firstImage);
+      }
+    } else if (storedMode === 'tags') {
+      // Get selected tags
+      const storedTags = sessionStorage.getItem('quickCatalogTags');
+      const storedProducts = sessionStorage.getItem('quickCatalogAllProducts');
+      if (!storedTags || !storedProducts) {
+        toast.error("Dados não encontrados");
+        navigate("/compartilhar");
+        return;
+      }
+
+      const tags = JSON.parse(storedTags);
+      const allProducts = JSON.parse(storedProducts);
+      setSelectedTags(tags);
+      setProducts(allProducts);
+      setTitle(`Catálogo por Tags – ${dateStr}`);
+
+      // Use first product image from first tag
+      const firstTagProducts = allProducts.filter((p: any) => {
+        const productTags = p.quality_tags;
+        if (typeof productTags === 'string') {
+          return productTags.split(',').map((t: string) => t.trim()).includes(tags[0]);
+        }
+        if (Array.isArray(productTags)) {
+          return productTags.includes(tags[0]);
+        }
+        return false;
+      });
+      const firstImage = firstTagProducts[0]?.photos?.[0]?.url || 
+                         firstTagProducts[0]?.photos?.[0]?.image_url;
+      if (firstImage) {
+        setCoverImage(firstImage);
+      }
     }
   }, [navigate]);
 
@@ -154,15 +231,18 @@ export default function QuickCatalogCreate() {
 
       if (capaError) throw capaError;
 
-      // Create Product Grid block
-      const productIds = products.map(p => p.id);
-      console.log('Creating catalog with product IDs:', productIds);
-      const { error: gridError } = await supabase
-        .from("catalog_blocks")
-        .insert({
+      // Generate blocks based on mode
+      let currentSort = 1;
+      const blocksToInsert: any[] = [];
+
+      if (mode === 'products') {
+        // Simple product grid for "few products" mode
+        const productIds = products.map(p => p.id);
+        console.log('Creating catalog with product IDs:', productIds);
+        blocksToInsert.push({
           catalog_id: catalog.id,
           type: 'product_grid',
-          sort: 1,
+          sort: currentSort++,
           visible: true,
           data: {
             source_type: 'manual',
@@ -174,11 +254,220 @@ export default function QuickCatalogCreate() {
             limit: productIds.length,
           },
         });
+      } else if (mode === 'categories') {
+        // For each category: create section cover + product grid
+        for (const category of selectedCategories) {
+          // Get products for this category
+          const categoryProducts = products.filter(p => {
+            if (p.category === category) return true;
+            const cats = (p as any).categories;
+            if (Array.isArray(cats) && cats.includes(category)) return true;
+            if (cats && typeof cats === 'object' && Object.values(cats).includes(category)) return true;
+            return false;
+          });
 
-      if (gridError) throw gridError;
+          if (categoryProducts.length === 0) continue;
+
+          const firstImage = categoryProducts[0]?.photos?.[0]?.url || categoryProducts[0]?.photos?.[0]?.image_url;
+
+          // Category cover block
+          blocksToInsert.push({
+            catalog_id: catalog.id,
+            type: 'cover',
+            sort: currentSort++,
+            visible: true,
+            data: {
+              title: category,
+              subtitle: `${categoryProducts.length} produto${categoryProducts.length !== 1 ? 's' : ''}`,
+              layout: 'image-top',
+              align: 'center',
+              image_url: firstImage || '',
+            },
+          });
+
+          // Category products grid
+          blocksToInsert.push({
+            catalog_id: catalog.id,
+            type: 'product_grid',
+            sort: currentSort++,
+            visible: true,
+            data: {
+              source_type: 'manual',
+              selected_product_ids: categoryProducts.map(p => p.id),
+              layout: layout,
+              show_price: true,
+              show_tags: false,
+              show_button: true,
+              limit: categoryProducts.length,
+            },
+          });
+        }
+      } else if (mode === 'tags') {
+        // For each tag: create section cover + product grid
+        for (const tag of selectedTags) {
+          // Get products for this tag
+          const tagProducts = products.filter(p => {
+            const productTags = (p as any).quality_tags;
+            if (typeof productTags === 'string') {
+              return productTags.split(',').map((t: string) => t.trim()).includes(tag);
+            }
+            if (Array.isArray(productTags)) {
+              return productTags.includes(tag);
+            }
+            return false;
+          });
+
+          if (tagProducts.length === 0) continue;
+
+          const firstImage = tagProducts[0]?.photos?.[0]?.url || tagProducts[0]?.photos?.[0]?.image_url;
+
+          // Tag cover block
+          blocksToInsert.push({
+            catalog_id: catalog.id,
+            type: 'cover',
+            sort: currentSort++,
+            visible: true,
+            data: {
+              title: tag,
+              subtitle: `${tagProducts.length} produto${tagProducts.length !== 1 ? 's' : ''}`,
+              layout: 'image-top',
+              align: 'center',
+              image_url: firstImage || '',
+            },
+          });
+
+          // Tag products grid
+          blocksToInsert.push({
+            catalog_id: catalog.id,
+            type: 'product_grid',
+            sort: currentSort++,
+            visible: true,
+            data: {
+              source_type: 'manual',
+              selected_product_ids: tagProducts.map(p => p.id),
+              layout: layout,
+              show_price: true,
+              show_tags: false,
+              show_button: true,
+              limit: tagProducts.length,
+            },
+          });
+        }
+      }
+
+      // Add profile sections if requested (only for categories/tags)
+      // Note: These will be inserted BEFORE product sections, then re-sorted
+      const profileBlocks: any[] = [];
+      
+      if (mode === 'categories' || mode === 'tags') {
+        if (addAbout) {
+          profileBlocks.push({
+            catalog_id: catalog.id,
+            type: 'about_business',
+            sort: 1, // Will be inserted right after main cover
+            visible: true,
+            data: {
+              use_profile: true, // Automatically use text from profile
+            },
+          });
+        }
+
+        if (addSocials) {
+          profileBlocks.push({
+            catalog_id: catalog.id,
+            type: 'socials',
+            sort: 999, // Will go at the end
+            visible: true,
+            data: {},
+          });
+        }
+
+        if (addLocation) {
+          // Get user's locations from profile.locations JSONB column
+          let locationIds: string[] = [];
+          try {
+            const { data: profileData } = await supabase
+              .from("profiles")
+              .select("locations")
+              .eq("id", user.id)
+              .single();
+            
+            if (profileData?.locations && Array.isArray(profileData.locations)) {
+              // Extract IDs from locations array (or generate them if missing)
+              locationIds = profileData.locations
+                .filter((loc: any) => loc && loc.name) // Only include locations with names
+                .map((loc: any, index: number) => loc.id || `location-${index}`);
+            }
+          } catch (e) {
+            console.log("Could not fetch locations:", e);
+          }
+
+          if (locationIds.length > 0) {
+            profileBlocks.push({
+              catalog_id: catalog.id,
+              type: 'location',
+              sort: 998, // Will go at the end, before social
+              visible: true,
+              data: {
+                title: "Nossas Localizações",
+                description: "Conheça nossas unidades e onde nos encontrar",
+                layout: "list",
+                show_map: true,
+                selected_locations: locationIds, // All location IDs
+              },
+            });
+          }
+        }
+      }
+
+      // Now we need to properly order blocks:
+      // 1. Main cover (sort: 0) - already inserted
+      // 2. Sobre block (sort: 1) - if selected
+      // 3. Category/Tag sections (sort: 2+)
+      // 4. Location block (sort: end-1)
+      // 5. Social block (sort: end)
+      
+      const finalBlocks: any[] = [];
+      let finalSort = 1;
+      
+      // Add "Sobre" first if selected
+      const aboutBlock = profileBlocks.find(b => b.type === 'about_business');
+      if (aboutBlock) {
+        finalBlocks.push({ ...aboutBlock, sort: finalSort++ });
+      }
+      
+      // Add all product blocks (categories/tags sections)
+      for (const block of blocksToInsert) {
+        finalBlocks.push({ ...block, sort: finalSort++ });
+      }
+      
+      // Add location block if exists
+      const locationBlock = profileBlocks.find(b => b.type === 'location');
+      if (locationBlock) {
+        finalBlocks.push({ ...locationBlock, sort: finalSort++ });
+      }
+      
+      // Add social block last if exists
+      const socialBlock = profileBlocks.find(b => b.type === 'socials');
+      if (socialBlock) {
+        finalBlocks.push({ ...socialBlock, sort: finalSort++ });
+      }
+
+      // Insert all blocks in correct order
+      if (finalBlocks.length > 0) {
+        const { error: blocksError } = await supabase
+          .from("catalog_blocks")
+          .insert(finalBlocks);
+
+        if (blocksError) throw blocksError;
+      }
 
       // Clear sessionStorage
       sessionStorage.removeItem('quickCatalogProducts');
+      sessionStorage.removeItem('quickCatalogCategories');
+      sessionStorage.removeItem('quickCatalogTags');
+      sessionStorage.removeItem('quickCatalogAllProducts');
+      sessionStorage.removeItem('quickCatalogMode');
 
       // Store catalog info for ShareModal
       sessionStorage.setItem('newCatalog', JSON.stringify({
@@ -225,7 +514,9 @@ export default function QuickCatalogCreate() {
           <div>
             <h1 className="text-2xl font-bold">Criar Catálogo Rápido</h1>
             <p className="text-muted-foreground">
-              {products.length} produto{products.length !== 1 ? "s" : ""} selecionado{products.length !== 1 ? "s" : ""}
+              {mode === 'products' && `${products.length} produto${products.length !== 1 ? "s" : ""} selecionado${products.length !== 1 ? "s" : ""}`}
+              {mode === 'categories' && `${selectedCategories.length} categoria${selectedCategories.length !== 1 ? "s" : ""} selecionada${selectedCategories.length !== 1 ? "s" : ""}`}
+              {mode === 'tags' && `${selectedTags.length} tag${selectedTags.length !== 1 ? "s" : ""} selecionada${selectedTags.length !== 1 ? "s" : ""}`}
             </p>
           </div>
         </div>
@@ -485,6 +776,110 @@ export default function QuickCatalogCreate() {
                 </button>
               </div>
             </div>
+
+            {/* Profile Sections - Only for categories/tags */}
+            {(mode === 'categories' || mode === 'tags') && (
+              <div className="space-y-3">
+                <Label>Seções do Perfil (opcional)</Label>
+                <p className="text-sm text-muted-foreground">
+                  Adicione informações do seu perfil automaticamente
+                </p>
+                <div className="space-y-2">
+                  {/* About */}
+                  <button
+                    type="button"
+                    onClick={() => setAddAbout(!addAbout)}
+                    className={`w-full p-3 rounded-lg border-2 transition-all text-left ${
+                      addAbout
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/20"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="text-2xl">ℹ️</div>
+                        <div>
+                          <p className="text-sm font-medium">Sobre o negócio</p>
+                          <p className="text-xs text-muted-foreground">Descrição e história</p>
+                        </div>
+                      </div>
+                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                        addAbout ? "bg-primary border-primary" : "border-muted-foreground"
+                      }`}>
+                        {addAbout && (
+                          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* Social */}
+                  <button
+                    type="button"
+                    onClick={() => setAddSocials(!addSocials)}
+                    className={`w-full p-3 rounded-lg border-2 transition-all text-left ${
+                      addSocials
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/20"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="text-2xl">📱</div>
+                        <div>
+                          <p className="text-sm font-medium">Redes sociais</p>
+                          <p className="text-xs text-muted-foreground">Instagram, Facebook, etc.</p>
+                        </div>
+                      </div>
+                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                        addSocials ? "bg-primary border-primary" : "border-muted-foreground"
+                      }`}>
+                        {addSocials && (
+                          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* Location */}
+                  <button
+                    type="button"
+                    onClick={() => setAddLocation(!addLocation)}
+                    className={`w-full p-3 rounded-lg border-2 transition-all text-left ${
+                      addLocation
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/20"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="text-2xl">📍</div>
+                        <div>
+                          <p className="text-sm font-medium">Localização</p>
+                          <p className="text-xs text-muted-foreground">Endereço e mapa</p>
+                        </div>
+                      </div>
+                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                        addLocation ? "bg-primary border-primary" : "border-muted-foreground"
+                      }`}>
+                        {addLocation && (
+                          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  💡 O botão flutuante do WhatsApp pode ser ativado depois no editor do catálogo
+                </p>
+              </div>
+            )}
 
             {/* Info */}
             <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">

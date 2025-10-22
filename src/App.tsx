@@ -14,6 +14,7 @@ import PerfilV2 from "./pages/PerfilV2";
 import Produtos from "./pages/Produtos";
 import Catalogos from "./pages/Catalogos";
 import CatalogoEditor from "./pages/CatalogoEditor";
+import CompartilharPurpose from "./pages/CompartilharPurpose";
 import Compartilhar from "./pages/Compartilhar";
 import QuickCatalogCreate from "./pages/QuickCatalogCreate";
 import QuickCatalogSuccess from "./pages/QuickCatalogSuccess";
@@ -50,7 +51,10 @@ const App = () => (
             <Route path="/produtos" element={<Produtos />} />
             <Route path="/catalogos" element={<Catalogos />} />
             <Route path="/catalogos/:id/editor" element={<CatalogoEditor />} />
-            <Route path="/compartilhar" element={<Compartilhar />} />
+            <Route path="/compartilhar" element={<CompartilharPurpose />} />
+            <Route path="/compartilhar/produtos" element={<Compartilhar />} />
+            <Route path="/compartilhar/categorias" element={<Compartilhar />} />
+            <Route path="/compartilhar/tags" element={<Compartilhar />} />
             <Route path="/compartilhar/criar" element={<QuickCatalogCreate />} />
             <Route path="/compartilhar/sucesso" element={<QuickCatalogSuccess />} />
             <Route path="/escolher-slug" element={<EscolherSlug />} />

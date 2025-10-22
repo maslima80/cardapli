@@ -19,6 +19,13 @@ interface Product {
 
 export default function Compartilhar() {
   const navigate = useNavigate();
+  const location = window.location.pathname;
+  
+  // Detect mode from URL
+  const mode = location.includes('/categorias') ? 'categories' 
+    : location.includes('/tags') ? 'tags' 
+    : 'products';
+  
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -160,7 +167,13 @@ export default function Compartilhar() {
   };
 
   const selectAll = () => {
-    setSelectedIds(new Set(filteredProducts.map(p => p.id)));
+    if (mode === 'categories') {
+      setSelectedIds(new Set(categories));
+    } else if (mode === 'tags') {
+      setSelectedIds(new Set(tags));
+    } else {
+      setSelectedIds(new Set(filteredProducts.map(p => p.id)));
+    }
   };
 
   const clearSelection = () => {
@@ -169,7 +182,8 @@ export default function Compartilhar() {
 
   const handleCreateCatalog = () => {
     if (selectedIds.size === 0) {
-      toast.error("Selecione pelo menos um produto");
+      const itemType = mode === 'categories' ? 'categoria' : mode === 'tags' ? 'tag' : 'produto';
+      toast.error(`Selecione pelo menos um${mode === 'categories' ? 'a' : ''} ${itemType}`);
       return;
     }
     
@@ -181,13 +195,30 @@ export default function Compartilhar() {
       localStorage.setItem('compartilhar_last_tag', selectedTag);
     }
     
-    // Navigate to modal or next step with selected products
-    const selectedProducts = filteredProducts.filter(p => selectedIds.has(p.id));
-    console.log('Selected IDs:', Array.from(selectedIds));
-    console.log('Filtered Products:', filteredProducts.length);
-    console.log('Selected Products:', selectedProducts.length, selectedProducts.map(p => p.title));
-    // Store in sessionStorage for the modal
-    sessionStorage.setItem('quickCatalogProducts', JSON.stringify(selectedProducts));
+    // Prepare data based on mode
+    if (mode === 'products') {
+      // Navigate to modal or next step with selected products
+      const selectedProducts = filteredProducts.filter(p => selectedIds.has(p.id));
+      console.log('Selected IDs:', Array.from(selectedIds));
+      console.log('Filtered Products:', filteredProducts.length);
+      console.log('Selected Products:', selectedProducts.length, selectedProducts.map(p => p.title));
+      // Store in sessionStorage for the modal
+      sessionStorage.setItem('quickCatalogProducts', JSON.stringify(selectedProducts));
+      sessionStorage.setItem('quickCatalogMode', 'products');
+    } else if (mode === 'categories') {
+      // Store selected category names
+      const selectedCategoryNames = Array.from(selectedIds);
+      sessionStorage.setItem('quickCatalogCategories', JSON.stringify(selectedCategoryNames));
+      sessionStorage.setItem('quickCatalogMode', 'categories');
+      sessionStorage.setItem('quickCatalogAllProducts', JSON.stringify(products));
+    } else if (mode === 'tags') {
+      // Store selected tag names
+      const selectedTagNames = Array.from(selectedIds);
+      sessionStorage.setItem('quickCatalogTags', JSON.stringify(selectedTagNames));
+      sessionStorage.setItem('quickCatalogMode', 'tags');
+      sessionStorage.setItem('quickCatalogAllProducts', JSON.stringify(products));
+    }
+    
     navigate("/compartilhar/criar");
   };
 
@@ -210,14 +241,20 @@ export default function Compartilhar() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate("/catalogos")}
+            onClick={() => navigate("/compartilhar")}
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">Criar Catálogo Rápido</h1>
+            <h1 className="text-2xl font-bold">
+              {mode === 'categories' ? 'Selecione as Categorias' 
+                : mode === 'tags' ? 'Selecione as Tags'
+                : 'Selecione os Produtos'}
+            </h1>
             <p className="text-muted-foreground">
-              Selecione os produtos que deseja enviar por WhatsApp
+              {mode === 'categories' ? 'Escolha quais categorias incluir no catálogo' 
+                : mode === 'tags' ? 'Escolha quais tags incluir no catálogo'
+                : 'Selecione os produtos que deseja incluir'}
             </p>
           </div>
         </div>
@@ -266,7 +303,11 @@ export default function Compartilhar() {
               variant="outline"
               size="sm"
               onClick={selectAll}
-              disabled={filteredProducts.length === 0}
+              disabled={
+                mode === 'categories' ? categories.length === 0 
+                : mode === 'tags' ? tags.length === 0 
+                : filteredProducts.length === 0
+              }
             >
               Selecionar todos
             </Button>
@@ -281,8 +322,107 @@ export default function Compartilhar() {
           </div>
         </div>
 
-        {/* Products Grid */}
-        {filteredProducts.length === 0 ? (
+        {/* Categories/Tags/Products Grid */}
+        {mode === 'categories' && categories.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {categories.map((category) => {
+              const isSelected = selectedIds.has(category);
+              const categoryProducts = products.filter(p => {
+                if (p.category === category) return true;
+                const cats = (p as any).categories;
+                if (Array.isArray(cats) && cats.includes(category)) return true;
+                if (cats && typeof cats === 'object' && Object.values(cats).includes(category)) return true;
+                return false;
+              });
+              const productCount = categoryProducts.length;
+              const firstImage = categoryProducts[0]?.photos?.[0]?.url || categoryProducts[0]?.photos?.[0]?.image_url;
+
+              return (
+                <div
+                  key={category}
+                  onClick={() => toggleProduct(category)}
+                  className={`bg-card rounded-xl border-2 transition-all duration-200 cursor-pointer transform hover:scale-[1.02] ${
+                    isSelected
+                      ? "border-primary bg-primary/5 shadow-lg"
+                      : "border-border hover:border-primary/50 hover:shadow-md"
+                  }`}
+                >
+                  <div className="p-4 flex gap-3">
+                    <div className="flex-shrink-0 pt-1">
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={() => toggleProduct(category)}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    <div className="w-20 h-20 flex-shrink-0 bg-muted rounded-lg overflow-hidden">
+                      {firstImage ? (
+                        <img src={firstImage} alt={category} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-4xl">🗂️</div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold line-clamp-2 mb-1">{category}</h3>
+                      <p className="text-sm text-muted-foreground">{productCount} produto{productCount !== 1 ? 's' : ''}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : mode === 'tags' && tags.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {tags.map((tag) => {
+              const isSelected = selectedIds.has(tag);
+              const tagProducts = products.filter(p => {
+                const productTags = (p as any).quality_tags;
+                if (typeof productTags === 'string') {
+                  return productTags.split(',').map(t => t.trim()).includes(tag);
+                }
+                if (Array.isArray(productTags)) {
+                  return productTags.includes(tag);
+                }
+                return false;
+              });
+              const productCount = tagProducts.length;
+              const firstImage = tagProducts[0]?.photos?.[0]?.url || tagProducts[0]?.photos?.[0]?.image_url;
+
+              return (
+                <div
+                  key={tag}
+                  onClick={() => toggleProduct(tag)}
+                  className={`bg-card rounded-xl border-2 transition-all duration-200 cursor-pointer transform hover:scale-[1.02] ${
+                    isSelected
+                      ? "border-primary bg-primary/5 shadow-lg"
+                      : "border-border hover:border-primary/50 hover:shadow-md"
+                  }`}
+                >
+                  <div className="p-4 flex gap-3">
+                    <div className="flex-shrink-0 pt-1">
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={() => toggleProduct(tag)}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    <div className="w-20 h-20 flex-shrink-0 bg-muted rounded-lg overflow-hidden">
+                      {firstImage ? (
+                        <img src={firstImage} alt={tag} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-4xl">🏷️</div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold line-clamp-2 mb-1">{tag}</h3>
+                      <p className="text-sm text-muted-foreground">{productCount} produto{productCount !== 1 ? 's' : ''}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : filteredProducts.length === 0 ? (
           <div className="text-center py-16 bg-card rounded-xl border-2 border-dashed border-border">
             <div className="text-6xl mb-4">📦</div>
             <h3 className="text-lg font-semibold mb-2">
@@ -375,7 +515,7 @@ export default function Compartilhar() {
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="font-semibold">
-                  {selectedIds.size} produto{selectedIds.size !== 1 ? "s" : ""} selecionado{selectedIds.size !== 1 ? "s" : ""}
+                  {selectedIds.size} {mode === 'categories' ? 'categoria' : mode === 'tags' ? 'tag' : 'produto'}{selectedIds.size !== 1 ? (mode === 'categories' ? 's' : 's') : ''} selecionado{selectedIds.size !== 1 ? (mode === 'categories' ? 's' : 's') : mode === 'categories' ? 'a' : ''}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   Pronto para criar seu catálogo
