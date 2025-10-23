@@ -317,7 +317,7 @@ export function TestimonialsManager({ onSelect, selectionMode = false }: Testimo
 
       {/* Edit Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle>
               {editingTestimonial?.id ? 'Editar Depoimento' : 'Adicionar Depoimento'}
@@ -436,11 +436,11 @@ export function TestimonialsManager({ onSelect, selectionMode = false }: Testimo
             </div>
 
             {/* Actions */}
-            <div className="flex gap-2 pt-4">
-              <Button variant="outline" onClick={() => setEditDialogOpen(false)} className="flex-1">
+            <div className="flex flex-col sm:flex-row gap-2 pt-4">
+              <Button variant="outline" onClick={() => setEditDialogOpen(false)} className="flex-1 w-full">
                 Cancelar
               </Button>
-              <Button onClick={handleSave} className="flex-1">
+              <Button onClick={handleSave} className="flex-1 w-full">
                 Salvar
               </Button>
             </div>

@@ -12,6 +12,7 @@ import Recuperar from "./pages/Recuperar";
 import Dashboard from "./pages/Dashboard";
 import PerfilV2 from "./pages/PerfilV2";
 import InformacoesNegocio from "./pages/InformacoesNegocio";
+import SubmitReview from "./pages/SubmitReview";
 import Produtos from "./pages/Produtos";
 import Catalogos from "./pages/Catalogos";
 import CatalogoEditor from "./pages/CatalogoEditor";
@@ -60,6 +61,7 @@ const App = () => (
             <Route path="/compartilhar/criar" element={<QuickCatalogCreate />} />
             <Route path="/compartilhar/sucesso" element={<QuickCatalogSuccess />} />
             <Route path="/escolher-slug" element={<EscolherSlug />} />
+            <Route path="/avaliar" element={<SubmitReview />} />
             
             {/* Public routes - /u/:userSlug for profiles and catalogs */}
             <Route path="/u/:userSlug" element={<PublicUserLayout />}>
