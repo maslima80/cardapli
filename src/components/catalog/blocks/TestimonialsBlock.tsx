@@ -1,44 +1,81 @@
 import { useRef, useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Quote, ChevronLeft, ChevronRight } from "lucide-react";
+import { Quote, ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 
 interface TestimonialsBlockProps {
   data: {
     title?: string;
+    source?: "manual" | "table";
+    selected_testimonial_ids?: string[];
     items?: Array<{
       name: string;
       quote: string;
       avatar_url?: string;
-      role?: string; // New optional role field
+      role?: string;
+      rating?: number;
     }>;
     background?: "default" | "accent" | "cards_elevated";
   };
 }
 
 export const TestimonialsBlock = ({ data }: TestimonialsBlockProps) => {
-  console.log("TestimonialsBlock received data:", data);
-  console.log("TestimonialsBlock data.items type:", data.items ? typeof data.items : "undefined");
-  console.log("TestimonialsBlock data.items value:", data.items);
-  
-  // Ensure items is always an array, even if data.items is undefined or null
-  let items = [];
-  
-  if (data.items) {
-    if (Array.isArray(data.items)) {
-      items = data.items.filter(item => item && item.name && item.quote);
-    } else if (typeof data.items === 'object') {
-      // Convert object to array if needed
-      items = Object.values(data.items).filter((item: any) => item && item.name && item.quote);
-    }
-  }
-  
-  console.log("TestimonialsBlock items after processing:", items);
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(data.source === "table");
   const title = data.title || "Depoimentos";
   const [activeIndex, setActiveIndex] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Load testimonials from table or use manual items
+  useEffect(() => {
+    async function loadTestimonials() {
+      if (data.source === "table" && data.selected_testimonial_ids && data.selected_testimonial_ids.length > 0) {
+        try {
+          const { data: testimonials, error } = await supabase
+            .from('testimonials')
+            .select('*')
+            .in('id', data.selected_testimonial_ids)
+            .eq('status', 'approved');
+
+          if (error) throw error;
+
+          // Map testimonials to items format
+          const mappedItems = (testimonials || []).map(t => ({
+            name: t.author_name,
+            quote: t.content,
+            avatar_url: t.author_photo_url,
+            role: t.author_role,
+            rating: t.rating,
+          }));
+
+          setItems(mappedItems);
+        } catch (error) {
+          console.error('Error loading testimonials:', error);
+          setItems([]);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        // Use manual items
+        let processedItems = [];
+        if (data.items) {
+          if (Array.isArray(data.items)) {
+            processedItems = data.items.filter(item => item && item.name && item.quote);
+          } else if (typeof data.items === 'object') {
+            processedItems = Object.values(data.items).filter((item: any) => item && item.name && item.quote);
+          }
+        }
+        setItems(processedItems);
+        setLoading(false);
+      }
+    }
+
+    loadTestimonials();
+  }, [data.source, data.selected_testimonial_ids, data.items]);
   
   // Handle background style
   const getBackgroundClass = () => {
@@ -203,10 +240,25 @@ export const TestimonialsBlock = ({ data }: TestimonialsBlockProps) => {
                           </AvatarFallback>
                         </Avatar>
                         
-                        <div>
+                        <div className="flex-1">
                           <p className="font-semibold text-sm">{item.name}</p>
                           {item.role && (
                             <p className="text-xs text-muted-foreground">{item.role}</p>
+                          )}
+                          {item.rating && (
+                            <div className="flex gap-0.5 mt-1">
+                              {Array.from({ length: 5 }).map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={cn(
+                                    "w-3 h-3",
+                                    i < item.rating!
+                                      ? "fill-yellow-400 text-yellow-400"
+                                      : "text-gray-300"
+                                  )}
+                                />
+                              ))}
+                            </div>
                           )}
                         </div>
                       </div>

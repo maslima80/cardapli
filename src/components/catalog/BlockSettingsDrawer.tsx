@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect } from "react";
 import { SimpleImageUploader } from "./SimpleImageUploader";
 import { ProductPickerModal } from "./ProductPickerModal";
+import { TestimonialPickerModal } from "./TestimonialPickerModal";
 import { MultiSelectChips } from "./MultiSelectChips";
 import { ProductGridBlockSettings } from "./ProductGridBlockSettings";
 import { LocationBlockSettings } from "./settings/LocationBlockSettings";
@@ -39,6 +40,7 @@ export const BlockSettingsDrawer = ({
 }: BlockSettingsDrawerProps) => {
   const [formData, setFormData] = useState(block?.data || {});
   const [productPickerOpen, setProductPickerOpen] = useState(false);
+  const [testimonialPickerOpen, setTestimonialPickerOpen] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [userId, setUserId] = useState<string | undefined>(undefined);
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
@@ -861,8 +863,62 @@ export const BlockSettingsDrawer = ({
               />
             )}
 
-            <div className="space-y-3">
-              <Label>Depoimentos</Label>
+            {/* Source Selection */}
+            <div className="space-y-2">
+              <Label>Origem dos Depoimentos</Label>
+              <Select
+                value={formData.source || "manual"}
+                onValueChange={(value) => {
+                  setFormData({ ...formData, source: value });
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a origem" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="manual">Adicionar manualmente</SelectItem>
+                  <SelectItem value="table">Usar da tabela de depoimentos</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {formData.source === "table" 
+                  ? "Selecione depoimentos salvos na sua biblioteca"
+                  : "Adicione depoimentos diretamente neste bloco"}
+              </p>
+            </div>
+
+            {formData.source === "table" ? (
+              // From Table - Show Testimonial Picker
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label>Depoimentos Selecionados</Label>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setTestimonialPickerOpen(true)}
+                  >
+                    Selecionar Depoimentos
+                  </Button>
+                </div>
+                {(formData.selected_testimonial_ids || []).length === 0 ? (
+                  <div className="text-center py-8 border-2 border-dashed rounded-lg">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Nenhum depoimento selecionado
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Clique em "Selecionar Depoimentos" para escolher
+                    </p>
+                  </div>
+                ) : (
+                  <div className="text-sm text-muted-foreground">
+                    {formData.selected_testimonial_ids.length} depoimento(s) selecionado(s)
+                  </div>
+                )}
+              </div>
+            ) : (
+              // Manual - Show Add Form
+              <div className="space-y-3">
+                <Label>Depoimentos</Label>
               {(formData.items || []).map((item: any, index: number) => (
                 <div key={index} className="p-4 border rounded-xl space-y-2">
                   <div className="flex justify-between items-center mb-2">
@@ -909,22 +965,23 @@ export const BlockSettingsDrawer = ({
                   />
                 </div>
               ))}
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => {
-                  console.log("Adding new testimonial, current formData:", formData);
-                  console.log("Current items array:", formData.items);
-                  const newItem = { name: "", quote: "", avatar_url: "", role: "" };
-                  const items = Array.isArray(formData.items) ? [...formData.items, newItem] : [newItem];
-                  console.log("New items array:", items);
-                  setFormData({ ...formData, items });
-                  console.log("Updated formData:", { ...formData, items });
-                }}
-              >
-                + Adicionar Depoimento
-              </Button>
-            </div>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    console.log("Adding new testimonial, current formData:", formData);
+                    console.log("Current items array:", formData.items);
+                    const newItem = { name: "", quote: "", avatar_url: "", role: "" };
+                    const items = Array.isArray(formData.items) ? [...formData.items, newItem] : [newItem];
+                    console.log("New items array:", items);
+                    setFormData({ ...formData, items });
+                    console.log("Updated formData:", { ...formData, items });
+                  }}
+                >
+                  + Adicionar Depoimento
+                </Button>
+              </div>
+            )}
           </>
         );
 
@@ -1916,6 +1973,16 @@ export const BlockSettingsDrawer = ({
           </Button>
         </div>
       </SheetContent>
+
+      {/* Testimonial Picker Modal */}
+      <TestimonialPickerModal
+        open={testimonialPickerOpen}
+        onOpenChange={setTestimonialPickerOpen}
+        selectedIds={formData.selected_testimonial_ids || []}
+        onConfirm={(selectedIds) => {
+          setFormData({ ...formData, selected_testimonial_ids: selectedIds });
+        }}
+      />
     </Sheet>
   );
 };
