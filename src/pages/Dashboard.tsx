@@ -69,29 +69,6 @@ const Dashboard = () => {
     checkSlug();
   }, [user, navigate]);
 
-  const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error("Erro ao sair");
-    } else {
-      toast.success("Você saiu da sua conta");
-      navigate("/");
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Carregando...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const displayName = userSlug || user?.email?.split("@")[0] || "Usuário";
-
   // Check if user is new (show welcome modal)
   useEffect(() => {
     const checkIfNewUser = async () => {
@@ -121,6 +98,29 @@ const Dashboard = () => {
     
     checkCompletion();
   }, [user, progress]);
+
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast.error("Erro ao sair");
+    } else {
+      toast.success("Você saiu da sua conta");
+      navigate("/");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const displayName = userSlug || user?.email?.split("@")[0] || "Usuário";
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
@@ -165,11 +165,9 @@ const Dashboard = () => {
           </div>
 
           {/* Onboarding Progress */}
-          {user && (
-            <div className="mb-8">
-              <OnboardingProgress userId={user.id} />
-            </div>
-          )}
+          <div className="mb-8">
+            {user && <OnboardingProgress userId={user.id} />}
+          </div>
 
           {/* Action Cards */}
           <div className="grid md:grid-cols-3 gap-6 mb-12">
@@ -220,9 +218,7 @@ const Dashboard = () => {
       </main>
 
       {/* Onboarding Hints */}
-      {user && progress && (
-        <OnboardingHints userId={user.id} progress={progress} />
-      )}
+      {user && progress && <OnboardingHints userId={user.id} progress={progress} />}
 
       {/* Welcome Modal */}
       <OnboardingWelcomeModal
