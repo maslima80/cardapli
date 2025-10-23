@@ -184,16 +184,18 @@ export function CatalogBlocksLayout({
   const groupedBlocks = groupBlocks(blocks);
 
   return (
-    <div className="max-w-3xl mx-auto px-6 md:px-8">
+    <div className="max-w-3xl mx-auto px-6 md:px-8 pb-20">
       {groupedBlocks.map((group, groupIndex) => {
         const spacing = getGroupSpacing(group.group);
         const background = getGroupBackground(group.group);
+        const isLastGroup = groupIndex === groupedBlocks.length - 1;
 
         return (
           <CinematicSection
             key={`group-${groupIndex}`}
             spacing={spacing}
             background={background}
+            className={isLastGroup ? 'mb-16' : ''}
           >
             {/* Blocks within group */}
             <div className={group.blocks.length > 1 ? 'space-y-6' : ''}>

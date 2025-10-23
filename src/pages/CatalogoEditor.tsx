@@ -594,21 +594,22 @@ const CatalogoEditor = () => {
 
             {/* Navigation Setup Prompt */}
             {blocks.length >= 2 && !blocks.some(b => b.navigation_label) && (
-              <div className="mt-6 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 border-2 border-purple-200 dark:border-purple-800 rounded-2xl p-6">
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center">
-                    <Navigation className="w-6 h-6 text-white" />
+              <div className="mt-6 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 border-2 border-purple-200 dark:border-purple-800 rounded-2xl p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+                  <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-purple-600 rounded-full flex items-center justify-center">
+                    <Navigation className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-100 mb-1">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base sm:text-lg font-semibold text-purple-900 dark:text-purple-100 mb-1">
                       🚀 Facilite a navegação dos seus clientes!
                     </h3>
-                    <p className="text-sm text-purple-700 dark:text-purple-300 mb-4">
+                    <p className="text-xs sm:text-sm text-purple-700 dark:text-purple-300 mb-3 sm:mb-4 leading-snug">
                       Adicione um menu de navegação para que seus clientes possam pular rapidamente entre as seções do catálogo.
                     </p>
                     <Button
                       onClick={() => setNavManagerOpen(true)}
-                      className="bg-purple-600 hover:bg-purple-700 gap-2"
+                      className="bg-purple-600 hover:bg-purple-700 gap-2 w-full sm:w-auto text-sm"
+                      size="sm"
                     >
                       <Navigation className="w-4 h-4" />
                       Configurar Menu de Navegação
