@@ -16,6 +16,7 @@ import { DeliveryPickupEditor } from "@/components/business-info/editors/Deliver
 import { ShippingEditor } from "@/components/business-info/editors/ShippingEditor";
 import { PaymentsEditor } from "@/components/business-info/editors/PaymentsEditor";
 import { PolicyEditor } from "@/components/business-info/editors/PolicyEditor";
+import { TestimonialsManager } from "@/components/testimonials/TestimonialsManager";
 
 export default function InformacoesNegocio() {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ export default function InformacoesNegocio() {
   const [loading, setLoading] = useState(true);
   const [editingType, setEditingType] = useState<BusinessInfoType | null>(null);
   const [editingSection, setEditingSection] = useState<BusinessInfoSection | null>(null);
+  const [testimonialsOpen, setTestimonialsOpen] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -146,19 +148,22 @@ export default function InformacoesNegocio() {
           })}
         </div>
 
-        {/* Testimonials Card (coming soon) */}
-        <Card className="opacity-60">
+        {/* Testimonials Card */}
+        <Card
+          className="cursor-pointer hover:shadow-md transition-shadow"
+          onClick={() => setTestimonialsOpen(true)}
+        >
           <CardContent className="p-6">
             <div className="flex items-start gap-4">
               <div className="text-4xl">💬</div>
-              <div className="flex-1 space-y-3">
-                <h3 className="font-semibold text-lg">Depoimentos</h3>
-                <p className="text-sm text-muted-foreground">
-                  Avaliações dos seus clientes
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-lg mb-1">Depoimentos</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Gerencie depoimentos para usar em seus catálogos
                 </p>
-                <div className="text-xs text-muted-foreground bg-muted px-3 py-2 rounded-md">
-                  🚧 Em breve: gerenciador de depoimentos
-                </div>
+                <Button variant="outline" size="sm" className="w-full">
+                  Gerenciar Depoimentos
+                </Button>
               </div>
             </div>
           </CardContent>
@@ -209,6 +214,32 @@ export default function InformacoesNegocio() {
           initialData={editingSection}
           onSaved={handleCloseEditor}
         />
+      )}
+
+      {/* Testimonials Manager Dialog */}
+      {testimonialsOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="p-6 border-b flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold">Depoimentos</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Gerencie depoimentos para reutilizar em seus catálogos
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setTestimonialsOpen(false)}
+              >
+                ✕
+              </Button>
+            </div>
+            <div className="p-6 overflow-y-auto flex-1">
+              <TestimonialsManager />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

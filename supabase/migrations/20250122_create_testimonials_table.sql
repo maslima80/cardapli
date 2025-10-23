@@ -1,5 +1,8 @@
+-- Drop existing table if it exists (clean slate)
+DROP TABLE IF EXISTS public.testimonials CASCADE;
+
 -- Create global testimonials table for reusable testimonials across catalogs
-CREATE TABLE IF NOT EXISTS public.testimonials (
+CREATE TABLE public.testimonials (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   
@@ -17,13 +20,10 @@ CREATE TABLE IF NOT EXISTS public.testimonials (
   
   -- Timestamps
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  
-  -- Indexes
-  CONSTRAINT testimonials_user_id_idx UNIQUE (user_id, id)
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Create index for faster queries
+-- Create indexes for faster queries
 CREATE INDEX IF NOT EXISTS idx_testimonials_user_id ON public.testimonials(user_id);
 CREATE INDEX IF NOT EXISTS idx_testimonials_featured ON public.testimonials(user_id, featured) WHERE featured = true;
 
