@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { User, Session } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { LogOut, Layout, Package, UserCircle } from "lucide-react";
-import { OnboardingProgress, OnboardingHints, OnboardingWelcomeModal, ConfettiCelebration } from "@/components/onboarding";
+import { OnboardingProgress, OnboardingHints, ConfettiCelebration } from "@/components/onboarding";
+import { OnboardingWelcomeWithSlug } from "@/components/onboarding/OnboardingWelcomeWithSlug";
 import { useOnboardingProgress } from "@/hooks/useOnboardingProgress";
 
 const Dashboard = () => {
@@ -14,7 +15,7 @@ const Dashboard = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [userSlug, setUserSlug] = useState<string | null>(null);
-  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [showWelcomeWithSlug, setShowWelcomeWithSlug] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [checkingSlug, setCheckingSlug] = useState(true);
   
@@ -48,60 +49,55 @@ const Dashboard = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  // Check if user has a slug, redirect to slug selection if not
+  // Check if user has a slug, show welcome modal if not
   useEffect(() => {
-    const checkSlug = async () => {
-      if (!user) {
-        setCheckingSlug(false);
-        return;
-      }
+    if (!user) {
+      setCheckingSlug(false);
+      return;
+    }
 
+    const checkSlug = async () => {
+      console.log('[Dashboard] Checking slug for user:', user.id);
+      
       try {
-        const { data: profile, error } = await supabase
-          .from("profiles")
-          .select("slug")
-          .eq("id", user.id)
-          .single();
+        // Use RPC function to get slug
+        const { data: slug, error } = await supabase
+          .rpc('get_user_slug', { user_id: user.id });
+
+        console.log('[Dashboard] Slug from RPC:', slug);
 
         if (error) {
-          console.error('Error checking slug:', error);
+          console.error('[Dashboard] Error checking slug:', error);
+        }
+
+        // If no slug, show welcome modal with slug selection
+        if (!slug) {
+          console.log('[Dashboard] NO SLUG - Showing welcome modal');
+          setShowWelcomeWithSlug(true);
           setCheckingSlug(false);
           return;
         }
 
-        if (profile) {
-          setUserSlug(profile.slug);
-          if (!profile.slug) {
-            // User doesn't have a slug - redirect to slug selection
-            navigate("/escolher-slug");
-            return; // Don't set checkingSlug to false, keep loading
-          }
-        }
-        
+        // Has slug - set it and continue
+        console.log('[Dashboard] Has slug:', slug);
+        setUserSlug(slug);
         setCheckingSlug(false);
-      } catch (error) {
-        console.error('Error in checkSlug:', error);
+      } catch (err) {
+        console.error('[Dashboard] Exception in checkSlug:', err);
         setCheckingSlug(false);
       }
     };
 
     checkSlug();
-  }, [user, navigate]);
+  }, [user]);
 
-  // Check if user is new (show welcome modal)
-  useEffect(() => {
-    const checkIfNewUser = async () => {
-      if (!user) return;
-      
-      const hasSeenWelcome = localStorage.getItem(`welcome_shown_${user.id}`);
-      if (!hasSeenWelcome && progress && progress.completionPercentage === 0) {
-        setShowWelcomeModal(true);
-        localStorage.setItem(`welcome_shown_${user.id}`, 'true');
-      }
-    };
-    
-    checkIfNewUser();
-  }, [user, progress]);
+  // Handle slug completion
+  const handleSlugComplete = (slug: string) => {
+    console.log('[Dashboard] Slug completed:', slug);
+    setUserSlug(slug);
+    setShowWelcomeWithSlug(false);
+    toast.success('Bem-vindo ao Cardapli! 🎉');
+  };
 
   // Check if user just completed onboarding (show celebration)
   useEffect(() => {
@@ -239,12 +235,14 @@ const Dashboard = () => {
       {/* Onboarding Hints */}
       {user && progress && <OnboardingHints userId={user.id} progress={progress} />}
 
-      {/* Welcome Modal */}
-      <OnboardingWelcomeModal
-        open={showWelcomeModal}
-        onOpenChange={setShowWelcomeModal}
-        userName={displayName}
-      />
+      {/* Welcome Modal with Slug Selection */}
+      {user && (
+        <OnboardingWelcomeWithSlug
+          open={showWelcomeWithSlug}
+          onComplete={handleSlugComplete}
+          userId={user.id}
+        />
+      )}
 
       {/* Celebration Modal */}
       <ConfettiCelebration

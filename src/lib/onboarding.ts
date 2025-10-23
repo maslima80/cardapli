@@ -210,14 +210,22 @@ export async function checkProfileComplete(userId: string): Promise<boolean> {
       .from('profiles')
       .select('business_name, logo_url, whatsapp')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error checking profile completion:', error);
+      return false;
+    }
+
+    if (!profile) {
+      // Profile doesn't exist yet
+      return false;
+    }
 
     return !!(
-      profile?.business_name &&
-      profile?.logo_url &&
-      profile?.whatsapp
+      profile.business_name &&
+      profile.logo_url &&
+      profile.whatsapp
     );
   } catch (error) {
     console.error('Error checking profile completion:', error);
@@ -234,11 +242,19 @@ export async function checkThemeComplete(userId: string): Promise<boolean> {
       .from('profiles')
       .select('accent_color')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error checking theme completion:', error);
+      return false;
+    }
 
-    return !!profile?.accent_color;
+    if (!profile) {
+      // Profile doesn't exist yet
+      return false;
+    }
+
+    return !!profile.accent_color;
   } catch (error) {
     console.error('Error checking theme completion:', error);
     return false;
