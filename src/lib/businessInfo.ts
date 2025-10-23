@@ -43,7 +43,7 @@ export async function upsertBusinessInfo(
   type: BusinessInfoType,
   scope: BusinessInfoScope = 'global',
   scopeId: string | undefined,
-  data: { title?: string; items?: any[]; content_md?: string }
+  data: { title?: string; items?: any[] | any; content_md?: string }
 ) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Not authenticated");

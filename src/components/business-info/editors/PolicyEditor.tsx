@@ -27,17 +27,23 @@ interface PolicyEditorProps {
   initialData?: {
     title?: string;
     content_md?: string;
+    items?: any;
+    callout?: PolicyCallout;
+    icon?: 'shield-check' | 'info';
   };
   onSaved?: () => void;
 }
 
 export function PolicyEditor({ open, onOpenChange, initialData, onSaved }: PolicyEditorProps) {
+  // Extract callout and icon from items JSONB field
+  const itemsData = initialData?.items as any;
+  
   const [title, setTitle] = useState(initialData?.title || 'Garantia & Política');
   const [content, setContent] = useState(
     initialData?.content_md || 'Trocas apenas em caso de defeito de fabricação em até 7 dias.'
   );
-  const [callout, setCallout] = useState<PolicyCallout>('info');
-  const [icon, setIcon] = useState<'shield-check' | 'info'>('shield-check');
+  const [callout, setCallout] = useState<PolicyCallout>(itemsData?.callout || initialData?.callout || 'info');
+  const [icon, setIcon] = useState<'shield-check' | 'info'>(itemsData?.icon || initialData?.icon || 'shield-check');
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
@@ -46,6 +52,7 @@ export function PolicyEditor({ open, onOpenChange, initialData, onSaved }: Polic
       await upsertBusinessInfo('guarantee', 'global', undefined, {
         title,
         content_md: content,
+        items: { callout, icon }, // Store in items as JSONB
       });
       toast.success('Garantia & Política salvo com sucesso!');
       onSaved?.();
