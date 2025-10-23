@@ -77,7 +77,7 @@ export function TestimonialPickerModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>Selecionar Depoimentos</DialogTitle>
         </DialogHeader>
@@ -100,8 +100,10 @@ export function TestimonialPickerModal({
                 <div
                   key={testimonial.id}
                   className={cn(
-                    "p-4 border rounded-lg cursor-pointer transition-colors hover:bg-accent",
-                    selected.includes(testimonial.id) && "border-primary bg-accent"
+                    "p-3 sm:p-4 border rounded-lg cursor-pointer transition-all",
+                    selected.includes(testimonial.id) 
+                      ? "border-primary bg-primary/10 hover:bg-primary/15" 
+                      : "hover:bg-accent/50"
                   )}
                   onClick={() => toggleSelection(testimonial.id)}
                 >
@@ -113,16 +115,16 @@ export function TestimonialPickerModal({
                     />
                     
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <div className="min-w-0">
-                          <h4 className="font-semibold truncate">{testimonial.author_name}</h4>
+                      <div className="flex items-start justify-between gap-2 mb-1 flex-wrap">
+                        <div className="min-w-0 flex-1">
+                          <h4 className="font-semibold text-sm sm:text-base truncate">{testimonial.author_name}</h4>
                           {testimonial.author_role && (
-                            <p className="text-sm text-muted-foreground truncate">
+                            <p className="text-xs sm:text-sm text-muted-foreground truncate">
                               {testimonial.author_role}
                             </p>
                           )}
                         </div>
-                        <div className="flex gap-2 flex-shrink-0">
+                        <div className="flex gap-1 sm:gap-2 flex-shrink-0">
                           {testimonial.featured && (
                             <Badge variant="secondary" className="text-xs">
                               Destaque
@@ -163,15 +165,22 @@ export function TestimonialPickerModal({
               ))}
             </div>
 
-            <div className="flex items-center justify-between pt-4 border-t">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-4 border-t">
               <p className="text-sm text-muted-foreground">
                 {selected.length} depoimento(s) selecionado(s)
               </p>
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={() => onOpenChange(false)}>
+              <div className="flex gap-2 w-full sm:w-auto">
+                <Button 
+                  variant="outline" 
+                  onClick={() => onOpenChange(false)}
+                  className="flex-1 sm:flex-initial"
+                >
                   Cancelar
                 </Button>
-                <Button onClick={handleConfirm}>
+                <Button 
+                  onClick={handleConfirm}
+                  className="flex-1 sm:flex-initial"
+                >
                   Confirmar Seleção
                 </Button>
               </div>

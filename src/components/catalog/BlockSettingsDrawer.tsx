@@ -854,15 +854,6 @@ export const BlockSettingsDrawer = ({
               />
             </div>
 
-            {showAnchorField && (
-              <NavigationSettings
-                block={block}
-                onUpdate={onUpdate}
-                blockTitle={formData.title}
-                generateSlug={generateSlug}
-              />
-            )}
-
             {/* Source Selection */}
             <div className="space-y-2">
               <Label>Origem dos Depoimentos</Label>
