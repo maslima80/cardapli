@@ -15,6 +15,7 @@ const Dashboard = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [userSlug, setUserSlug] = useState<string | null>(null);
+  const [businessName, setBusinessName] = useState<string | null>(null);
   const [showWelcomeWithSlug, setShowWelcomeWithSlug] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [checkingSlug, setCheckingSlug] = useState(true);
@@ -60,27 +61,31 @@ const Dashboard = () => {
       console.log('[Dashboard] Checking slug for user:', user.id);
       
       try {
-        // Use RPC function to get slug
-        const { data: slug, error } = await supabase
-          .rpc('get_user_slug', { user_id: user.id });
+        // Fetch profile data including slug and business name
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('slug, business_name')
+          .eq('id', user.id)
+          .single();
 
-        console.log('[Dashboard] Slug from RPC:', slug);
+        console.log('[Dashboard] Profile data:', profile);
 
         if (error) {
-          console.error('[Dashboard] Error checking slug:', error);
+          console.error('[Dashboard] Error checking profile:', error);
         }
 
         // If no slug, show welcome modal with slug selection
-        if (!slug) {
+        if (!profile || !profile.slug) {
           console.log('[Dashboard] NO SLUG - Showing welcome modal');
           setShowWelcomeWithSlug(true);
           setCheckingSlug(false);
           return;
         }
 
-        // Has slug - set it and continue
-        console.log('[Dashboard] Has slug:', slug);
-        setUserSlug(slug);
+        // Has slug - set it and business name
+        console.log('[Dashboard] Has slug:', profile.slug);
+        setUserSlug(profile.slug);
+        setBusinessName(profile.business_name);
         setCheckingSlug(false);
       } catch (err) {
         console.error('[Dashboard] Exception in checkSlug:', err);
@@ -135,7 +140,7 @@ const Dashboard = () => {
     );
   }
 
-  const displayName = userSlug || user?.email?.split("@")[0] || "Usuário";
+  const displayName = businessName || userSlug || user?.email?.split("@")[0] || "você";
 
   return (
     <div className="min-h-screen bg-gradient-subtle">

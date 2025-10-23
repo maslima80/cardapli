@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,6 +33,7 @@ type Profile = {
 
 export default function PerfilV2() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [profile, setProfile] = useState<Profile>({
     logo_url: null,
     business_name: null,
@@ -54,6 +55,14 @@ export default function PerfilV2() {
   const [saving, setSaving] = useState(false);
   const [userId, setUserId] = useState<string>("");
   const [activeSection, setActiveSection] = useState<string | null>(null);
+
+  // Read section from URL on mount
+  useEffect(() => {
+    const sectionParam = searchParams.get('section');
+    if (sectionParam) {
+      setActiveSection(sectionParam);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     fetchProfile();
