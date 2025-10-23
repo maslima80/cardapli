@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { User, Session } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { LogOut, Layout, Package, UserCircle } from "lucide-react";
+import { OnboardingProgress, OnboardingHints, OnboardingWelcomeModal } from "@/components/onboarding";
+import { useOnboardingProgress } from "@/hooks/useOnboardingProgress";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -12,6 +14,10 @@ const Dashboard = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [userSlug, setUserSlug] = useState<string | null>(null);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  
+  // Get onboarding progress
+  const { progress } = useOnboardingProgress(user?.id || null);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -85,6 +91,21 @@ const Dashboard = () => {
 
   const displayName = userSlug || user?.email?.split("@")[0] || "Usuário";
 
+  // Check if user is new (show welcome modal)
+  useEffect(() => {
+    const checkIfNewUser = async () => {
+      if (!user) return;
+      
+      const hasSeenWelcome = localStorage.getItem(`welcome_shown_${user.id}`);
+      if (!hasSeenWelcome && progress && progress.completionPercentage === 0) {
+        setShowWelcomeModal(true);
+        localStorage.setItem(`welcome_shown_${user.id}`, 'true');
+      }
+    };
+    
+    checkIfNewUser();
+  }, [user, progress]);
+
   return (
     <div className="min-h-screen bg-gradient-subtle">
       {/* Header */}
@@ -118,7 +139,7 @@ const Dashboard = () => {
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="max-w-5xl mx-auto">
           {/* Welcome Section */}
-          <div className="mb-12 animate-fade-in">
+          <div className="mb-8 animate-fade-in">
             <h1 className="text-3xl sm:text-4xl font-bold mb-2">
               Bem-vindo(a), {displayName} 👋
             </h1>
@@ -126,6 +147,13 @@ const Dashboard = () => {
               Crie e gerencie seus catálogos digitais
             </p>
           </div>
+
+          {/* Onboarding Progress */}
+          {user && (
+            <div className="mb-8">
+              <OnboardingProgress userId={user.id} />
+            </div>
+          )}
 
           {/* Action Cards */}
           <div className="grid md:grid-cols-3 gap-6 mb-12">
@@ -174,6 +202,18 @@ const Dashboard = () => {
 
         </div>
       </main>
+
+      {/* Onboarding Hints */}
+      {user && progress && (
+        <OnboardingHints userId={user.id} progress={progress} />
+      )}
+
+      {/* Welcome Modal */}
+      <OnboardingWelcomeModal
+        open={showWelcomeModal}
+        onOpenChange={setShowWelcomeModal}
+        userName={displayName}
+      />
     </div>
   );
 };
