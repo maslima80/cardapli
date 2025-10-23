@@ -119,21 +119,20 @@ function PaymentBadge({ method, index }: { method: PaymentMethod; index: number 
         "hover:border-primary/50 hover:shadow-sm"
       )}
     >
-      <span className="text-lg">{config.icon}</span>
       <span className="font-medium text-sm">{config.label}</span>
     </motion.div>
   );
 }
 
-const PAYMENT_BADGE_CONFIG: Record<PaymentMethod, { icon: string; label: string }> = {
-  pix: { icon: '🇧🇷', label: 'Pix' },
-  mbway: { icon: '🇵🇹', label: 'MB Way' },
-  visa: { icon: '💳', label: 'Visa' },
-  mastercard: { icon: '💳', label: 'Mastercard' },
-  amex: { icon: '💳', label: 'Amex' },
-  dinheiro: { icon: '💵', label: 'Dinheiro' },
-  transferencia: { icon: '🏦', label: 'Transferência' },
-  boleto: { icon: '📄', label: 'Boleto' },
-  link: { icon: '🔗', label: 'Link de Pagamento' },
-  paypal: { icon: '🌐', label: 'PayPal' },
+const PAYMENT_BADGE_CONFIG: Record<PaymentMethod, { label: string }> = {
+  pix: { label: 'Pix' },
+  mbway: { label: 'MB Way' },
+  visa: { label: 'Visa' },
+  mastercard: { label: 'Mastercard' },
+  amex: { label: 'American Express' },
+  dinheiro: { label: 'Dinheiro' },
+  transferencia: { label: 'Transferência Bancária' },
+  boleto: { label: 'Boleto Bancário' },
+  link: { label: 'Link de Pagamento' },
+  paypal: { label: 'PayPal' },
 };

@@ -99,24 +99,38 @@ export function OnboardingWelcomeWithSlug({
   };
 
   const handleSaveSlug = async () => {
-    if (!slug || !isAvailable || error) return;
+    if (!slug || !isAvailable || error) {
+      console.log('[OnboardingWelcome] Cannot save - slug:', slug, 'available:', isAvailable, 'error:', error);
+      return;
+    }
 
+    console.log('[OnboardingWelcome] Saving slug:', slug, 'for user:', userId);
     setIsSaving(true);
     try {
+      // Update the slug
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ slug })
         .eq('id', userId);
 
-      if (updateError) throw updateError;
+      console.log('[OnboardingWelcome] Update result:', { error: updateError });
+
+      if (updateError) {
+        console.error('[OnboardingWelcome] Update error:', updateError);
+        throw updateError;
+      }
+
+      // If no error, the update succeeded - trust it!
+      console.log('[OnboardingWelcome] Slug saved successfully:', slug);
 
       toast.success('Nome de usuário definido!', {
         description: `Seu link: cardapli.com/u/${slug}`,
       });
 
+      console.log('[OnboardingWelcome] Calling onComplete with slug:', slug);
       onComplete(slug);
     } catch (err: any) {
-      console.error('Error saving slug:', err);
+      console.error('[OnboardingWelcome] Error saving slug:', err);
       toast.error('Erro ao salvar', {
         description: err.message || 'Tente novamente',
       });

@@ -56,11 +56,17 @@ export default function PerfilV2() {
   const [userId, setUserId] = useState<string>("");
   const [activeSection, setActiveSection] = useState<string | null>(null);
 
-  // Read section from URL on mount
+  // Read section from URL on mount and whenever it changes
   useEffect(() => {
     const sectionParam = searchParams.get('section');
+    console.log('[PerfilV2] Section param from URL:', sectionParam);
     if (sectionParam) {
       setActiveSection(sectionParam);
+      // Scroll to top when opening a section
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      // If no section param, show main dashboard
+      setActiveSection(null);
     }
   }, [searchParams]);
 
@@ -82,9 +88,13 @@ export default function PerfilV2() {
         .from("profiles")
         .select("*")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching profile:", error);
+        toast.error("Erro ao carregar perfil");
+        return;
+      }
 
       if (data) {
         setProfile({
@@ -216,11 +226,15 @@ export default function PerfilV2() {
                 onChange={handleFieldChange}
               />
               <div className="flex gap-3 mt-6 pt-6 border-t">
-                <Button onClick={handleSave} disabled={saving}>
-                  {saving ? "Salvando..." : "Salvar"}
+                <Button onClick={async () => {
+                  await handleSave();
+                  // After saving, navigate to next onboarding step
+                  navigate('/produtos');
+                }} disabled={saving}>
+                  {saving ? "Salvando..." : "Salvar e Continuar"}
                 </Button>
-                <Button variant="outline" onClick={() => setActiveSection(null)}>
-                  Voltar
+                <Button variant="outline" onClick={() => navigate('/inicio')}>
+                  Voltar ao Início
                 </Button>
               </div>
             </CardContent>

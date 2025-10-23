@@ -203,12 +203,12 @@ export const businessInfoTypeLabels: Record<BusinessInfoType, { icon: string; ti
   how_to_buy: {
     icon: '🛒',
     title: 'Como Comprar',
-    description: 'Passo a passo da compra',
+    description: 'Guie seus clientes: como escolher, pedir e receber seus produtos',
   },
   delivery: {
     icon: '🚚',
     title: 'Entrega & Retirada',
-    description: 'Áreas atendidas, prazos e horários',
+    description: 'Informe regiões, prazos, valores e horários de entrega ou retirada',
   },
   pickup: {
     icon: '📍',
@@ -218,17 +218,17 @@ export const businessInfoTypeLabels: Record<BusinessInfoType, { icon: string; ti
   shipping: {
     icon: '📦',
     title: 'Envio (Correios/Transportadora)',
-    description: 'Informações sobre envio',
+    description: 'Informe prazos, valores e condições de envio pelos Correios ou transportadora',
   },
   payment: {
     icon: '💳',
     title: 'Pagamentos',
-    description: 'Pix, MB Way, cartão',
+    description: 'Informe quais formas de pagamento você aceita',
   },
   guarantee: {
     icon: '🛡️',
     title: 'Garantia / Política',
-    description: 'Troca e devoluções',
+    description: 'Informe suas políticas de troca, devolução e garantia',
   },
   custom: {
     icon: '📝',

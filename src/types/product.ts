@@ -3,7 +3,7 @@ export interface Product {
   user_id: string;
   title: string;
   description: string | null;
-  price: number;
+  price: number | null;
   price_unit: string;
   price_unit_custom: string | null;
   price_note: string | null;

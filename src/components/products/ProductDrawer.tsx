@@ -146,7 +146,7 @@ export function ProductDrawer({
         }
         
         // Validate price only if price on request is disabled
-        if (!data.price_on_request && !data.price) {
+        if (!data.price_on_request && (data.price === null || data.price === undefined || data.price === 0)) {
           throw new Error("Preço é obrigatório ou ative 'Preço sob consulta'");
         }
         
@@ -237,15 +237,27 @@ export function ProductDrawer({
               {!product && (
                 <Button 
                   onClick={() => {
-                    if (formData.title && formData.price) {
-                      saveProduct(formData).then(() => onSaved());
-                    } else {
+                    // Title is always required
+                    if (!formData.title) {
                       toast({
-                        title: "Campos obrigatórios",
-                        description: "Preencha título e preço antes de salvar",
+                        title: "Título obrigatório",
+                        description: "Preencha o título do produto",
                         variant: "destructive",
                       });
+                      return;
                     }
+                    
+                    // Price is required only if not price_on_request
+                    if (!formData.price_on_request && !formData.price) {
+                      toast({
+                        title: "Preço obrigatório",
+                        description: "Preencha o preço ou ative 'Preço sob consulta'",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    
+                    saveProduct(formData).then(() => onSaved());
                   }}
                   disabled={saving}
                   className="min-h-[44px] min-w-[44px]"

@@ -36,7 +36,7 @@ interface DeliveryPickupEditorProps {
 
 const QUICK_CHIPS = [
   'Até 3 dias úteis',
-  'Região: Valença/Tuias',
+  'Região: Grande SP',
   'Taxa sob consulta',
   'Retirada na loja',
   'Horário: seg–sáb 9h–18h',
@@ -48,7 +48,7 @@ export function DeliveryPickupEditor({ open, onOpenChange, initialData, onSaved 
   const [title, setTitle] = useState(initialData?.title || 'Entrega & Retirada');
   const [mode, setMode] = useState<'chips' | 'text'>('chips');
   const [chips, setChips] = useState<string[]>(
-    initialData?.items?.map(i => i.title) || ['Até 3 dias úteis', 'Valença / Tuias', 'Retirada na loja']
+    initialData?.items?.map(i => i.title) || ['Até 3 dias úteis', 'Região: Grande SP', 'Retirada na loja']
   );
   const [newChip, setNewChip] = useState('');
   const [textContent, setTextContent] = useState(
@@ -102,7 +102,7 @@ export function DeliveryPickupEditor({ open, onOpenChange, initialData, onSaved 
       onOpenChange={onOpenChange}
       icon={Truck}
       title="Entrega & Retirada"
-      description="Informe suas opções de logística"
+      description="Informe regiões atendidas, prazos, valores e horários"
       onSave={handleSave}
       onCancel={handleCancel}
       saving={saving}
@@ -123,9 +123,23 @@ export function DeliveryPickupEditor({ open, onOpenChange, initialData, onSaved 
         />
       }
     >
+      {/* Helpful Instructions */}
+      <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <p className="text-sm text-blue-900 dark:text-blue-100 mb-2">
+          💡 <strong>O que incluir:</strong>
+        </p>
+        <ul className="text-sm text-blue-900 dark:text-blue-100 space-y-1 ml-4 list-disc">
+          <li><strong>Regiões:</strong> Onde você entrega (ex: "Região: Grande SP")</li>
+          <li><strong>Prazos:</strong> Quanto tempo leva (ex: "Até 3 dias úteis")</li>
+          <li><strong>Valores:</strong> Custo ou condições (ex: "Grátis acima de R$ 100")</li>
+          <li><strong>Retirada:</strong> Se tem opção de retirar (ex: "Retirada na loja")</li>
+          <li><strong>Horários:</strong> Quando entrega/retira (ex: "Seg–Sáb 9h–18h")</li>
+        </ul>
+      </div>
+
       {/* Title */}
       <div className="space-y-2">
-        <Label>Título</Label>
+        <Label>Título da seção</Label>
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -155,7 +169,12 @@ export function DeliveryPickupEditor({ open, onOpenChange, initialData, onSaved 
       {/* Chips Mode */}
       {mode === 'chips' && (
         <div className="space-y-3">
-          <Label>Chips rápidos</Label>
+          <div>
+            <Label>Exemplos prontos (clique para adicionar)</Label>
+            <p className="text-sm text-muted-foreground mt-1">
+              Escolha os que se aplicam ao seu negócio
+            </p>
+          </div>
           
           {/* Quick chips presets */}
           <div className="flex flex-wrap gap-2">
@@ -175,37 +194,46 @@ export function DeliveryPickupEditor({ open, onOpenChange, initialData, onSaved 
 
           {/* Current chips */}
           {chips.length > 0 && (
-            <div className="flex flex-wrap gap-2 p-3 border rounded-lg bg-muted/30">
-              {chips.map((chip, index) => (
-                <Badge key={index} variant="secondary" className="gap-1">
-                  {chip}
-                  <button
-                    onClick={() => handleRemoveChip(index)}
-                    className="ml-1 hover:text-destructive"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </Badge>
-              ))}
+            <div className="space-y-2">
+              <Label>Informações selecionadas (clique no X para remover)</Label>
+              <div className="flex flex-wrap gap-2 p-3 border rounded-lg bg-muted/30">
+                {chips.map((chip, index) => (
+                  <Badge key={index} variant="secondary" className="gap-1">
+                    {chip}
+                    <button
+                      onClick={() => handleRemoveChip(index)}
+                      className="ml-1 hover:text-destructive"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
             </div>
           )}
 
           {/* Custom chip input */}
-          <div className="flex gap-2">
-            <Input
-              value={newChip}
-              onChange={(e) => setNewChip(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  handleAddChip(newChip);
-                }
-              }}
-              placeholder="Adicionar chip personalizado..."
-            />
-            <Button onClick={() => handleAddChip(newChip)} disabled={!newChip}>
-              <Plus className="w-4 h-4" />
-            </Button>
+          <div className="space-y-2">
+            <Label>Adicionar informação personalizada</Label>
+            <div className="flex gap-2">
+              <Input
+                value={newChip}
+                onChange={(e) => setNewChip(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddChip(newChip);
+                  }
+                }}
+                placeholder="Ex: Pedido mínimo R$ 50 para entrega"
+              />
+              <Button onClick={() => handleAddChip(newChip)} disabled={!newChip}>
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Digite e pressione Enter ou clique no + para adicionar
+            </p>
           </div>
         </div>
       )}
@@ -217,7 +245,7 @@ export function DeliveryPickupEditor({ open, onOpenChange, initialData, onSaved 
           <Textarea
             value={textContent}
             onChange={(e) => setTextContent(e.target.value)}
-            placeholder="Ex.: Entrega em até 3 dias úteis em Valença/Tuias. Retirada na Rua Central, 45."
+            placeholder="Ex.: Entrega em até 3 dias úteis na Grande SP. Retirada na Rua das Flores, 123."
             rows={6}
           />
         </div>

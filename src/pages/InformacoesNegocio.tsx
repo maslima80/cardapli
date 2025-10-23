@@ -11,7 +11,7 @@ import {
   listBusinessInfo,
   BusinessInfoSection,
 } from "@/lib/businessInfo";
-import { HowToBuyEditor } from "@/components/business-info/editors/HowToBuyEditor";
+import { HowToBuyEditorSimple } from "@/components/business-info/editors/HowToBuyEditorSimple";
 import { DeliveryPickupEditor } from "@/components/business-info/editors/DeliveryPickupEditor";
 import { ShippingEditor } from "@/components/business-info/editors/ShippingEditor";
 import { PaymentsEditor } from "@/components/business-info/editors/PaymentsEditor";
@@ -159,7 +159,7 @@ export default function InformacoesNegocio() {
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-lg mb-1">Depoimentos</h3>
                 <p className="text-sm text-muted-foreground mb-3">
-                  Gerencie depoimentos para usar em seus catálogos
+                  Adicione avaliações de clientes e compartilhe links para receber novos depoimentos
                 </p>
                 <Button variant="outline" size="sm" className="w-full">
                   Gerenciar Depoimentos
@@ -172,7 +172,7 @@ export default function InformacoesNegocio() {
 
       {/* Specialized Editors */}
       {editingType === 'how_to_buy' && (
-        <HowToBuyEditor
+        <HowToBuyEditorSimple
           open={true}
           onOpenChange={(open) => !open && handleCloseEditor()}
           initialData={editingSection}
@@ -224,7 +224,7 @@ export default function InformacoesNegocio() {
               <div>
                 <h2 className="text-2xl font-bold">Depoimentos</h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Gerencie depoimentos para reutilizar em seus catálogos
+                  Adicione manualmente ou clique em "Solicitar" para enviar link por WhatsApp/Email
                 </p>
               </div>
               <Button

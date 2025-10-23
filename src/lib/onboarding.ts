@@ -15,7 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 // TYPES
 // ============================================================================
 
-export type OnboardingStep = 'profile' | 'theme' | 'products' | 'info' | 'catalog';
+export type OnboardingStep = 'profile' | 'products' | 'info' | 'catalog';
 export type StepStatus = 'pending' | 'in_progress' | 'completed' | 'skipped';
 
 export interface UserProgress {
@@ -59,20 +59,12 @@ export const ONBOARDING_STEPS: StepConfig[] = [
     order: 1,
   },
   {
-    id: 'theme',
-    title: 'Escolha seu Tema',
-    description: 'Cores e fontes',
-    route: '/perfil?section=theme',
-    icon: 'Palette',
-    order: 2,
-  },
-  {
     id: 'products',
     title: 'Adicione Produtos',
-    description: 'Pelo menos 3 produtos',
+    description: 'Pelo menos 1 produto',
     route: '/produtos',
     icon: 'Package',
-    order: 3,
+    order: 2,
   },
   {
     id: 'info',
@@ -80,7 +72,7 @@ export const ONBOARDING_STEPS: StepConfig[] = [
     description: 'Entrega, Pagamentos, Política',
     route: '/informacoes-negocio',
     icon: 'Info',
-    order: 4,
+    order: 3,
   },
   {
     id: 'catalog',
@@ -88,7 +80,7 @@ export const ONBOARDING_STEPS: StepConfig[] = [
     description: 'Monte e publique',
     route: '/catalogos',
     icon: 'Layout',
-    order: 5,
+    order: 4,
   },
 ];
 
@@ -114,18 +106,18 @@ export async function getOnboardingProgress(userId: string): Promise<OnboardingS
       steps[progress.step as OnboardingStep] = progress;
     });
 
-    // Calculate completion percentage
+    // Calculate completion percentage (4 steps now)
     const completedCount = Object.values(steps).filter(
       (s) => s.status === 'completed'
     ).length;
-    const completionPercentage = Math.round((completedCount / 5) * 100);
+    const completionPercentage = Math.round((completedCount / 4) * 100);
 
     // Find next incomplete step
     const nextStep = ONBOARDING_STEPS.find(
       (config) => steps[config.id]?.status !== 'completed'
     )?.id || null;
 
-    const isComplete = completedCount === 5;
+    const isComplete = completedCount === 4;
 
     return {
       steps,
@@ -235,30 +227,13 @@ export async function checkProfileComplete(userId: string): Promise<boolean> {
 
 /**
  * Check if theme step is complete
+ * NOTE: Theme completion is now marked explicitly when user changes theme settings
+ * We don't auto-check because theme fields have defaults
  */
 export async function checkThemeComplete(userId: string): Promise<boolean> {
-  try {
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('accent_color')
-      .eq('id', userId)
-      .maybeSingle();
-
-    if (error) {
-      console.error('Error checking theme completion:', error);
-      return false;
-    }
-
-    if (!profile) {
-      // Profile doesn't exist yet
-      return false;
-    }
-
-    return !!profile.accent_color;
-  } catch (error) {
-    console.error('Error checking theme completion:', error);
-    return false;
-  }
+  // Theme step is marked complete explicitly when user changes settings
+  // Don't auto-check to avoid false positives from default values
+  return false;
 }
 
 /**
@@ -275,7 +250,7 @@ export async function checkProductsComplete(userId: string): Promise<{ complete:
 
     const productCount = count || 0;
     return {
-      complete: productCount >= 3,
+      complete: productCount >= 1,
       count: productCount,
     };
   } catch (error) {
@@ -342,12 +317,6 @@ export async function autoCheckAndUpdateProgress(userId: string): Promise<void> 
       await updateStepStatus(userId, 'profile', 'completed');
     }
 
-    // Check theme
-    const themeComplete = await checkThemeComplete(userId);
-    if (themeComplete) {
-      await updateStepStatus(userId, 'theme', 'completed');
-    }
-
     // Check products
     const { complete: productsComplete, count: productCount } = await checkProductsComplete(userId);
     if (productsComplete) {
@@ -381,7 +350,6 @@ export async function autoCheckAndUpdateProgress(userId: string): Promise<void> 
 export type HintKey = 
   | 'welcome'
   | 'profile_done'
-  | 'theme_done'
   | 'products_done'
   | 'info_done'
   | 'all_done';
@@ -396,25 +364,19 @@ export interface Hint {
 export const HINTS: Record<HintKey, Hint> = {
   welcome: {
     key: 'welcome',
-    message: '👋 Oi, {{name}}! Vamos criar seu primeiro catálogo? Comece pelo Perfil.',
+    message: '👋 Oi! Vamos criar seu primeiro catálogo? Comece pelo Perfil.',
     cta: 'Ir para Perfil',
-    route: '/perfil',
+    route: '/perfil?section=profile',
   },
   profile_done: {
     key: 'profile_done',
-    message: '✨ Perfeito! Agora escolha o Tema — cores e fontes da sua marca.',
-    cta: 'Escolher Tema',
-    route: '/perfil',
-  },
-  theme_done: {
-    key: 'theme_done',
-    message: '🛍️ Ótimo! Vamos adicionar alguns produtos agora?',
+    message: '✨ Perfeito! Agora adicione pelo menos um produto.',
     cta: 'Adicionar Produtos',
     route: '/produtos',
   },
   products_done: {
     key: 'products_done',
-    message: '💡 Último toque: adicione suas informações de entrega e pagamento.',
+    message: '💡 Ótimo! Adicione suas informações de entrega e pagamento.',
     cta: 'Adicionar Informações',
     route: '/informacoes-negocio',
   },
@@ -464,11 +426,14 @@ export async function markHintViewed(userId: string, hintKey: HintKey): Promise<
         hint_key: hintKey,
       });
 
-    if (error && error.code !== '23505') { // Ignore duplicate key error
+    if (error && error.code !== '23505' && error.code !== '23503') { 
+      // Ignore duplicate key error (23505) and foreign key error (23503)
+      // Foreign key error happens if profile doesn't exist yet
       throw error;
     }
   } catch (error) {
     console.error('Error marking hint viewed:', error);
+    // Don't throw - hints are not critical, just log the error
   }
 }
 
@@ -486,8 +451,6 @@ export async function getCurrentHint(userId: string, progress: OnboardingState):
       hintKey = 'info_done';
     } else if (progress.steps.products?.status === 'completed') {
       hintKey = 'products_done';
-    } else if (progress.steps.theme?.status === 'completed') {
-      hintKey = 'theme_done';
     } else if (progress.steps.profile?.status === 'completed') {
       hintKey = 'profile_done';
     } else {

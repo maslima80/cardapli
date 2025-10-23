@@ -61,18 +61,20 @@ const Dashboard = () => {
       console.log('[Dashboard] Checking slug for user:', user.id);
       
       try {
-        // Fetch profile data including slug and business name
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('slug, business_name')
-          .eq('id', user.id)
-          .single();
+        // Use RPC to get profile data (avoids 406 errors)
+        const { data, error } = await supabase
+          .rpc('get_user_profile_data', { user_id: user.id });
 
-        console.log('[Dashboard] Profile data:', profile);
+        console.log('[Dashboard] Profile data from RPC:', data);
 
         if (error) {
           console.error('[Dashboard] Error checking profile:', error);
+          setCheckingSlug(false);
+          return;
         }
+
+        // RPC returns array, get first item
+        const profile = data && data.length > 0 ? data[0] : null;
 
         // If no slug, show welcome modal with slug selection
         if (!profile || !profile.slug) {
@@ -82,7 +84,7 @@ const Dashboard = () => {
           return;
         }
 
-        // Has slug - set it and business name
+        // Has slug - set both slug and business name
         console.log('[Dashboard] Has slug:', profile.slug);
         setUserSlug(profile.slug);
         setBusinessName(profile.business_name);

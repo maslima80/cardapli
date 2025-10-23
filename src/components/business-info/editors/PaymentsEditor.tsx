@@ -33,18 +33,28 @@ interface PaymentsEditorProps {
   onSaved?: () => void;
 }
 
-const PAYMENT_METHODS: Array<{ value: PaymentMethod; label: string; icon: string }> = [
-  { value: 'pix', label: 'Pix', icon: '🇧🇷' },
-  { value: 'mbway', label: 'MB Way', icon: '🇵🇹' },
-  { value: 'dinheiro', label: 'Dinheiro', icon: '💵' },
-  { value: 'transferencia', label: 'Transferência', icon: '🏦' },
-  { value: 'link', label: 'Link de Pagamento', icon: '🔗' },
-  { value: 'boleto', label: 'Boleto', icon: '📄' },
-  { value: 'visa', label: 'Visa', icon: '💳' },
-  { value: 'mastercard', label: 'Mastercard', icon: '💳' },
-  { value: 'amex', label: 'Amex', icon: '💳' },
-  { value: 'paypal', label: 'PayPal', icon: '🌐' },
-];
+// Payment methods grouped by category - clean, professional
+const PAYMENT_METHODS = {
+  instant: [
+    { value: 'pix' as PaymentMethod, label: 'Pix', category: 'Pagamento Instantâneo' },
+    { value: 'dinheiro' as PaymentMethod, label: 'Dinheiro', category: 'Pagamento Instantâneo' },
+  ],
+  transfer: [
+    { value: 'transferencia' as PaymentMethod, label: 'Transferência Bancária', category: 'Transferência' },
+    { value: 'link' as PaymentMethod, label: 'Link de Pagamento', category: 'Transferência' },
+  ],
+  cards: [
+    { value: 'visa' as PaymentMethod, label: 'Visa', category: 'Cartões' },
+    { value: 'mastercard' as PaymentMethod, label: 'Mastercard', category: 'Cartões' },
+    { value: 'amex' as PaymentMethod, label: 'American Express', category: 'Cartões' },
+  ],
+  other: [
+    { value: 'boleto' as PaymentMethod, label: 'Boleto Bancário', category: 'Outros' },
+    { value: 'paypal' as PaymentMethod, label: 'PayPal', category: 'Outros' },
+  ],
+};
+
+const ALL_METHODS = [...PAYMENT_METHODS.instant, ...PAYMENT_METHODS.transfer, ...PAYMENT_METHODS.cards, ...PAYMENT_METHODS.other];
 
 export function PaymentsEditor({ open, onOpenChange, initialData, onSaved }: PaymentsEditorProps) {
   const [title, setTitle] = useState(initialData?.title || 'Formas de Pagamento');
@@ -62,14 +72,13 @@ export function PaymentsEditor({ open, onOpenChange, initialData, onSaved }: Pay
       initialData.items.forEach(item => {
         const text = item.title.toLowerCase();
         if (text.includes('pix')) methods.push('pix');
-        if (text.includes('mb way') || text.includes('mbway')) methods.push('mbway');
         if (text.includes('dinheiro')) methods.push('dinheiro');
         if (text.includes('transferência') || text.includes('transferencia')) methods.push('transferencia');
         if (text.includes('link')) methods.push('link');
         if (text.includes('boleto')) methods.push('boleto');
         if (text.includes('visa')) methods.push('visa');
         if (text.includes('mastercard')) methods.push('mastercard');
-        if (text.includes('amex')) methods.push('amex');
+        if (text.includes('amex') || text.includes('american express')) methods.push('amex');
         if (text.includes('paypal')) methods.push('paypal');
       });
       if (methods.length > 0) {
@@ -89,11 +98,8 @@ export function PaymentsEditor({ open, onOpenChange, initialData, onSaved }: Pay
         .eq('id', user.id)
         .single();
 
-      if (profile?.country === 'BR') {
-        setSelectedMethods(['pix', 'link']);
-      } else if (profile?.country === 'PT') {
-        setSelectedMethods(['mbway', 'link']);
-      }
+      // Smart defaults for Brazil (main market)
+      setSelectedMethods(['pix', 'link']);
     } catch (error) {
       console.error('Error loading smart defaults:', error);
     }
@@ -113,7 +119,7 @@ export function PaymentsEditor({ open, onOpenChange, initialData, onSaved }: Pay
       await upsertBusinessInfo('payment', 'global', undefined, {
         title,
         items: selectedMethods.map(m => ({
-          title: PAYMENT_METHODS.find(pm => pm.value === m)?.label || m,
+          title: ALL_METHODS.find(pm => pm.value === m)?.label || m,
           description: '',
         })),
         content_md: terms,
@@ -139,7 +145,7 @@ export function PaymentsEditor({ open, onOpenChange, initialData, onSaved }: Pay
       onOpenChange={onOpenChange}
       icon={CreditCard}
       title="Formas de Pagamento"
-      description="Métodos aceitos e condições"
+      description="Informe quais formas de pagamento você aceita e condições especiais"
       onSave={handleSave}
       onCancel={handleCancel}
       saving={saving}
@@ -159,9 +165,19 @@ export function PaymentsEditor({ open, onOpenChange, initialData, onSaved }: Pay
         />
       }
     >
+      {/* Helpful Instructions */}
+      <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <p className="text-sm text-blue-900 dark:text-blue-100 mb-2">
+          💡 <strong>Dica:</strong> Selecione todas as formas de pagamento que você aceita
+        </p>
+        <p className="text-xs text-blue-900 dark:text-blue-100">
+          Quanto mais opções, mais fácil para seus clientes comprarem!
+        </p>
+      </div>
+
       {/* Title */}
       <div className="space-y-2">
-        <Label>Título</Label>
+        <Label>Título da seção</Label>
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -169,30 +185,128 @@ export function PaymentsEditor({ open, onOpenChange, initialData, onSaved }: Pay
         />
       </div>
 
-      {/* Payment Methods */}
-      <div className="space-y-3">
-        <Label>Métodos aceitos</Label>
-        <div className="grid grid-cols-2 gap-3">
-          {PAYMENT_METHODS.map((method) => (
-            <div
-              key={method.value}
-              className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-muted/50 cursor-pointer"
-              onClick={() => handleToggleMethod(method.value)}
-            >
-              <Checkbox
-                id={method.value}
-                checked={selectedMethods.includes(method.value)}
-                onCheckedChange={() => handleToggleMethod(method.value)}
-              />
-              <label
-                htmlFor={method.value}
-                className="flex items-center gap-2 cursor-pointer flex-1"
+      {/* Payment Methods - Grouped by Category */}
+      <div className="space-y-4">
+        <Label>Métodos aceitos (selecione todos que você aceita)</Label>
+        
+        {/* Instant Payments */}
+        <div className="space-y-2">
+          <h4 className="text-sm font-semibold text-muted-foreground">Pagamento Instantâneo</h4>
+          <div className="grid grid-cols-2 gap-2">
+            {PAYMENT_METHODS.instant.map((method) => (
+              <div
+                key={method.value}
+                className={`flex items-center space-x-3 border rounded-lg p-3 cursor-pointer transition-colors ${
+                  selectedMethods.includes(method.value)
+                    ? 'bg-primary/5 border-primary'
+                    : 'hover:bg-muted/50'
+                }`}
+                onClick={() => handleToggleMethod(method.value)}
               >
-                <span className="text-lg">{method.icon}</span>
-                <span className="text-sm font-medium">{method.label}</span>
-              </label>
-            </div>
-          ))}
+                <Checkbox
+                  id={method.value}
+                  checked={selectedMethods.includes(method.value)}
+                  onCheckedChange={() => handleToggleMethod(method.value)}
+                />
+                <label
+                  htmlFor={method.value}
+                  className="text-sm font-medium cursor-pointer flex-1"
+                >
+                  {method.label}
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Transfers */}
+        <div className="space-y-2">
+          <h4 className="text-sm font-semibold text-muted-foreground">Transferência</h4>
+          <div className="grid grid-cols-2 gap-2">
+            {PAYMENT_METHODS.transfer.map((method) => (
+              <div
+                key={method.value}
+                className={`flex items-center space-x-3 border rounded-lg p-3 cursor-pointer transition-colors ${
+                  selectedMethods.includes(method.value)
+                    ? 'bg-primary/5 border-primary'
+                    : 'hover:bg-muted/50'
+                }`}
+                onClick={() => handleToggleMethod(method.value)}
+              >
+                <Checkbox
+                  id={method.value}
+                  checked={selectedMethods.includes(method.value)}
+                  onCheckedChange={() => handleToggleMethod(method.value)}
+                />
+                <label
+                  htmlFor={method.value}
+                  className="text-sm font-medium cursor-pointer flex-1"
+                >
+                  {method.label}
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Cards */}
+        <div className="space-y-2">
+          <h4 className="text-sm font-semibold text-muted-foreground">Cartões de Crédito/Débito</h4>
+          <div className="grid grid-cols-2 gap-2">
+            {PAYMENT_METHODS.cards.map((method) => (
+              <div
+                key={method.value}
+                className={`flex items-center space-x-3 border rounded-lg p-3 cursor-pointer transition-colors ${
+                  selectedMethods.includes(method.value)
+                    ? 'bg-primary/5 border-primary'
+                    : 'hover:bg-muted/50'
+                }`}
+                onClick={() => handleToggleMethod(method.value)}
+              >
+                <Checkbox
+                  id={method.value}
+                  checked={selectedMethods.includes(method.value)}
+                  onCheckedChange={() => handleToggleMethod(method.value)}
+                />
+                <label
+                  htmlFor={method.value}
+                  className="text-sm font-medium cursor-pointer flex-1"
+                >
+                  {method.label}
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Other */}
+        <div className="space-y-2">
+          <h4 className="text-sm font-semibold text-muted-foreground">Outros</h4>
+          <div className="grid grid-cols-2 gap-2">
+            {PAYMENT_METHODS.other.map((method) => (
+              <div
+                key={method.value}
+                className={`flex items-center space-x-3 border rounded-lg p-3 cursor-pointer transition-colors ${
+                  selectedMethods.includes(method.value)
+                    ? 'bg-primary/5 border-primary'
+                    : 'hover:bg-muted/50'
+                }`}
+                onClick={() => handleToggleMethod(method.value)}
+              >
+                <Checkbox
+                  id={method.value}
+                  checked={selectedMethods.includes(method.value)}
+                  onCheckedChange={() => handleToggleMethod(method.value)}
+                />
+                <label
+                  htmlFor={method.value}
+                  className="text-sm font-medium cursor-pointer flex-1"
+                >
+                  {method.label}
+                </label>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
