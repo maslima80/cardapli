@@ -232,13 +232,13 @@ export async function checkThemeComplete(userId: string): Promise<boolean> {
   try {
     const { data: profile, error } = await supabase
       .from('profiles')
-      .select('theme_primary_color')
+      .select('accent_color')
       .eq('id', userId)
       .single();
 
     if (error) throw error;
 
-    return !!profile?.theme_primary_color;
+    return !!profile?.accent_color;
   } catch (error) {
     console.error('Error checking theme completion:', error);
     return false;

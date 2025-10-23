@@ -43,7 +43,7 @@ export async function onProfileSaved(userId: string, profileData: any): Promise<
  */
 export async function onThemeUpdated(userId: string, themeData: any): Promise<void> {
   try {
-    const isComplete = !!themeData.theme_primary_color;
+    const isComplete = !!themeData.accent_color;
 
     if (isComplete) {
       await updateStepStatus(userId, 'theme', 'completed');
