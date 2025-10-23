@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { User, Session } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { LogOut, Layout, Package, UserCircle } from "lucide-react";
-import { OnboardingProgress, OnboardingHints, OnboardingWelcomeModal } from "@/components/onboarding";
+import { OnboardingProgress, OnboardingHints, OnboardingWelcomeModal, ConfettiCelebration } from "@/components/onboarding";
 import { useOnboardingProgress } from "@/hooks/useOnboardingProgress";
 
 const Dashboard = () => {
@@ -15,6 +15,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [userSlug, setUserSlug] = useState<string | null>(null);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
   
   // Get onboarding progress
   const { progress } = useOnboardingProgress(user?.id || null);
@@ -104,6 +105,21 @@ const Dashboard = () => {
     };
     
     checkIfNewUser();
+  }, [user, progress]);
+
+  // Check if user just completed onboarding (show celebration)
+  useEffect(() => {
+    const checkCompletion = async () => {
+      if (!user || !progress) return;
+      
+      const hasSeenCelebration = localStorage.getItem(`celebration_shown_${user.id}`);
+      if (!hasSeenCelebration && progress.isComplete) {
+        setShowCelebration(true);
+        localStorage.setItem(`celebration_shown_${user.id}`, 'true');
+      }
+    };
+    
+    checkCompletion();
   }, [user, progress]);
 
   return (
@@ -213,6 +229,12 @@ const Dashboard = () => {
         open={showWelcomeModal}
         onOpenChange={setShowWelcomeModal}
         userName={displayName}
+      />
+
+      {/* Celebration Modal */}
+      <ConfettiCelebration
+        open={showCelebration}
+        onOpenChange={setShowCelebration}
       />
     </div>
   );
