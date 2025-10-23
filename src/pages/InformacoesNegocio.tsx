@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, ShoppingBag, Truck, Package, CreditCard, ShieldCheck, MessageCircle } from "lucide-react";
+import { ArrowLeft, ShoppingBag, Truck, Package, CreditCard, ShieldCheck, MessageCircle, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import {
   BusinessInfoType,
@@ -17,6 +17,7 @@ import { ShippingEditor } from "@/components/business-info/editors/ShippingEdito
 import { PaymentsEditor } from "@/components/business-info/editors/PaymentsEditor";
 import { PolicyEditor } from "@/components/business-info/editors/PolicyEditor";
 import { TestimonialsManager } from "@/components/testimonials/TestimonialsManager";
+import { LocationsManager } from "@/components/business-info/LocationsManager";
 
 export default function InformacoesNegocio() {
   const navigate = useNavigate();
@@ -25,6 +26,7 @@ export default function InformacoesNegocio() {
   const [editingType, setEditingType] = useState<BusinessInfoType | null>(null);
   const [editingSection, setEditingSection] = useState<BusinessInfoSection | null>(null);
   const [testimonialsOpen, setTestimonialsOpen] = useState(false);
+  const [locationsOpen, setLocationsOpen] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -168,6 +170,27 @@ export default function InformacoesNegocio() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Locations Card */}
+        <Card
+          className="cursor-pointer hover:shadow-md transition-shadow"
+          onClick={() => setLocationsOpen(true)}
+        >
+          <CardContent className="p-6">
+            <div className="flex items-start gap-4">
+              <MapPin className="w-10 h-10 text-primary" />
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-lg mb-1">Localizações Físicas</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Adicione os endereços das suas lojas ou pontos de atendimento físico
+                </p>
+                <Button variant="outline" size="sm" className="w-full">
+                  Gerenciar Localizações
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Specialized Editors */}
@@ -241,6 +264,12 @@ export default function InformacoesNegocio() {
           </div>
         </div>
       )}
+
+      {/* Locations Manager Dialog */}
+      <LocationsManager
+        open={locationsOpen}
+        onOpenChange={setLocationsOpen}
+      />
     </div>
   );
 }
