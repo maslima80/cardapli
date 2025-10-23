@@ -1,18 +1,20 @@
 import { useRef, useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Quote } from "lucide-react";
+import { Quote, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { listTestimonials, Testimonial } from "@/lib/businessInfo";
+import { cn } from "@/lib/utils";
 
 interface TestimonialsBlockProps {
   data: {
     mode?: 'auto' | 'custom';
-    source?: {
+    source?: 'manual' | 'table' | {
       scope: 'global' | 'product' | 'category' | 'tag';
       scope_id?: string | null;
       include_global_backfill?: boolean;
       limit?: number;
     };
+    selected_testimonial_ids?: string[];
     title?: string;
     subtitle?: string;
     items?: Array<{
@@ -20,6 +22,7 @@ interface TestimonialsBlockProps {
       quote: string;
       avatar_url?: string;
       role?: string;
+      rating?: number;
     }>;
     layout?: 'grid' | 'list';
   };
@@ -27,19 +30,25 @@ interface TestimonialsBlockProps {
 }
 
 export const TestimonialsBlockPremium = ({ data, userId }: TestimonialsBlockProps) => {
-  const [items, setItems] = useState<Array<{name: string; quote: string; avatar_url?: string; role?: string}>>([]);
+  const [items, setItems] = useState<Array<{name: string; quote: string; avatar_url?: string; role?: string; rating?: number}>>([]);
   const [loading, setLoading] = useState(false);
-  const title = data.title || "O que dizem por aí?";
+  const title = data.title || "Depoimentos";
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   // Initialize items from data or fetch if auto mode
   useEffect(() => {
-    if (data.mode === 'auto') {
+    // New structure: source = 'table' with selected_testimonial_ids
+    if (data.source === 'table' && data.selected_testimonial_ids && data.selected_testimonial_ids.length > 0) {
+      fetchSelectedTestimonials();
+    }
+    // Legacy auto mode
+    else if (data.mode === 'auto') {
       fetchTestimonials();
-    } else if (data.items) {
-      // Custom mode - use provided items
+    }
+    // Manual mode
+    else if (data.items) {
       let processedItems = [];
       if (Array.isArray(data.items)) {
         processedItems = data.items.filter(item => item && item.name && item.quote);
@@ -48,20 +57,51 @@ export const TestimonialsBlockPremium = ({ data, userId }: TestimonialsBlockProp
       }
       setItems(processedItems);
     }
-  }, [data.mode, data.source, data.items]);
+  }, [data.mode, data.source, data.items, data.selected_testimonial_ids]);
+
+  const fetchSelectedTestimonials = async () => {
+    setLoading(true);
+    try {
+      const { data: testimonials, error } = await supabase
+        .from('testimonials')
+        .select('*')
+        .in('id', data.selected_testimonial_ids!)
+        .eq('status', 'approved');
+
+      if (error) throw error;
+
+      // Map to component format
+      const mappedItems = (testimonials || []).map(t => ({
+        name: t.author_name,
+        quote: t.content,
+        avatar_url: t.author_photo_url,
+        role: t.author_role,
+        rating: t.rating,
+      }));
+
+      setItems(mappedItems);
+    } catch (error) {
+      console.error('Error loading selected testimonials:', error);
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchTestimonials = async () => {
     setLoading(true);
     try {
-      const scope = data.source?.scope || 'global';
-      const scopeId = data.source?.scope_id;
-      const limit = data.source?.limit || 6;
+      // Handle legacy source object structure
+      const sourceObj = typeof data.source === 'object' ? data.source : { scope: 'global' as const };
+      const scope = sourceObj.scope || 'global';
+      const scopeId = sourceObj.scope_id;
+      const limit = sourceObj.limit || 6;
 
       // Fetch testimonials for the specified scope
       let testimonials = await listTestimonials(scope, scopeId);
 
       // If include_global_backfill and we don't have enough, add global ones
-      if (data.source?.include_global_backfill && testimonials.length < limit && scope !== 'global') {
+      if (typeof data.source === 'object' && data.source.include_global_backfill && testimonials.length < limit && scope !== 'global') {
         const globalTestimonials = await listTestimonials('global');
         const remaining = limit - testimonials.length;
         testimonials = [...testimonials, ...globalTestimonials.slice(0, remaining)];
@@ -222,7 +262,7 @@ export const TestimonialsBlockPremium = ({ data, userId }: TestimonialsBlockProp
                         </AvatarFallback>
                       </Avatar>
                       
-                      <div>
+                      <div className="flex-1">
                         <p 
                           className="font-semibold text-base text-slate-900 dark:text-slate-50"
                           style={{ fontFamily: 'var(--font-heading, inherit)' }}
@@ -233,6 +273,21 @@ export const TestimonialsBlockPremium = ({ data, userId }: TestimonialsBlockProp
                           <p className="text-sm text-slate-600 dark:text-slate-400">
                             {item.role}
                           </p>
+                        )}
+                        {item.rating && (
+                          <div className="flex gap-0.5 mt-1">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <Star
+                                key={i}
+                                className={cn(
+                                  "w-3 h-3",
+                                  i < item.rating!
+                                    ? "fill-yellow-400 text-yellow-400"
+                                    : "text-gray-300"
+                                )}
+                              />
+                            ))}
+                          </div>
                         )}
                       </div>
                     </div>
