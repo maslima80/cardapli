@@ -16,6 +16,7 @@ const Dashboard = () => {
   const [userSlug, setUserSlug] = useState<string | null>(null);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [checkingSlug, setCheckingSlug] = useState(true);
   
   // Get onboarding progress
   const { progress } = useOnboardingProgress(user?.id || null);
@@ -50,19 +51,37 @@ const Dashboard = () => {
   // Check if user has a slug, redirect to slug selection if not
   useEffect(() => {
     const checkSlug = async () => {
-      if (!user) return;
+      if (!user) {
+        setCheckingSlug(false);
+        return;
+      }
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("slug")
-        .eq("id", user.id)
-        .single();
+      try {
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("slug")
+          .eq("id", user.id)
+          .single();
 
-      if (profile) {
-        setUserSlug(profile.slug);
-        if (!profile.slug) {
-          navigate("/escolher-slug");
+        if (error) {
+          console.error('Error checking slug:', error);
+          setCheckingSlug(false);
+          return;
         }
+
+        if (profile) {
+          setUserSlug(profile.slug);
+          if (!profile.slug) {
+            // User doesn't have a slug - redirect to slug selection
+            navigate("/escolher-slug");
+            return; // Don't set checkingSlug to false, keep loading
+          }
+        }
+        
+        setCheckingSlug(false);
+      } catch (error) {
+        console.error('Error in checkSlug:', error);
+        setCheckingSlug(false);
       }
     };
 
@@ -109,7 +128,7 @@ const Dashboard = () => {
     }
   };
 
-  if (loading) {
+  if (loading || checkingSlug) {
     return (
       <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
         <div className="text-center">
