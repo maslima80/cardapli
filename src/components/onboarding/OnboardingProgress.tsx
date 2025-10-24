@@ -1,11 +1,13 @@
 /**
  * OnboardingProgress Component
  * 
- * Main progress tracker showing all 5 steps with visual progress bar
+ * Main progress tracker showing all 4 steps with visual progress bar
+ * Automatically hides when user dismisses after completion
  */
 
-import { motion } from 'framer-motion';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRight, Sparkles, X } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ProgressBar } from './ProgressBar';
@@ -19,6 +21,20 @@ interface OnboardingProgressProps {
 
 export function OnboardingProgress({ userId }: OnboardingProgressProps) {
   const { progress, loading, continueToNextStep, goToStep } = useOnboardingProgress(userId);
+  const [isDismissed, setIsDismissed] = useState(false);
+
+  // Check if user has dismissed onboarding
+  useEffect(() => {
+    const dismissed = localStorage.getItem(`onboarding_dismissed_${userId}`);
+    if (dismissed === 'true') {
+      setIsDismissed(true);
+    }
+  }, [userId]);
+
+  const handleDismiss = () => {
+    localStorage.setItem(`onboarding_dismissed_${userId}`, 'true');
+    setIsDismissed(true);
+  };
 
   if (loading) {
     return (
@@ -32,18 +48,20 @@ export function OnboardingProgress({ userId }: OnboardingProgressProps) {
     );
   }
 
-  if (!progress) {
+  if (!progress || isDismissed) {
     return null;
   }
 
   const { completionPercentage, isComplete } = progress;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.5 }}
+      >
       <Card className="bg-gradient-to-br from-purple-50 to-white dark:from-purple-950/20 dark:to-background border-purple-200 dark:border-purple-900">
         <CardHeader className="pb-4">
           <div className="flex items-start justify-between gap-4">
@@ -60,13 +78,26 @@ export function OnboardingProgress({ userId }: OnboardingProgressProps) {
                   : 'Monte seu catálogo passo a passo'}
               </p>
             </div>
-            <div className="text-right">
-              <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
-                {completionPercentage}%
+            <div className="flex items-start gap-2">
+              <div className="text-right">
+                <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                  {completionPercentage}%
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  completo
+                </div>
               </div>
-              <div className="text-xs text-muted-foreground">
-                completo
-              </div>
+              {isComplete && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleDismiss}
+                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                  title="Fechar"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              )}
             </div>
           </div>
         </CardHeader>
@@ -130,6 +161,7 @@ export function OnboardingProgress({ userId }: OnboardingProgressProps) {
           )}
         </CardContent>
       </Card>
-    </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 }
