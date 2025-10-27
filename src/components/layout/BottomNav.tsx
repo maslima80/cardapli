@@ -26,8 +26,8 @@ export const BottomNav = () => {
   if (shouldHide) return null;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50 safe-area-bottom">
-      <div className="flex items-center justify-around h-16 max-w-screen-xl mx-auto px-2">
+    <nav className="bottom-nav fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
+      <div className="flex items-center justify-around h-16 max-w-screen-xl mx-auto px-2 safe-area-bottom">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path || 
                           (item.path !== "/dashboard" && location.pathname.startsWith(item.path));

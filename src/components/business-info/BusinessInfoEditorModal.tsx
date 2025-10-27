@@ -1,10 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ResponsiveSheet, SheetSection } from "@/components/ui/responsive-sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -145,16 +140,26 @@ export function BusinessInfoEditorModal({
   ];
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <span className="text-2xl">{label.icon}</span>
-            Editar {label.title}
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-6 py-4">
+    <ResponsiveSheet
+      open={open}
+      onOpenChange={onClose}
+      title={`${label.icon} Editar ${label.title}`}
+      size="full"
+      safeClose={saving}
+      actions={{
+        primary: {
+          label: "Salvar",
+          onClick: handleSave,
+          disabled: saving,
+          loading: saving,
+        },
+        secondary: {
+          label: "Cancelar",
+          onClick: onClose,
+        },
+      }}
+    >
+      <SheetSection className="space-y-6">
           {/* Title */}
           <div className="space-y-2">
             <Label>Título (opcional)</Label>
@@ -272,27 +277,21 @@ export function BusinessInfoEditorModal({
             </RadioGroup>
           </div>
 
-          {/* Actions */}
-          <div className="flex gap-2 pt-4">
-            <Button
-              onClick={handleSave}
-              disabled={saving}
-              className="flex-1"
-            >
-              {saving ? "Salvando..." : "Salvar"}
-            </Button>
-            {existingSection && (
+          {/* Delete button if editing existing */}
+          {existingSection && (
+            <div className="pt-4 border-t">
               <Button
                 variant="destructive"
                 onClick={handleDelete}
                 disabled={saving}
+                className="w-full"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-4 h-4 mr-2" />
+                Excluir
               </Button>
-            )}
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+            </div>
+          )}
+        </SheetSection>
+    </ResponsiveSheet>
   );
 }

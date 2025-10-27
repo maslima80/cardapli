@@ -1,0 +1,178 @@
+/**
+ * iOS-specific fixes for mobile web app
+ * Prevents zoom, handles keyboard, respects safe areas
+ */
+
+/* Prevent zoom on input focus (iOS Safari zooms if font-size < 16px) */
+input,
+textarea,
+select {
+  font-size: 16px !important;
+}
+
+/* On larger screens, we can use smaller fonts */
+@media (min-width: 768px) {
+  input,
+  textarea,
+  select {
+    font-size: 0.875rem !important; /* 14px */
+  }
+}
+
+/* Ensure body and html use full viewport height */
+html {
+  height: 100%;
+  /* Prevent text size adjustment on orientation change */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  height: 100%;
+  /* Prevent overscroll bounce on iOS */
+  overscroll-behavior-y: none;
+  /* Prevent pull-to-refresh */
+  overscroll-behavior-x: none;
+}
+
+/* App root should fill available space */
+#root {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  min-height: 100dvh; /* Dynamic viewport height */
+}
+
+/* Fix for iOS Safari address bar */
+.app-container {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  min-height: 100dvh;
+}
+
+/* Bottom navigation with safe area and keyboard offset */
+.bottom-nav,
+.bottom-navigation {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  
+  /* Account for safe area (iPhone notch/home indicator) */
+  padding-bottom: env(safe-area-inset-bottom);
+  
+  /* When keyboard is open, adjust position */
+  transform: translateY(calc(-1 * var(--keyboard-offset, 0px)));
+  transition: transform 0.2s ease-out;
+}
+
+/* Prevent bottom nav from floating when scrolling */
+.bottom-nav {
+  /* Ensure it stays fixed */
+  position: fixed !important;
+  /* Prevent any transforms that might cause floating */
+  will-change: transform;
+  /* Force GPU acceleration for smoother rendering */
+  transform: translateZ(0);
+}
+
+/* When keyboard is open, hide bottom nav to prevent overlap */
+.keyboard-open .bottom-nav {
+  transform: translateY(100%);
+}
+
+/* Sticky action buttons in sheets/drawers */
+.sticky-actions {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--background);
+  border-top: 1px solid var(--border);
+  padding: 1rem;
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  z-index: 10;
+  
+  /* Ensure it's always visible above keyboard */
+  margin-bottom: calc(-1 * var(--keyboard-offset, 0px));
+}
+
+/* Sheet/Drawer content should account for keyboard */
+.sheet-content,
+.drawer-content {
+  max-height: calc(100vh - var(--keyboard-offset, 0px));
+  max-height: calc(100dvh - var(--keyboard-offset, 0px));
+}
+
+/* Prevent iOS momentum scrolling issues */
+.sheet-scrollable,
+.drawer-scrollable {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Safe area padding utilities */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-area-left {
+  padding-left: env(safe-area-inset-left);
+}
+
+.safe-area-right {
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Prevent white gaps on scroll */
+body::before {
+  content: '';
+  position: fixed;
+  top: -100vh;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  background: var(--background);
+  z-index: -1;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -100vh;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  background: var(--background);
+  z-index: -1;
+}
+
+/* Tap highlight color */
+* {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Smooth scrolling for iOS */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Prevent text selection on UI elements (feels more native) */
+button,
+.button,
+[role="button"] {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Allow text selection in inputs and content areas */
+input,
+textarea,
+[contenteditable] {
+  -webkit-user-select: text;
+  user-select: text;
+}

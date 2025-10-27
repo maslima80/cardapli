@@ -1,4 +1,7 @@
-/* Import block rhythm system first */
+/* Import iOS fixes first for proper cascade */
+@import "./styles/ios.css";
+
+/* Import block rhythm system */
 @import "./styles/block-rhythm.css";
 @import "./styles/premium-dark.css";
 @import "./styles/business-info-blocks.css";

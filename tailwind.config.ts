@@ -138,6 +138,9 @@ export default {
         "slide-up": "slide-up 0.4s ease-out",
         "scale-in": "scale-in 0.2s ease-out",
       },
+      spacing: {
+        'safe': 'env(safe-area-inset-bottom)',
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

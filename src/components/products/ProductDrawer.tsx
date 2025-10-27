@@ -205,7 +205,7 @@ export function ProductDrawer({
 
   return (
     <Drawer open={open} onOpenChange={handleOpenChange}>
-      <DrawerContent className="h-[90vh]">
+      <DrawerContent className="h-[90vh] sheet-content">
         <DrawerHeader className="border-b sticky top-0 bg-background z-10">
           <div className="flex items-center justify-between">
             <DrawerTitle>
@@ -283,8 +283,8 @@ export function ProductDrawer({
               </TabsList>
             </div>
             
-            <TabsContent value="geral" className="flex-1 overflow-auto" style={{ height: "calc(100% - 48px)" }}>
-              <div className="p-4 md:p-6">
+            <TabsContent value="geral" className="flex-1 overflow-auto sheet-scrollable" style={{ height: "calc(100% - 48px)" }}>
+              <div className="p-4 md:p-6 pb-safe">
                 <div className="max-w-4xl mx-auto space-y-8">
                   
                   {/* Sticky section header */}
@@ -379,8 +379,8 @@ export function ProductDrawer({
               </div>
             </TabsContent>
             
-            <TabsContent value="opcoes" className="flex-1 overflow-auto" style={{ height: "calc(100% - 48px)" }}>
-              <div className="p-4 md:p-6">
+            <TabsContent value="opcoes" className="flex-1 overflow-auto sheet-scrollable" style={{ height: "calc(100% - 48px)" }}>
+              <div className="p-4 md:p-6 pb-safe">
                 <div className="max-w-4xl mx-auto space-y-8">
                   <h3 className="text-lg font-semibold mb-1">Opções de Produto</h3>
                   <p className="text-sm text-muted-foreground mb-4">
