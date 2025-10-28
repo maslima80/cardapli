@@ -29,10 +29,15 @@ html {
 
 body {
   height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
   /* Prevent overscroll bounce on iOS */
   overscroll-behavior-y: none;
   /* Prevent pull-to-refresh */
   overscroll-behavior-x: none;
+  /* Fill viewport completely - critical for Android */
+  position: relative;
+  background: var(--background);
 }
 
 /* App root should fill available space */
@@ -40,6 +45,8 @@ body {
   min-height: 100vh;
   min-height: -webkit-fill-available;
   min-height: 100dvh; /* Dynamic viewport height */
+  /* Prevent white gaps */
+  position: relative;
 }
 
 /* Fix for iOS Safari address bar */
@@ -47,6 +54,8 @@ body {
   min-height: 100vh;
   min-height: -webkit-fill-available;
   min-height: 100dvh;
+  /* Prevent white gaps */
+  position: relative;
 }
 
 /* Bottom navigation with safe area and keyboard offset */
@@ -102,6 +111,18 @@ body {
 .drawer-content {
   max-height: calc(100vh - var(--keyboard-offset, 0px));
   max-height: calc(100dvh - var(--keyboard-offset, 0px));
+  /* Prevent white gaps on mobile */
+  background: var(--background);
+  position: relative;
+}
+
+/* Ensure drawer fills viewport properly on mobile */
+@media (max-width: 768px) {
+  .sheet-content,
+  .drawer-content {
+    min-height: 90vh;
+    min-height: 90dvh;
+  }
 }
 
 /* Prevent iOS momentum scrolling issues */
@@ -128,7 +149,7 @@ body {
   padding-right: env(safe-area-inset-right);
 }
 
-/* Prevent white gaps on scroll */
+/* Prevent white gaps on scroll - CRITICAL for mobile */
 body::before {
   content: '';
   position: fixed;
@@ -149,6 +170,13 @@ body::after {
   height: 100vh;
   background: var(--background);
   z-index: -1;
+}
+
+/* Ensure all fixed elements cover viewport properly */
+[data-vaul-drawer],
+[data-vaul-overlay] {
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
 }
 
 /* Tap highlight color */

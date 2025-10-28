@@ -205,7 +205,7 @@ export function ProductDrawer({
 
   return (
     <Drawer open={open} onOpenChange={handleOpenChange}>
-      <DrawerContent className="h-[90vh] sheet-content">
+      <DrawerContent className="h-[95vh] h-[95dvh] sheet-content">
         <DrawerHeader className="border-b sticky top-0 bg-background z-10">
           <div className="flex items-center justify-between">
             <DrawerTitle>
