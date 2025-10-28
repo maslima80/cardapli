@@ -206,7 +206,7 @@ export function PaymentsEditor({ open, onOpenChange, initialData, onSaved }: Pay
                 <Checkbox
                   id={method.value}
                   checked={selectedMethods.includes(method.value)}
-                  onCheckedChange={() => handleToggleMethod(method.value)}
+                  className="pointer-events-none"
                 />
                 <label
                   htmlFor={method.value}
@@ -236,7 +236,7 @@ export function PaymentsEditor({ open, onOpenChange, initialData, onSaved }: Pay
                 <Checkbox
                   id={method.value}
                   checked={selectedMethods.includes(method.value)}
-                  onCheckedChange={() => handleToggleMethod(method.value)}
+                  className="pointer-events-none"
                 />
                 <label
                   htmlFor={method.value}
@@ -266,7 +266,7 @@ export function PaymentsEditor({ open, onOpenChange, initialData, onSaved }: Pay
                 <Checkbox
                   id={method.value}
                   checked={selectedMethods.includes(method.value)}
-                  onCheckedChange={() => handleToggleMethod(method.value)}
+                  className="pointer-events-none"
                 />
                 <label
                   htmlFor={method.value}
@@ -296,7 +296,7 @@ export function PaymentsEditor({ open, onOpenChange, initialData, onSaved }: Pay
                 <Checkbox
                   id={method.value}
                   checked={selectedMethods.includes(method.value)}
-                  onCheckedChange={() => handleToggleMethod(method.value)}
+                  className="pointer-events-none"
                 />
                 <label
                   htmlFor={method.value}
