@@ -141,6 +141,13 @@ export function PricingSection({
                   placeholder="89.90"
                   value={price || ""}
                   onChange={(e) => onPriceChange(parseFloat(e.target.value) || 0)}
+                  onBlur={(e) => {
+                    // Format to 2 decimal places when user finishes typing
+                    const value = parseFloat(e.target.value);
+                    if (!isNaN(value) && value > 0) {
+                      onPriceChange(parseFloat(value.toFixed(2)));
+                    }
+                  }}
                 />
               </div>
 
