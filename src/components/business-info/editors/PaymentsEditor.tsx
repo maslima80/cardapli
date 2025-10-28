@@ -204,16 +204,12 @@ export function PaymentsEditor({ open, onOpenChange, initialData, onSaved }: Pay
                 onClick={() => handleToggleMethod(method.value)}
               >
                 <Checkbox
-                  id={method.value}
                   checked={selectedMethods.includes(method.value)}
                   className="pointer-events-none"
                 />
-                <label
-                  htmlFor={method.value}
-                  className="text-sm font-medium cursor-pointer flex-1"
-                >
+                <span className="text-sm font-medium flex-1">
                   {method.label}
-                </label>
+                </span>
               </div>
             ))}
           </div>
@@ -234,16 +230,12 @@ export function PaymentsEditor({ open, onOpenChange, initialData, onSaved }: Pay
                 onClick={() => handleToggleMethod(method.value)}
               >
                 <Checkbox
-                  id={method.value}
                   checked={selectedMethods.includes(method.value)}
                   className="pointer-events-none"
                 />
-                <label
-                  htmlFor={method.value}
-                  className="text-sm font-medium cursor-pointer flex-1"
-                >
+                <span className="text-sm font-medium flex-1">
                   {method.label}
-                </label>
+                </span>
               </div>
             ))}
           </div>
@@ -264,16 +256,12 @@ export function PaymentsEditor({ open, onOpenChange, initialData, onSaved }: Pay
                 onClick={() => handleToggleMethod(method.value)}
               >
                 <Checkbox
-                  id={method.value}
                   checked={selectedMethods.includes(method.value)}
                   className="pointer-events-none"
                 />
-                <label
-                  htmlFor={method.value}
-                  className="text-sm font-medium cursor-pointer flex-1"
-                >
+                <span className="text-sm font-medium flex-1">
                   {method.label}
-                </label>
+                </span>
               </div>
             ))}
           </div>
@@ -294,16 +282,12 @@ export function PaymentsEditor({ open, onOpenChange, initialData, onSaved }: Pay
                 onClick={() => handleToggleMethod(method.value)}
               >
                 <Checkbox
-                  id={method.value}
                   checked={selectedMethods.includes(method.value)}
                   className="pointer-events-none"
                 />
-                <label
-                  htmlFor={method.value}
-                  className="text-sm font-medium cursor-pointer flex-1"
-                >
+                <span className="text-sm font-medium flex-1">
                   {method.label}
-                </label>
+                </span>
               </div>
             ))}
           </div>
