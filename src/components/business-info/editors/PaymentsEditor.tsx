@@ -89,16 +89,8 @@ export function PaymentsEditor({ open, onOpenChange, initialData, onSaved }: Pay
 
   const loadSmartDefaults = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('country')
-        .eq('id', user.id)
-        .single();
-
       // Smart defaults for Brazil (main market)
+      // Most Brazilian businesses accept Pix and payment links
       setSelectedMethods(['pix', 'link']);
     } catch (error) {
       console.error('Error loading smart defaults:', error);
