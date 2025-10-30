@@ -78,7 +78,7 @@ export const ONBOARDING_STEPS: StepConfig[] = [
     id: 'catalog',
     title: 'Crie seu Catálogo',
     description: 'Monte e publique',
-    route: '/catalogos',
+    route: '/catalogo/criar',
     icon: 'Layout',
     order: 4,
   },
@@ -384,12 +384,12 @@ export const HINTS: Record<HintKey, Hint> = {
     key: 'info_done',
     message: '🎉 Quase lá! Agora é só criar seu catálogo e compartilhar!',
     cta: 'Criar Catálogo',
-    route: '/catalogos',
+    route: '/catalogo/criar',
   },
   all_done: {
     key: 'all_done',
     message: '🎊 Parabéns! Seu catálogo está pronto para ser compartilhado com o mundo!',
-    cta: 'Ver Catálogo',
+    cta: 'Ver Catálogos',
     route: '/catalogos',
   },
 };
