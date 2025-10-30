@@ -16,7 +16,7 @@ DROP POLICY IF EXISTS "Public can update with review token" ON public.testimonia
 CREATE POLICY "Public can update with review token"
   ON public.testimonials
   FOR UPDATE
-  USING (review_token IS NOT NULL AND submitted_by IS NULL)
+  USING (review_token IS NOT NULL)
   WITH CHECK (review_token IS NOT NULL AND submitted_by = 'customer');
 
 -- Comment

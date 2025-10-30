@@ -1,7 +1,8 @@
 # Fix Testimonial Review Token Access
 
-## Problem
-When users click the testimonial review link, they get a **406 Not Acceptable** error because Row Level Security (RLS) blocks anonymous users from querying by `review_token`.
+## Problems Fixed
+1. **406 Not Acceptable** error when clicking review link - RLS blocked anonymous SELECT
+2. **Testimonials not appearing** after submission - RLS blocked anonymous UPDATE
 
 ## Solution
 Apply the SQL migration to add RLS policies for anonymous access.
